@@ -167,39 +167,148 @@ Size mp_obj_to_size(mp_obj_t obj)
         mp_raise_TypeError(MP_ERROR_TEXT("Size must be length 2"));
     }
 
-    // Check the type of the ndarray
-    if(ndarray->dtype == NDARRAY_UINT8)
+    // Compute the size, checking the type of the ndarray
+    Size size;
+    switch(ndarray->dtype)
     {
-        uint8_t *data = (uint8_t *)ndarray->array;
-        return Size(data[0], data[1]);
+        case NDARRAY_UINT8:
+            size.width = ((uint8_t*) ndarray->array)[0];
+            size.height = ((uint8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT8:
+            size.width = ((int8_t*) ndarray->array)[0];
+            size.height = ((int8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_UINT16:
+            size.width = ((uint16_t*) ndarray->array)[0];
+            size.height = ((uint16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT16:
+            size.width = ((int16_t*) ndarray->array)[0];
+            size.height = ((int16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_FLOAT:
+            size.width = ((float*) ndarray->array)[0];
+            size.height = ((float*) ndarray->array)[1];
+            break;
+        case NDARRAY_BOOL:
+            size.width = ((bool*) ndarray->array)[0];
+            size.height = ((bool*) ndarray->array)[1];
+            break;
+        default:
+            mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
+            break;
     }
-    else if(ndarray->dtype == NDARRAY_INT8)
+
+    return size;
+}
+
+Point mp_obj_to_point(mp_obj_t obj)
+{
+    // Check for None object
+    if(obj == mp_const_none)
     {
-        int8_t *data = (int8_t *)ndarray->array;
-        return Size(data[0], data[1]);
+        // Create an empty Point object
+        return Point();
     }
-    else if(ndarray->dtype == NDARRAY_UINT16)
+
+    // Assume the object is a ndarray, or can be converted to one. Will raise an
+    // exception if not
+    ndarray_obj_t *ndarray = ndarray_from_mp_obj(obj, 0);
+    
+    // Validate the length of the ndarray
+    if(ndarray->len != 2)
     {
-        uint16_t *data = (uint16_t *)ndarray->array;
-        return Size(data[0], data[1]);
+        mp_raise_TypeError(MP_ERROR_TEXT("Point must be length 2"));
     }
-    else if(ndarray->dtype == NDARRAY_INT16)
+
+    // Compute the point, checking the type of the ndarray
+    Point point;
+    switch(ndarray->dtype)
     {
-        int16_t *data = (int16_t *)ndarray->array;
-        return Size(data[0], data[1]);
+        case NDARRAY_UINT8:
+            point.x = ((uint8_t*) ndarray->array)[0];
+            point.y = ((uint8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT8:
+            point.x = ((int8_t*) ndarray->array)[0];
+            point.y = ((int8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_UINT16:
+            point.x = ((uint16_t*) ndarray->array)[0];
+            point.y = ((uint16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT16:
+            point.x = ((int16_t*) ndarray->array)[0];
+            point.y = ((int16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_FLOAT:
+            point.x = ((float*) ndarray->array)[0];
+            point.y = ((float*) ndarray->array)[1];
+            break;
+        case NDARRAY_BOOL:
+            point.x = ((bool*) ndarray->array)[0];
+            point.y = ((bool*) ndarray->array)[1];
+            break;
+        default:
+            mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
+            break;
     }
-    else if(ndarray->dtype == NDARRAY_FLOAT)
+
+    return point;
+}
+
+Scalar mp_obj_to_scalar(mp_obj_t obj)
+{
+    // Check for None object
+    if(obj == mp_const_none)
     {
-        float *data = (float *)ndarray->array;
-        return Size(data[0], data[1]);
+        // Create an empty Scalar object
+        return Scalar();
     }
-    else if(ndarray->dtype == NDARRAY_BOOL)
+
+    // Assume the object is a ndarray, or can be converted to one. Will raise an
+    // exception if not
+    ndarray_obj_t *ndarray = ndarray_from_mp_obj(obj, 0);
+    
+    // Validate the length of the ndarray
+    if(ndarray->len > 4)
     {
-        bool *data = (bool *)ndarray->array;
-        return Size(data[0], data[1]);
+        mp_raise_TypeError(MP_ERROR_TEXT("Scalar must be length 4 or less"));
     }
-    else
+
+    // Compute the scalar, checking the type of the ndarray
+    Scalar scalar;
+    switch(ndarray->dtype)
     {
-        mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
+        case NDARRAY_UINT8:
+            for(size_t i = 0; i < ndarray->len; i++)
+                scalar[i] = ((uint8_t*) ndarray->array)[i];
+            break;
+        case NDARRAY_INT8:
+            for(size_t i = 0; i < ndarray->len; i++)
+                scalar[i] = ((int8_t*) ndarray->array)[i];
+            break;
+        case NDARRAY_UINT16:
+            for(size_t i = 0; i < ndarray->len; i++)
+                scalar[i] = ((uint16_t*) ndarray->array)[i];
+            break;
+        case NDARRAY_INT16:
+            for(size_t i = 0; i < ndarray->len; i++)
+                scalar[i] = ((int16_t*) ndarray->array)[i];
+            break;
+        case NDARRAY_FLOAT:
+            for(size_t i = 0; i < ndarray->len; i++)
+                scalar[i] = ((float*) ndarray->array)[i];
+            break;
+        case NDARRAY_BOOL:
+            for(size_t i = 0; i < ndarray->len; i++)
+                scalar[i] = ((bool*) ndarray->array)[i];
+            break;
+        default:
+            mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
+            break;
     }
+
+    return scalar;
 }
