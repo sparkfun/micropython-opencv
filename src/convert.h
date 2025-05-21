@@ -17,7 +17,10 @@ int ndarray_type_to_mat_depth(uint8_t type);
 ndarray_obj_t *mat_to_ndarray(Mat &mat);
 Mat ndarray_to_mat(ndarray_obj_t *ndarray);
 
-// Conversion functions  between Mat and mp_obj_t. Abstracts away intermediate
+// Conversion functions between Mat and mp_obj_t. Abstracts away intermediate
 // conversions to ndarray_obj_t
 mp_obj_t mat_to_mp_obj(Mat &mat);
 Mat mp_obj_to_mat(mp_obj_t obj);
+
+// Conversion functions between Size and mp_obj_t
+Size mp_obj_to_size(mp_obj_t obj);

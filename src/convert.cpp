@@ -16,8 +16,8 @@ uint8_t mat_depth_to_ndarray_type(int depth)
         case CV_16U: return NDARRAY_UINT16;
         case CV_16S: return NDARRAY_INT16;
         case CV_32F: return NDARRAY_FLOAT;
-        // case CV_Bool: return NDARRAY_BOOL;
-        default: mp_raise_ValueError(MP_ERROR_TEXT("Unsupported Mat depth"));
+        case CV_Bool: return NDARRAY_BOOL;
+        default: mp_raise_TypeError(MP_ERROR_TEXT("Unsupported Mat depth"));
     }
 }
 
@@ -29,8 +29,8 @@ int ndarray_type_to_mat_depth(uint8_t type)
         case NDARRAY_UINT16: return CV_16U;
         case NDARRAY_INT16: return CV_16S;
         case NDARRAY_FLOAT: return CV_32F;
-        // case NDARRAY_BOOL: return CV_Bool;
-        default: mp_raise_ValueError(MP_ERROR_TEXT("Unsupported ndarray type"));
+        case NDARRAY_BOOL: return CV_Bool;
+        default: mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
     }
 }
 
@@ -146,4 +146,60 @@ Mat mp_obj_to_mat(mp_obj_t obj)
     Mat mat = ndarray_to_mat(ndarray);
 
     return mat;
+}
+
+Size mp_obj_to_size(mp_obj_t obj)
+{
+    // Check for None object
+    if(obj == mp_const_none)
+    {
+        // Create an empty Size object
+        return Size();
+    }
+
+    // Assume the object is a ndarray, or can be converted to one. Will raise an
+    // exception if not
+    ndarray_obj_t *ndarray = ndarray_from_mp_obj(obj, 0);
+    
+    // Validate the length of the ndarray
+    if(ndarray->len != 2)
+    {
+        mp_raise_TypeError(MP_ERROR_TEXT("Size must be length 2"));
+    }
+
+    // Check the type of the ndarray
+    if(ndarray->dtype == NDARRAY_UINT8)
+    {
+        uint8_t *data = (uint8_t *)ndarray->array;
+        return Size(data[0], data[1]);
+    }
+    else if(ndarray->dtype == NDARRAY_INT8)
+    {
+        int8_t *data = (int8_t *)ndarray->array;
+        return Size(data[0], data[1]);
+    }
+    else if(ndarray->dtype == NDARRAY_UINT16)
+    {
+        uint16_t *data = (uint16_t *)ndarray->array;
+        return Size(data[0], data[1]);
+    }
+    else if(ndarray->dtype == NDARRAY_INT16)
+    {
+        int16_t *data = (int16_t *)ndarray->array;
+        return Size(data[0], data[1]);
+    }
+    else if(ndarray->dtype == NDARRAY_FLOAT)
+    {
+        float *data = (float *)ndarray->array;
+        return Size(data[0], data[1]);
+    }
+    else if(ndarray->dtype == NDARRAY_BOOL)
+    {
+        bool *data = (bool *)ndarray->array;
+        return Size(data[0], data[1]);
+    }
+    else
+    {
+        mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
+    }
 }
