@@ -55,6 +55,41 @@ mp_obj_t cv2_imgproc_arrowedLine(size_t n_args, const mp_obj_t *pos_args, mp_map
     return mat_to_mp_obj(img);
 }
 
+mp_obj_t cv2_imgproc_Canny(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_image, ARG_threshold1, ARG_threshold2, ARG_edges, ARG_apertureSize, ARG_L2gradient };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_image, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_threshold1, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_threshold2, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_edges, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_apertureSize, MP_ARG_INT, { .u_int = 3 } },
+        { MP_QSTR_L2gradient, MP_ARG_BOOL, { .u_bool = false } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat image = mp_obj_to_mat(args[ARG_image].u_obj);
+    int threshold1 = args[ARG_threshold1].u_int;
+    int threshold2 = args[ARG_threshold2].u_int;
+    Mat edges = mp_obj_to_mat(args[ARG_edges].u_obj);
+    int apertureSize = args[ARG_apertureSize].u_int;
+    bool L2gradient = args[ARG_L2gradient].u_bool;
+
+    // Call the corresponding OpenCV function
+    try {
+        Canny(image, edges, threshold1, threshold2, apertureSize, L2gradient);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mat_to_mp_obj(edges);
+}
+
 mp_obj_t cv2_imgproc_circle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
     enum { ARG_img, ARG_center, ARG_radius, ARG_color, ARG_thickness, ARG_lineType, ARG_shift };
@@ -407,6 +442,293 @@ mp_obj_t cv2_imgproc_getStructuringElement(size_t n_args, const mp_obj_t *pos_ar
 
     // Return the result
     return mat_to_mp_obj(kernel);
+}
+
+mp_obj_t cv2_imgproc_HoughCircles(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_image, ARG_method, ARG_dp, ARG_minDist, ARG_circles, ARG_param1, ARG_param2, ARG_minRadius, ARG_maxRadius };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_image, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_method, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_dp, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_minDist, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_circles, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_param1, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_param2, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_minRadius, MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_maxRadius, MP_ARG_INT, { .u_int = 0 } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat image = mp_obj_to_mat(args[ARG_image].u_obj);
+    int method = args[ARG_method].u_int;
+    mp_float_t dp = mp_obj_get_float(args[ARG_dp].u_obj);
+    mp_float_t minDist = mp_obj_get_float(args[ARG_minDist].u_obj);
+    Mat circles = mp_obj_to_mat(args[ARG_circles].u_obj);
+    float param1;
+    if(args[ARG_param1].u_obj == mp_const_none)
+        param1 = 100; // Default value
+    else
+        param1 = mp_obj_get_float(args[ARG_param1].u_obj);
+    float param2;
+    if(args[ARG_param2].u_obj == mp_const_none)
+        param2 = 100; // Default value
+    else
+        param2 = mp_obj_get_float(args[ARG_param2].u_obj);
+    int minRadius = args[ARG_minRadius].u_int;
+    int maxRadius = args[ARG_maxRadius].u_int;
+
+    // Call the corresponding OpenCV function
+    try {
+        HoughCircles(image, circles, method, dp, minDist, param1, param2, minRadius, maxRadius);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mat_to_mp_obj(circles);
+}
+
+mp_obj_t cv2_imgproc_HoughCirclesWithAccumulator(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_image, ARG_method, ARG_dp, ARG_minDist, ARG_circles, ARG_param1, ARG_param2, ARG_minRadius, ARG_maxRadius };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_image, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_method, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_dp, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_minDist, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_circles, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_param1, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_param2, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_minRadius, MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_maxRadius, MP_ARG_INT, { .u_int = 0 } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat image = mp_obj_to_mat(args[ARG_image].u_obj);
+    int method = args[ARG_method].u_int;
+    mp_float_t dp = mp_obj_get_float(args[ARG_dp].u_obj);
+    mp_float_t minDist = mp_obj_get_float(args[ARG_minDist].u_obj);
+    Mat circles = mp_obj_to_mat(args[ARG_circles].u_obj);
+    float param1;
+    if(args[ARG_param1].u_obj == mp_const_none)
+        param1 = 100; // Default value
+    else
+        param1 = mp_obj_get_float(args[ARG_param1].u_obj);
+    float param2;
+    if(args[ARG_param2].u_obj == mp_const_none)
+        param2 = 100; // Default value
+    else
+        param2 = mp_obj_get_float(args[ARG_param2].u_obj);
+    int minRadius = args[ARG_minRadius].u_int;
+    int maxRadius = args[ARG_maxRadius].u_int;
+
+    // Vector to hold the circles and votes
+    std::vector<Vec4f> circles_acc;
+
+    // Call the corresponding OpenCV function
+    try {
+        HoughCircles(image, circles_acc, method, dp, minDist, param1, param2, minRadius, maxRadius);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Copy the vector of circles and votes to output circles object
+    Mat(circles_acc).copyTo(circles);
+
+    // Return the result
+    return mat_to_mp_obj(circles);
+}
+
+mp_obj_t cv2_imgproc_HoughLines(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_image, ARG_rho, ARG_theta, ARG_threshold, ARG_lines, ARG_srn, ARG_stn, ARG_min_theta, ARG_max_theta, ARG_use_edgeval };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_image, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_rho, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_theta, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_threshold, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 100 } },
+        { MP_QSTR_lines, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_srn, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_stn, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_min_theta, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_max_theta, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_use_edgeval, MP_ARG_BOOL, { .u_bool = false } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat image = mp_obj_to_mat(args[ARG_image].u_obj);
+    mp_float_t rho;
+    if(args[ARG_rho].u_obj == mp_const_none)
+        rho = 1; // Default value
+    else
+        rho = mp_obj_get_float(args[ARG_rho].u_obj);
+    mp_float_t theta;
+    if(args[ARG_theta].u_obj == mp_const_none)
+        theta = CV_PI / 180; // Default value
+    else
+        theta = mp_obj_get_float(args[ARG_theta].u_obj);
+    int threshold = args[ARG_threshold].u_int;
+    Mat lines = mp_obj_to_mat(args[ARG_lines].u_obj);
+    mp_float_t srn;
+    if(args[ARG_srn].u_obj == mp_const_none)
+        srn = 0; // Default value
+    else
+        srn = mp_obj_get_float(args[ARG_srn].u_obj);
+    mp_float_t stn;
+    if(args[ARG_stn].u_obj == mp_const_none)
+        stn = 0; // Default value
+    else
+        stn = mp_obj_get_float(args[ARG_stn].u_obj);
+    mp_float_t min_theta;
+    if(args[ARG_min_theta].u_obj == mp_const_none)
+        min_theta = 0; // Default value
+    else
+        min_theta = mp_obj_get_float(args[ARG_min_theta].u_obj);
+    mp_float_t max_theta;
+    if(args[ARG_max_theta].u_obj == mp_const_none)
+        max_theta = CV_PI; // Default value
+    else
+        max_theta = mp_obj_get_float(args[ARG_max_theta].u_obj);
+    bool use_edgeval = args[ARG_use_edgeval].u_bool;
+
+    // Call the corresponding OpenCV function
+    try {
+        HoughLines(image, lines, rho, theta, threshold, srn, stn, min_theta, max_theta, use_edgeval);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mat_to_mp_obj(lines);
+}
+
+// mp_obj_t cv2_imgproc_HoughLinesP(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+//     // Define the arguments
+//     enum { ARG_image, ARG_rho, ARG_theta, ARG_threshold, ARG_lines, ARG_minLineLength, ARG_maxLineGap };
+//     static const mp_arg_t allowed_args[] = {
+//         { MP_QSTR_image, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+//         { MP_QSTR_rho, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+//         { MP_QSTR_theta, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+//         { MP_QSTR_threshold, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 100 } },
+//         { MP_QSTR_lines, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+//         { MP_QSTR_minLineLength, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+//         { MP_QSTR_maxLineGap, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+//     };
+
+//     // Parse the arguments
+//     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+//     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+//     // Convert arguments to required types
+//     Mat image = mp_obj_to_mat(args[ARG_image].u_obj);
+//     mp_float_t rho = mp_obj_get_float(args[ARG_rho].u_obj);
+//     mp_float_t theta = mp_obj_get_float(args[ARG_theta].u_obj);
+//     int threshold = args[ARG_threshold].u_int;
+//     Mat lines = mp_obj_to_mat(args[ARG_lines].u_obj);
+//     mp_float_t minLineLength;
+//     if(args[ARG_minLineLength].u_obj == mp_const_none)
+//         minLineLength = 0; // Default value
+//     else
+//         minLineLength = mp_obj_get_float(args[ARG_minLineLength].u_obj);
+//     mp_float_t maxLineGap;
+//     if(args[ARG_maxLineGap].u_obj == mp_const_none)
+//         maxLineGap = 0; // Default value
+//     else
+//         maxLineGap = mp_obj_get_float(args[ARG_maxLineGap].u_obj);  
+
+//     // Call the corresponding OpenCV function
+//     try {
+//         HoughLinesP(image, lines, rho, theta, threshold, minLineLength, maxLineGap);
+//     } catch(Exception& e) {
+//         mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+//     }
+
+//     // Return the result
+//     return mat_to_mp_obj(lines);
+// }
+
+mp_obj_t cv2_imgproc_HoughLinesWithAccumulator(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_image, ARG_rho, ARG_theta, ARG_threshold, ARG_lines, ARG_srn, ARG_stn, ARG_min_theta, ARG_max_theta };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_image, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_rho, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_theta, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_threshold, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 100 } },
+        { MP_QSTR_lines, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_srn, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_stn, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_min_theta, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_max_theta, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat image = mp_obj_to_mat(args[ARG_image].u_obj);
+    mp_float_t rho;
+    if(args[ARG_rho].u_obj == mp_const_none)
+        rho = 1; // Default value
+    else
+        rho = mp_obj_get_float(args[ARG_rho].u_obj);
+    mp_float_t theta;
+    if(args[ARG_theta].u_obj == mp_const_none)
+        theta = CV_PI / 180; // Default value
+    else
+        theta = mp_obj_get_float(args[ARG_theta].u_obj);
+    int threshold = args[ARG_threshold].u_int;
+    Mat lines = mp_obj_to_mat(args[ARG_lines].u_obj);
+    mp_float_t srn;
+    if(args[ARG_srn].u_obj == mp_const_none)
+        srn = 0; // Default value
+    else
+        srn = mp_obj_get_float(args[ARG_srn].u_obj);
+    mp_float_t stn;
+    if(args[ARG_stn].u_obj == mp_const_none)
+        stn = 0; // Default value
+    else
+        stn = mp_obj_get_float(args[ARG_stn].u_obj);
+    mp_float_t min_theta;
+    if(args[ARG_min_theta].u_obj == mp_const_none)
+        min_theta = 0; // Default value
+    else
+        min_theta = mp_obj_get_float(args[ARG_min_theta].u_obj);
+    mp_float_t max_theta;
+    if(args[ARG_max_theta].u_obj == mp_const_none)
+        max_theta = CV_PI; // Default value
+    else
+        max_theta = mp_obj_get_float(args[ARG_max_theta].u_obj);
+
+    // Vector to hold the lines and votes
+    std::vector<Vec3f> lines_acc;
+
+    // Call the corresponding OpenCV function
+    try {
+        HoughLines(image, lines_acc, rho, theta, threshold, srn, stn, min_theta, max_theta);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Copy the vector of lines and votes to output lines object
+    Mat(lines_acc).copyTo(lines);
+
+    // Return the result
+    return mat_to_mp_obj(lines);
 }
 
 mp_obj_t cv2_imgproc_line(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {

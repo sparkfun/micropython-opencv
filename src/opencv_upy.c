@@ -10,6 +10,7 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_core_inRange_obj, 3, cv2_core_inRange);
 
 // OpenCV imgproc module
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_arrowedLine_obj, 4, cv2_imgproc_arrowedLine);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_Canny_obj, 3, cv2_imgproc_Canny);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_circle_obj, 4, cv2_imgproc_circle);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_cvtColor_obj, 2, cv2_imgproc_cvtColor);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_dilate_obj, 2, cv2_imgproc_dilate);
@@ -19,6 +20,11 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_erode_obj, 2, cv2_imgproc_erode);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_fillConvexPoly_obj, 3, cv2_imgproc_fillConvexPoly);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_fillPoly_obj, 3, cv2_imgproc_fillPoly);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_getStructuringElement_obj, 2, cv2_imgproc_getStructuringElement);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughCircles_obj, 4, cv2_imgproc_HoughCircles);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughCirclesWithAccumulator_obj, 4, cv2_imgproc_HoughCirclesWithAccumulator);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughLines_obj, 4, cv2_imgproc_HoughLines);
+// static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughLinesP_obj, 4, cv2_imgproc_HoughLinesP);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughLinesWithAccumulator_obj, 4, cv2_imgproc_HoughLinesWithAccumulator);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_line_obj, 4, cv2_imgproc_line);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_morphologyEx_obj, 3, cv2_imgproc_morphologyEx);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_putText_obj, 6, cv2_imgproc_putText);
@@ -67,6 +73,13 @@ static const mp_rom_map_elem_t cv2_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_MORPH_RECT), MP_ROM_INT(0) },
     { MP_ROM_QSTR(MP_QSTR_MORPH_CROSS), MP_ROM_INT(1) },
     { MP_ROM_QSTR(MP_QSTR_MORPH_ELLIPSE), MP_ROM_INT(2) },
+
+    // Hough modes, from opencv2/imgproc.hpp
+    { MP_ROM_QSTR(MP_QSTR_HOUGH_STANDARD), MP_ROM_INT(0) },
+    { MP_ROM_QSTR(MP_QSTR_HOUGH_PROBABILISTIC), MP_ROM_INT(1) },
+    { MP_ROM_QSTR(MP_QSTR_HOUGH_MULTI_SCALE), MP_ROM_INT(2) },
+    { MP_ROM_QSTR(MP_QSTR_HOUGH_GRADIENT), MP_ROM_INT(3) },
+    { MP_ROM_QSTR(MP_QSTR_HOUGH_GRADIENT_ALT), MP_ROM_INT(4) },
 
     // Color conversion codes, from opencv2/imgproc.hpp
     { MP_ROM_QSTR(MP_QSTR_COLOR_BGR2BGRA), MP_ROM_INT(0) },
@@ -126,7 +139,7 @@ static const mp_rom_map_elem_t cv2_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_LINE_8), MP_ROM_INT(8) },
     { MP_ROM_QSTR(MP_QSTR_LINE_AA), MP_ROM_INT(16) },
 
-    // Fonts, from opencv2/imgproc.hpp
+    // Hershey fonts, from opencv2/imgproc.hpp
     { MP_ROM_QSTR(MP_QSTR_FONT_HERSHEY_SIMPLEX), MP_ROM_INT(0) },
     { MP_ROM_QSTR(MP_QSTR_FONT_HERSHEY_PLAIN), MP_ROM_INT(1) },
     { MP_ROM_QSTR(MP_QSTR_FONT_HERSHEY_DUPLEX), MP_ROM_INT(2) },
@@ -157,6 +170,7 @@ static const mp_rom_map_elem_t cv2_module_globals_table[] = {
     ////////////////////////////////////////////////////////////////////////////
     
     { MP_ROM_QSTR(MP_QSTR_arrowedLine), MP_ROM_PTR(&cv2_imgproc_arrowedLine_obj) },
+    { MP_ROM_QSTR(MP_QSTR_Canny), MP_ROM_PTR(&cv2_imgproc_Canny_obj) },
     { MP_ROM_QSTR(MP_QSTR_circle), MP_ROM_PTR(&cv2_imgproc_circle_obj) },
     { MP_ROM_QSTR(MP_QSTR_cvtColor), MP_ROM_PTR(&cv2_imgproc_cvtColor_obj) },
     { MP_ROM_QSTR(MP_QSTR_dilate), MP_ROM_PTR(&cv2_imgproc_dilate_obj) },
@@ -166,6 +180,11 @@ static const mp_rom_map_elem_t cv2_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_fillConvexPoly), MP_ROM_PTR(&cv2_imgproc_fillConvexPoly_obj) },
     { MP_ROM_QSTR(MP_QSTR_fillPoly), MP_ROM_PTR(&cv2_imgproc_fillPoly_obj) },
     { MP_ROM_QSTR(MP_QSTR_getStructuringElement), MP_ROM_PTR(&cv2_imgproc_getStructuringElement_obj) },
+    { MP_ROM_QSTR(MP_QSTR_HoughCircles), MP_ROM_PTR(&cv2_imgproc_HoughCircles_obj) },
+    { MP_ROM_QSTR(MP_QSTR_HoughCirclesWithAccumulator), MP_ROM_PTR(&cv2_imgproc_HoughCirclesWithAccumulator_obj) },
+    { MP_ROM_QSTR(MP_QSTR_HoughLines), MP_ROM_PTR(&cv2_imgproc_HoughLines_obj) },
+    // { MP_ROM_QSTR(MP_QSTR_HoughLinesP), MP_ROM_PTR(&cv2_imgproc_HoughLinesP_obj) },
+    { MP_ROM_QSTR(MP_QSTR_HoughLinesWithAccumulator), MP_ROM_PTR(&cv2_imgproc_HoughLinesWithAccumulator_obj) },
     { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&cv2_imgproc_line_obj) },
     { MP_ROM_QSTR(MP_QSTR_morphologyEx), MP_ROM_PTR(&cv2_imgproc_morphologyEx_obj) },
     { MP_ROM_QSTR(MP_QSTR_putText), MP_ROM_PTR(&cv2_imgproc_putText_obj) },
