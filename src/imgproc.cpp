@@ -232,6 +232,86 @@ mp_obj_t cv2_imgproc_Canny(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
     return mat_to_mp_obj(edges);
 }
 
+mp_obj_t cv2_imgproc_connectedComponents(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_image, ARG_labels, ARG_connectivity, ARG_ltype };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_image, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_labels, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_connectivity, MP_ARG_INT, { .u_int = 8 } },
+        { MP_QSTR_ltype, MP_ARG_INT, { .u_int = CV_16U } }, // Normally CV_32S, but ulab doesn't support 32-bit integers
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat image = mp_obj_to_mat(args[ARG_image].u_obj);
+    Mat labels = mp_obj_to_mat(args[ARG_labels].u_obj);
+    int connectivity = args[ARG_connectivity].u_int;
+    int ltype = args[ARG_ltype].u_int;
+
+    // Return value
+    int retval = 0;
+
+    // Call the corresponding OpenCV function
+    try {
+        retval = connectedComponents(image, labels, connectivity, ltype);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    mp_obj_t result[2];
+    result[0] = mp_obj_new_int(retval);
+    result[1] = mat_to_mp_obj(labels);
+    return mp_obj_new_tuple(2, result);
+}
+
+// mp_obj_t cv2_imgproc_connectedComponentsWithStats(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+//     // Define the arguments
+//     enum { ARG_image, ARG_labels, ARG_stats, ARG_centroids, ARG_connectivity, ARG_ltype };
+//     static const mp_arg_t allowed_args[] = {
+//         { MP_QSTR_image, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+//         { MP_QSTR_labels, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+//         { MP_QSTR_stats, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+//         { MP_QSTR_centroids, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+//         { MP_QSTR_connectivity, MP_ARG_INT, { .u_int = 8 } },
+//         { MP_QSTR_ltype, MP_ARG_INT, { .u_int = CV_16U } }, // Normally CV_32S, but ulab doesn't support 32-bit integers
+//     };
+
+//     // Parse the arguments
+//     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+//     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+//     // Convert arguments to required types
+//     Mat image = mp_obj_to_mat(args[ARG_image].u_obj);
+//     Mat labels = mp_obj_to_mat(args[ARG_labels].u_obj);
+//     Mat stats = mp_obj_to_mat(args[ARG_stats].u_obj);
+//     Mat centroids = mp_obj_to_mat(args[ARG_centroids].u_obj);
+//     int connectivity = args[ARG_connectivity].u_int;
+//     int ltype = args[ARG_ltype].u_int;
+
+//     // Return value
+//     int retval = 0;
+
+//     // Call the corresponding OpenCV function
+//     try {
+//         retval = connectedComponentsWithStats(image, labels, stats, centroids, connectivity, ltype);
+//     } catch(Exception& e) {
+//         mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+//     }
+
+//     // Return the result
+//     mp_obj_t result[4];
+//     result[0] = mp_obj_new_int(retval);
+//     result[1] = mat_to_mp_obj(labels);
+//     result[2] = mat_to_mp_obj(stats);
+//     result[3] = mat_to_mp_obj(centroids);
+//     return mp_obj_new_tuple(4, result);
+// }
+
 mp_obj_t cv2_imgproc_circle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
     enum { ARG_img, ARG_center, ARG_radius, ARG_color, ARG_thickness, ARG_lineType, ARG_shift };

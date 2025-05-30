@@ -7,6 +7,8 @@ extern mp_obj_t cv2_imgproc_bilateralFilter(size_t n_args, const mp_obj_t *pos_a
 extern mp_obj_t cv2_imgproc_blur(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_boxFilter(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_Canny(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_connectedComponents(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+// extern mp_obj_t cv2_imgproc_connectedComponentsWithStats(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_circle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_cvtColor(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_dilate(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);

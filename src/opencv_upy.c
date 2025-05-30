@@ -15,6 +15,8 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_bilateralFilter_obj, 4, cv2_imgpro
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_blur_obj, 2, cv2_imgproc_blur);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_boxFilter_obj, 3, cv2_imgproc_boxFilter);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_Canny_obj, 3, cv2_imgproc_Canny);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_connectedComponents_obj, 1, cv2_imgproc_connectedComponents);
+// static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_connectedComponentsWithStats_obj, 1, cv2_imgproc_connectedComponentsWithStats);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_circle_obj, 4, cv2_imgproc_circle);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_cvtColor_obj, 2, cv2_imgproc_cvtColor);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_dilate_obj, 2, cv2_imgproc_dilate);
@@ -60,6 +62,14 @@ static const mp_rom_map_elem_t cv2_module_globals_table[] = {
     // These constants are defined by in OpenCV's header files, however we can't
     // include them here because it's C++ and this is C, so we have to redefine
     // them here. Only a subset of the most common conversions are included.
+
+    // OpenCV data types, from opencv2/core/hal/interface.h
+    { MP_ROM_QSTR(MP_QSTR_CV_8U), MP_ROM_INT(0) },
+    { MP_ROM_QSTR(MP_QSTR_CV_8S), MP_ROM_INT(1) },
+    { MP_ROM_QSTR(MP_QSTR_CV_16U), MP_ROM_INT(2) },
+    { MP_ROM_QSTR(MP_QSTR_CV_16S), MP_ROM_INT(3) },
+    { MP_ROM_QSTR(MP_QSTR_CV_32F), MP_ROM_INT(4) },
+    // Other types are currently not supported by ulab
 
     // Border types, from opencv2/core/base.hpp
     { MP_ROM_QSTR(MP_QSTR_BORDER_CONSTANT), MP_ROM_INT(0) },
@@ -210,6 +220,8 @@ static const mp_rom_map_elem_t cv2_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_blur), MP_ROM_PTR(&cv2_imgproc_blur_obj) },
     { MP_ROM_QSTR(MP_QSTR_boxFilter), MP_ROM_PTR(&cv2_imgproc_boxFilter_obj) },
     { MP_ROM_QSTR(MP_QSTR_Canny), MP_ROM_PTR(&cv2_imgproc_Canny_obj) },
+    { MP_ROM_QSTR(MP_QSTR_connectedComponents), MP_ROM_PTR(&cv2_imgproc_connectedComponents_obj) },
+    // { MP_ROM_QSTR(MP_QSTR_connectedComponentsWithStats), MP_ROM_PTR(&cv2_imgproc_connectedComponentsWithStats_obj) },
     { MP_ROM_QSTR(MP_QSTR_circle), MP_ROM_PTR(&cv2_imgproc_circle_obj) },
     { MP_ROM_QSTR(MP_QSTR_cvtColor), MP_ROM_PTR(&cv2_imgproc_cvtColor_obj) },
     { MP_ROM_QSTR(MP_QSTR_dilate), MP_ROM_PTR(&cv2_imgproc_dilate_obj) },
