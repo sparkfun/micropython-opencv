@@ -9,6 +9,7 @@
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_core_inRange_obj, 3, cv2_core_inRange);
 
 // OpenCV imgproc module
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_adaptiveThreshold_obj, 6, cv2_imgproc_adaptiveThreshold);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_arrowedLine_obj, 4, cv2_imgproc_arrowedLine);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_bilateralFilter_obj, 4, cv2_imgproc_bilateralFilter);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_blur_obj, 2, cv2_imgproc_blur);
@@ -39,6 +40,7 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_rectangle_obj, 4, cv2_imgproc_rect
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_Scharr_obj, 4, cv2_imgproc_Scharr);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_Sobel_obj, 4, cv2_imgproc_Sobel);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_spatialGradient_obj, 1, cv2_imgproc_spatialGradient);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_threshold_obj, 4, cv2_imgproc_threshold);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Module attributes
@@ -83,6 +85,20 @@ static const mp_rom_map_elem_t cv2_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_MORPH_RECT), MP_ROM_INT(0) },
     { MP_ROM_QSTR(MP_QSTR_MORPH_CROSS), MP_ROM_INT(1) },
     { MP_ROM_QSTR(MP_QSTR_MORPH_ELLIPSE), MP_ROM_INT(2) },
+
+    // Threshold types, from opencv2/imgproc.hpp
+    { MP_ROM_QSTR(MP_QSTR_THRESH_BINARY), MP_ROM_INT(0) },
+    { MP_ROM_QSTR(MP_QSTR_THRESH_BINARY_INV), MP_ROM_INT(1) },
+    { MP_ROM_QSTR(MP_QSTR_THRESH_TRUNC), MP_ROM_INT(2) },
+    { MP_ROM_QSTR(MP_QSTR_THRESH_TOZERO), MP_ROM_INT(3) },
+    { MP_ROM_QSTR(MP_QSTR_THRESH_TOZERO_INV), MP_ROM_INT(4) },
+    { MP_ROM_QSTR(MP_QSTR_THRESH_MASK), MP_ROM_INT(7) },
+    { MP_ROM_QSTR(MP_QSTR_THRESH_OTSU), MP_ROM_INT(8) },
+    { MP_ROM_QSTR(MP_QSTR_THRESH_TRIANGLE), MP_ROM_INT(16) },
+    
+    // Adaptive threshold methods, from opencv2/imgproc.hpp
+    { MP_ROM_QSTR(MP_QSTR_ADAPTIVE_THRESH_MEAN_C), MP_ROM_INT(0) },
+    { MP_ROM_QSTR(MP_QSTR_ADAPTIVE_THRESH_GAUSSIAN_C), MP_ROM_INT(1) },
 
     // Hough modes, from opencv2/imgproc.hpp
     { MP_ROM_QSTR(MP_QSTR_HOUGH_STANDARD), MP_ROM_INT(0) },
@@ -179,6 +195,7 @@ static const mp_rom_map_elem_t cv2_module_globals_table[] = {
     // OpenCV imgproc functions
     ////////////////////////////////////////////////////////////////////////////
     
+    { MP_ROM_QSTR(MP_QSTR_adaptiveThreshold), MP_ROM_PTR(&cv2_imgproc_adaptiveThreshold_obj) },
     { MP_ROM_QSTR(MP_QSTR_arrowedLine), MP_ROM_PTR(&cv2_imgproc_arrowedLine_obj) },
     { MP_ROM_QSTR(MP_QSTR_bilateralFilter), MP_ROM_PTR(&cv2_imgproc_bilateralFilter_obj) },
     { MP_ROM_QSTR(MP_QSTR_blur), MP_ROM_PTR(&cv2_imgproc_blur_obj) },
@@ -209,6 +226,7 @@ static const mp_rom_map_elem_t cv2_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_Scharr), MP_ROM_PTR(&cv2_imgproc_Scharr_obj) },
     { MP_ROM_QSTR(MP_QSTR_Sobel), MP_ROM_PTR(&cv2_imgproc_Sobel_obj) },
     { MP_ROM_QSTR(MP_QSTR_spatialGradient), MP_ROM_PTR(&cv2_imgproc_spatialGradient_obj) },
+    { MP_ROM_QSTR(MP_QSTR_threshold), MP_ROM_PTR(&cv2_imgproc_threshold_obj) },
 };
 static MP_DEFINE_CONST_DICT(cv2_module_globals, cv2_module_globals_table);
 

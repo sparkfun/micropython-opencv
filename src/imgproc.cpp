@@ -12,6 +12,43 @@ extern "C" {
 
 using namespace cv;
 
+mp_obj_t cv2_imgproc_adaptiveThreshold(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_src, ARG_maxValue, ARG_adaptiveMethod, ARG_thresholdType, ARG_blockSize, ARG_C, ARG_dst };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_src, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_maxValue, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_adaptiveMethod, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_thresholdType, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_blockSize, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_C, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_dst, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat src = mp_obj_to_mat(args[ARG_src].u_obj);
+    mp_float_t maxValue = mp_obj_get_float(args[ARG_maxValue].u_obj);
+    int adaptiveMethod = args[ARG_adaptiveMethod].u_int;
+    int thresholdType = args[ARG_thresholdType].u_int;
+    int blockSize = args[ARG_blockSize].u_int;
+    mp_float_t C = mp_obj_get_float(args[ARG_C].u_obj);
+    Mat dst = mp_obj_to_mat(args[ARG_dst].u_obj);
+
+    // Call the corresponding OpenCV function
+    try {
+        adaptiveThreshold(src, dst, maxValue, adaptiveMethod, thresholdType, blockSize, C);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mat_to_mp_obj(dst);
+}
+
 mp_obj_t cv2_imgproc_arrowedLine(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
     enum { ARG_img, ARG_pt1, ARG_pt2, ARG_color, ARG_thickness, ARG_line_type, ARG_shift, ARG_tipLength };
@@ -1258,4 +1295,37 @@ mp_obj_t cv2_imgproc_spatialGradient(size_t n_args, const mp_obj_t *pos_args, mp
     result[0] = mat_to_mp_obj(dx);
     result[1] = mat_to_mp_obj(dy);
     return mp_obj_new_tuple(2, result);
+}
+
+mp_obj_t cv2_imgproc_threshold(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_src, ARG_thresh, ARG_maxval, ARG_type, ARG_dst };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_src, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_thresh, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_maxval, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_type, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = THRESH_BINARY } },
+        { MP_QSTR_dst, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat src = mp_obj_to_mat(args[ARG_src].u_obj);
+    mp_float_t thresh = mp_obj_get_float(args[ARG_thresh].u_obj);
+    mp_float_t maxval = mp_obj_get_float(args[ARG_maxval].u_obj);
+    int type = args[ARG_type].u_int;
+    Mat dst = mp_obj_to_mat(args[ARG_dst].u_obj);
+
+    // Call the corresponding OpenCV function
+    try {
+        threshold(src, dst, thresh, maxval, type);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mat_to_mp_obj(dst);
 }

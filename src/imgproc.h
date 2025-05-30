@@ -1,6 +1,7 @@
 // C headers
 #include "py/runtime.h"
 
+extern mp_obj_t cv2_imgproc_adaptiveThreshold(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_arrowedLine(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_bilateralFilter(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_blur(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
@@ -31,3 +32,4 @@ extern mp_obj_t cv2_imgproc_rectangle(size_t n_args, const mp_obj_t *pos_args, m
 extern mp_obj_t cv2_imgproc_Scharr(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_Sobel(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_spatialGradient(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_threshold(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
