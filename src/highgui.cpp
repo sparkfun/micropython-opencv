@@ -7,6 +7,7 @@
 extern "C" {
 #include "highgui.h"
 #include "ulab/code/ndarray.h"
+#include "py/mphal.h"
 } // extern "C"
 
 extern const mp_obj_type_t cv2_display_type;
@@ -42,4 +43,29 @@ mp_obj_t cv2_highgui_imshow(size_t n_args, const mp_obj_t *pos_args, mp_map_t *k
 
     // Call the method with one positional argument (the image we just added)
     return mp_call_method_n_kw(1, 0, method);
+}
+
+mp_obj_t cv2_highgui_waitKey(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { Arg_delay };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_delay, MP_ARG_INT, {.u_int = 0} },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    int delay = args[Arg_delay].u_int;
+
+    // Because we have no way to get user input in this environment, we'll just
+    // delay for the specified time and return a dummy value. Normally, passing
+    // a delay of 0 would wait infinitely until a keyPress, but since that will
+    // never happen here, we will just return immediately after the delay.
+    if(delay > 0)
+        mp_hal_delay_ms(delay);
+    
+    // Return a dummy value to indicate no key was pressed
+    return MP_OBJ_NEW_SMALL_INT(-1);
 }
