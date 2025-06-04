@@ -59,13 +59,56 @@ mp_obj_t cv2_highgui_waitKey(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
     // Convert arguments to required types
     int delay = args[Arg_delay].u_int;
 
-    // Because we have no way to get user input in this environment, we'll just
-    // delay for the specified time and return a dummy value. Normally, passing
-    // a delay of 0 would wait infinitely until a keyPress, but since that will
-    // never happen here, we will just return immediately after the delay.
-    if(delay > 0)
-        mp_hal_delay_ms(delay);
+    // Derived from:
+    // https://github.com/orgs/micropython/discussions/11448
     
-    // Return a dummy value to indicate no key was pressed
-    return MP_OBJ_NEW_SMALL_INT(-1);
+    // Import `sys` and `select` modules
+    mp_obj_t sys_module = mp_import_name(MP_QSTR_sys, mp_const_none, MP_OBJ_NEW_SMALL_INT(0));
+    mp_obj_t select_module = mp_import_name(MP_QSTR_select, mp_const_none, MP_OBJ_NEW_SMALL_INT(0));
+
+    // Get the `sys.stdin` object
+    mp_obj_t stdin_obj = mp_load_attr(sys_module, MP_QSTR_stdin);
+
+    // Get the `select.POLLIN` constant
+    mp_obj_t pollin_obj = mp_load_attr(select_module, MP_QSTR_POLLIN);
+
+    // Call `select.poll()` function to create a poll object
+    mp_obj_t select_poll_method[2];
+    mp_load_method(select_module, MP_QSTR_poll, select_poll_method);
+    mp_obj_t poll_obj = mp_call_method_n_kw(0, 0, select_poll_method);
+
+    // Call `poll.register(sys.stdin, select.POLLIN)`
+    mp_obj_t poll_register_method[4];
+    mp_load_method(poll_obj, MP_QSTR_register, poll_register_method);
+    poll_register_method[2] = stdin_obj;
+    poll_register_method[3] = pollin_obj;
+    mp_call_method_n_kw(2, 0, poll_register_method);
+
+    // Create timeout integer object for next method call. OpenCV uses a delay
+    // of 0 to wait indefinitely, whereas `select.poll` uses -1
+    mp_obj_t timeout = MP_OBJ_NEW_SMALL_INT(delay <= 0 ? -1 : delay);
+
+    // Call `poll.poll(timeout)`
+    mp_obj_t poll_poll_method[3];
+    mp_load_method(poll_obj, MP_QSTR_poll, poll_poll_method);
+    poll_poll_method[2] = timeout;
+    mp_obj_t result = mp_call_method_n_kw(1, 0, poll_poll_method);
+
+    // Extract the items from the result list
+    mp_obj_t *items;
+    size_t len;
+    mp_obj_list_get(result, &len, &items);
+
+    // Check if any items were returned
+    if(len == 0) {
+        // If no items were returned, return -1 to indicate no key was pressed
+        return MP_OBJ_NEW_SMALL_INT(-1);
+    }
+
+    // Since something was returned, a key was pressed. We need to extract it
+    // with `sys.stdin.read(1)`
+    mp_obj_t read_method[3];
+    mp_load_method(stdin_obj, MP_QSTR_read, read_method);
+    read_method[2] = MP_OBJ_NEW_SMALL_INT(1);
+    return mp_call_method_n_kw(1, 0, read_method);
 }
