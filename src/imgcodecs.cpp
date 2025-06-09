@@ -65,6 +65,7 @@ mp_obj_t cv2_imgcodecs_imread(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
 
     // Decode the image from the buffer
     Mat img;
+    img.allocator = &GetNumpyAllocator();
     try {
         img = imdecode(buf, flags);
     } catch(Exception& e) {
