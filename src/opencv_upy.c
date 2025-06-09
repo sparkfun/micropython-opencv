@@ -1,6 +1,7 @@
 #include "core.h"
 #include "highgui.h"
 #include "imgproc.h"
+#include "imgcodecs.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Python references to OpenCV functions
@@ -13,6 +14,9 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_core_inRange_obj, 3, cv2_core_inRange);
 // OpenCV highgui module
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_highgui_imshow_obj, 2, cv2_highgui_imshow);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_highgui_waitKey_obj, 0, cv2_highgui_waitKey);
+
+// OpenCV imgcodecs module
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgcodecs_imread_obj, 1, cv2_imgcodecs_imread);
 
 // OpenCV imgproc module
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_adaptiveThreshold_obj, 6, cv2_imgproc_adaptiveThreshold);
@@ -87,6 +91,23 @@ static const mp_rom_map_elem_t cv2_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_BORDER_REFLECT101), MP_ROM_INT(4) },
     { MP_ROM_QSTR(MP_QSTR_BORDER_DEFAULT), MP_ROM_INT(4) },
     { MP_ROM_QSTR(MP_QSTR_BORDER_ISOLATED), MP_ROM_INT(16) },
+
+    // Image read mode flags, from opencv2/imgcodecs.hpp
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_UNCHANGED), MP_ROM_INT(-1) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_GRAYSCALE), MP_ROM_INT(0) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_COLOR_BGR), MP_ROM_INT(1) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_COLOR), MP_ROM_INT(1) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_ANYDEPTH), MP_ROM_INT(2) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_ANYCOLOR), MP_ROM_INT(4) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_LOAD_GDAL), MP_ROM_INT(8) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_REDUCED_GRAYSCALE_2), MP_ROM_INT(16) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_REDUCED_COLOR_2), MP_ROM_INT(17) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_REDUCED_GRAYSCALE_4), MP_ROM_INT(32) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_REDUCED_COLOR_4), MP_ROM_INT(33) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_REDUCED_GRAYSCALE_8), MP_ROM_INT(64) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_REDUCED_COLOR_8), MP_ROM_INT(65) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_IGNORE_ORIENTATION), MP_ROM_INT(128) },
+    { MP_ROM_QSTR(MP_QSTR_IMREAD_COLOR_RGB), MP_ROM_INT(256) },
 
     // Morphology operation types, from opencv2/imgproc.hpp
     { MP_ROM_QSTR(MP_QSTR_MORPH_ERODE), MP_ROM_INT(0) },
@@ -223,6 +244,12 @@ static const mp_rom_map_elem_t cv2_module_globals_table[] = {
     
     { MP_ROM_QSTR(MP_QSTR_imshow), MP_ROM_PTR(&cv2_highgui_imshow_obj) },
     { MP_ROM_QSTR(MP_QSTR_waitKey), MP_ROM_PTR(&cv2_highgui_waitKey_obj) },
+
+    ////////////////////////////////////////////////////////////////////////////
+    // OpenCV imgcodecs functions
+    ////////////////////////////////////////////////////////////////////////////
+
+    { MP_ROM_QSTR(MP_QSTR_imread), MP_ROM_PTR(&cv2_imgcodecs_imread_obj) },
     
     ////////////////////////////////////////////////////////////////////////////
     // OpenCV imgproc functions
