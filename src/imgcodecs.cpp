@@ -13,25 +13,6 @@ extern "C" {
 
 using namespace cv;
 
-// Fix for https://github.com/sparkfun/micropython-opencv/issues/17
-// 
-// TLDR; The `g_codecs` object (which stores all image encoders and decoders) is
-// allocated once, whenever the first OpenCV function that needs it happens to
-// be called. That will only happen from the user's code, after the GC has been
-// initialized, meaning it gets allocated on the GC heap (see `__wrap_malloc()`)
-// If a soft reset occurs, the GC gets reset and overwrites the memory location,
-// but the same memory location is still referenced for the the `g_codecs`
-// object, resulting in bogus values and subsequent `imread()` and `imwrite()`
-// calls fail
-// 
-// The solution here is to create a global variable that subsequently creates
-// the `g_codecs` object before the GC has been initialized, so it's allocated
-// on the C heap and persists through soft resets. `g_codecs` is initialized
-// when calling `getCodecs()`, which is not publicly exposed. The next best
-// option is to call `haveImageWriter()`, which calls `findEncoder()`, which
-// calls `getCodecs()`
-volatile bool haveImageWriterPNG = haveImageWriter(".png");
-
 // Helper macro to create an empty mp_map_t, derived from MP_DEFINE_CONST_MAP.
 // Primarily used for function calls with no keyword arguments, since we can't
 // just pass `NULL` or mp_const_none (crash occurs otherwise)

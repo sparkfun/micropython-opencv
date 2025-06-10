@@ -1,5 +1,6 @@
 // C++ headers
 #include "opencv2/core.hpp"
+#include "opencv2/imgcodecs.hpp"
 #include "convert.h"
 #include "numpy.h"
 
@@ -11,46 +12,46 @@ extern "C" {
 
 using namespace cv;
 
-// Fix for https://github.com/sparkfun/micropython-opencv/issues/13
+// The function below is a workaround for memory management issues between
+// OpenCV and the MicroPython GC. OpenCV allocates some objects on the heap,
+// whenever the first function that needs the objects happen to be called. That
+// only happens from the user's code after the GC has been initialized, meaning
+// they get allocated on the GC heap (see `__wrap_malloc()`). If a soft reset
+// occurs, the GC gets reset and the memory locations get overwritten, but the
+// same memory locations are still referenced for the objects, resulting in bad
+// values and problems (crashes and freezes, `CV_Assert()` calls fail, etc.).
 // 
-// TLDR; The CoreTLSData object gets allocated once, whenever the first OpenCV
-// function that needs it happens to be called. That will only happen from the
-// user's code, after the GC has been initialized, meaning it gets allocated on
-// the GC heap (see `__wrap_malloc()`). If a soft reset occurs, the GC gets
-// reset and overwrites the memory location, but the same memory location is
-// still referenced for the CoreTLSData object, resulting in bogus values and
-// subsequent `CV_Assert()` calls fail
+// The solution here is to ensure those objects are allocated in the C heap
+// instead of the GC heap. The function below calls various OpenCV functions
+// that subsequently allocate the problematic objects. To ensure they are
+// allocated on the C heap, this needs to happen before the GC is initialized
+// (before `main()` is called), so __wrap_malloc() will use __real_malloc()
+// instead of the GC.
 // 
-// The solution here is to create a global variable that subsequently calls
-// `getCoreTlsData()` to allocate the CoreTLSData object before the GC has
-// been initialized, so it gets allocated on the C heap and persists through
-// soft resets. `getCoreTlsData()` is not publicly exposed, but `theRNG()` is
-// exposed, which just runs `return getCoreTlsData().rng`
-volatile RNG rng = theRNG();
-
-// Fix for https://github.com/sparkfun/micropython-opencv/issues/17
-// 
-// TLDR; The `StdMatAllocator` gets allocated once, whenever the first time a
-// Mat object is created without the NumpyAllocator being set (OpenCV creates
-// internal Mat objects for various operations that use whatever the default
-// allocator is). Similar to above, the `StdMatAllocator` gets allocated on the
-// GC heap, so if a soft reset occurs, the GC gets reset and overwrites the
-// memory location, causing problems
-// 
-// Instead of ensuring the `StdMatAllocator` is allocated on the C heap, we just
-// set the NumpyAllocator as the default allocator. `Mat::setDefaultAllocator()`
-// does not return anything, so this wrapper function returns a dummy value so
-// we can use it to initialize a global variable, ensuring it gets run before
-// `main()` gets called
-bool setNumpyAllocator() {
+// The function below returns a dummy value that we use to initialize a global
+// variable, ensuring it gets run before `main()` gets called. This also means
+// it can be used as a general boot function for anything else that needs to
+// happen before `main()` is called, such as setting the default Mat allocator.
+bool upyOpenCVBoot() {
     try {
+        // Initializes `CoreTLSData` on the C heap, see:
+        // https://github.com/sparkfun/micropython-opencv/issues/13
+        theRNG();
+
+        // Initializes all image codecs on the C heap, see:
+        // https://github.com/sparkfun/micropython-opencv/issues/17
+        haveImageWriter(".bmp");
+
+        // Sets the NumpyAllocator as the default Mat object allocator, see
+        // https://github.com/sparkfun/micropython-opencv/issues/17
         Mat::setDefaultAllocator(&GetNumpyAllocator());
+
         return true;
     } catch (const Exception& e) {
         return false;
     }
 }
-volatile bool defaultAllocatorSet = setNumpyAllocator();
+volatile bool bootSuccess = upyOpenCVBoot();
 
 mp_obj_t cv2_core_convertScaleAbs(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
