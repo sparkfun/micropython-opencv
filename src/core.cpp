@@ -42,9 +42,16 @@ bool upyOpenCVBoot() {
         // https://github.com/sparkfun/micropython-opencv/issues/17
         haveImageWriter(".bmp");
 
-        // Sets the NumpyAllocator as the default Mat object allocator, see
+        // Initializes `StdMatAllocator` on the C heap, see:
         // https://github.com/sparkfun/micropython-opencv/issues/17
-        Mat::setDefaultAllocator(&GetNumpyAllocator());
+        // Alternatively, we could set the NumpyAllocator as the default Mat
+        // allocator with Mat::setDefaultAllocator(&GetNumpyAllocator()),
+        // however that actually causes some issues. For example, Canny()
+        // creates an temporary 64-bit float Mat, which is not supported by
+        // ulab NumPy and therefore fails if we use the NumpyAllocator. The
+        // StdMatAllocator is fine, because it calls `malloc()`, which we catch
+        // with `__wrap_malloc()` to ensure the data is allocated on the GC heap
+        Mat::getDefaultAllocator();
 
         return true;
     } catch (const Exception& e) {
