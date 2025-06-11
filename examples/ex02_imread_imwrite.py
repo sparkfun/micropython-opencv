@@ -1,0 +1,37 @@
+# Import OpenCV
+import cv2
+
+# Call `cv2.imread()` to read an image from the MicroPython filesystem, just
+# like in any other Python environment! Make sure to copy the image to the
+# MicroPython filesystem first, and set the path to the image file as needed
+# 
+# If your board can mount an SD card, you can instead load the image to the SD
+# card and change the path to point to the SD card
+# 
+# Note - only BMP and PNG formats are currently supported in MicroPython OpenCV
+img = cv2.imread("test_images/sparkfun_logo.png")
+
+# Show the image for a moment
+cv2.imshow(display, img)
+key = cv2.waitKey(1000)
+
+# Let's modify the image! Here we use `cv2.Canny()` to perform edge detection
+# on the image, which is a common operation in computer vision
+edges = cv2.Canny(img, 100, 200)
+
+# Display the modified image
+cv2.imshow(display, edges)
+
+# Now we'll save the modified image to the MicroPyhton filesystem using
+# `cv2.imwrite()`, just like in any other Python environment!
+# 
+# Again, SD cards are supported, just change the path to point to the SD card
+# 
+# Note - only BMP and PNG formats are currently supported in MicroPython OpenCV
+success = cv2.imwrite("test_images/sparkfun_logo_edges.png", edges)
+
+# Check if the image was saved successfully
+if success:
+    print("Image saved successfully!")
+else:
+    print("Failed to save the image!")
