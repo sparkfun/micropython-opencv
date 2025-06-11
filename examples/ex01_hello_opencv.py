@@ -53,4 +53,8 @@ cv2.imshow(display, img) # Can alternatively call `display.imshow(img)`
 # 
 # Note - Some MicroPython IDEs (like Thonny) don't actually send any key presses
 # until you hit Enter on your keyboard
+print("Press any key to continue")
 key = cv2.waitKey(0) # Not necessary to display image, can remove if desired
+
+# Print the key pressed
+print("Key pressed:", chr(key))
