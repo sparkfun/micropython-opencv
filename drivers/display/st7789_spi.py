@@ -118,15 +118,11 @@ class ST7789_SPI():
     OpenCV SPI driver for ST7789 displays
 
     Args:
-        width (int): display width   **Required**
+        width (int): display width **Required**
         height (int): display height **Required**
-        spi_id (int): SPI bus ID
-        spi_baudrate (int): SPI baudrate, default 24MHz
-        pin_sck (pin): SCK pin number
-        pin_mosi (pin): MOSI pin number
-        pin_miso (pin): MISO pin number
-        pin_cs (pin): Chip Select pin number
-        pin_dc (pin): Data/Command pin number
+        spi (SPI): SPI bus **Required**
+        pin_dc (Pin): Data/Command pin number **Required**
+        pin_cs (Pin): Chip Select pin number
         rotation (int): Orientation of display
           - 0-Portrait, default
           - 1-Landscape
@@ -142,24 +138,17 @@ class ST7789_SPI():
         self,
         width,
         height,
-        spi_id,
-        spi_baudrate=24000000,
-        pin_sck=None,
-        pin_mosi=None,
-        pin_miso=None,
+        spi,
+        pin_dc,
         pin_cs=None,
-        pin_dc=None,
         rotation=0,
         color_order=BGR,
         reverse_bytes_in_word=True,
     ):
         # Store SPI arguments
-        self.spi = SPI(spi_id, baudrate=spi_baudrate,
-                       sck=Pin(pin_sck, Pin.OUT) if pin_sck else None,
-                       mosi=Pin(pin_mosi, Pin.OUT) if pin_mosi else None,
-                       miso=Pin(pin_miso, Pin.IN) if pin_miso else None)
+        self.spi = spi
+        self.dc = Pin(pin_dc) # Don't change mode/alt
         self.cs = Pin(pin_cs, Pin.OUT, value=1) if pin_cs else None
-        self.dc = Pin(pin_dc, Pin.OUT, value=1) if pin_dc else None
         # Initial dimensions and offsets; will be overridden when rotation applied
         self.width = width
         self.height = height
@@ -359,8 +348,54 @@ class ST7789_SPI():
         # Write the buffer to the display
         self._write(None, self.buffer)
 
+    def saveDcPin(self):
+        """
+        Saves the current `mode` and `alt` of the DC pin so it can be restored
+        later. Mostly used to restore the SPI mode (MISO) of the DC pin after
+        communication with the display in case another device is using the same
+        SPI bus.
+
+        Returns:
+            tuple: (mode, alt)
+        """
+        # There's no way to get the mode and alt of a pin directly, so we
+        # convert the pin to a string and parse it. Example format:
+        # "Pin(GPIO16, mode=ALT, alt=SPI)"
+        dcStr = str(self.dc)
+
+        # Extract the "mode" parameter from the pin string
+        if "mode=" in dcStr:
+            # Split between "mode=" and the next comma or closing parenthesis
+            modeStr = dcStr.split("mode=")[1].split(",")[0].split(")")[0]
+
+            # Look up the mode in Pin class dictionary
+            mode = Pin.__dict__[modeStr]
+        else:
+            # No mode specified, just set to None
+            mode = None
+
+        # Extrct the "alt" parameter from the pin string
+        if "alt=" in dcStr:
+            # Split between "alt=" and the next comma or closing parenthesis
+            altStr = dcStr.split("alt=")[1].split(",")[0].split(")")[0]
+
+            # Look up the alt in Pin class dictionary (with "ALT_" prefix)
+            alt = Pin.__dict__["ALT_" + altStr]
+        else:
+            # No alt specified, just set to None
+            alt = None
+
+        # Return the mode and alt as a tuple
+        return (mode, alt)
+
     def _write(self, command=None, data=None):
         """SPI write to the device: commands and data."""
+        # Save the current mode and alt of the DC pin in case it's used by
+        # another device on the same SPI bus
+        mode, alt = self.saveDcPin()
+        # Temporarily set the DC pin to output mode
+        self.dc.init(mode=Pin.OUT)
+
         if self.cs:
             self.cs.off()
         if command is not None:
@@ -371,3 +406,6 @@ class ST7789_SPI():
             self.spi.write(data)
         if self.cs:
             self.cs.on()
+
+        # Restore the DC pin to its original mode and alt
+        self.dc.init(mode=mode, alt=alt)
