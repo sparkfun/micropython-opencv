@@ -200,7 +200,6 @@ class HM01B0_PIO():
         self.sm_id = sm_id
         self.i2c_address = i2c_address
         self.buffer = np.zeros((244, 324), dtype=np.uint8)
-        # self.buffer = bytearray(244 * 324)
 
         Pin(pin_d0, Pin.IN)
         Pin(pin_vsync, Pin.IN)
@@ -286,7 +285,6 @@ class HM01B0_PIO():
         )
         self.dma.config(
             read = self.sm,
-            write = self.buffer,
             count = 244 * 324,
             ctrl = dma_ctrl
         )
@@ -297,10 +295,18 @@ class HM01B0_PIO():
         )
 
     def _vsync_handler(self):
-        self.sm.restart()
+        # Disable DMA before reconfiguring it
+        self.dma.active(False)
+
+        # Ensure PIO RX FIFO is empty
+        while self.sm.rx_fifo() > 0:
+            self.sm.get()
+        
+        # Reset the DMA write address
         self.dma.write = self.buffer
+
+        # Start the DMA
         self.dma.active(True)
-        # print("new frame:", time.ticks_ms())
 
     @rp2.asm_pio(
             in_shiftdir = rp2.PIO.SHIFT_LEFT,
