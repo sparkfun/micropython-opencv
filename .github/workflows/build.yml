@@ -12,13 +12,13 @@ jobs:
         submodules: true
     - name: Install packages
       run: sudo apt-get install gcc-arm-none-eabi libnewlib-arm-none-eabi
-    - name: Set Pico SDK path
-      run: echo "PICO_SDK_PATH=$GITHUB_WORKSPACE/micropython/lib/pico-sdk" >> "$GITHUB_ENV"
-    - name: Build OpenCV
-      run: make -C src/opencv PLATFORM=embedded/rp2350
     - name: Build MPY Cross
       run: make -C micropython/mpy-cross
     - name: Submodules
       run: make -C micropython/ports/rp2 BOARD=SPARKFUN_XRP_CONTROLLER submodules
+    - name: Set Pico SDK path
+      run: echo "PICO_SDK_PATH=$GITHUB_WORKSPACE/micropython/lib/pico-sdk" >> "$GITHUB_ENV"
+    - name: Build OpenCV
+      run: make -C src/opencv PLATFORM=embedded/rp2350
     - name: Build firmware
       run: make BOARD=SPARKFUN_XRP_CONTROLLER
