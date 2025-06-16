@@ -19,6 +19,6 @@ jobs:
     - name: Set Pico SDK path
       run: echo "PICO_SDK_PATH=$GITHUB_WORKSPACE/micropython/lib/pico-sdk" >> "$GITHUB_ENV"
     - name: Build OpenCV
-      run: make -C src/opencv PLATFORM=embedded/rp2350
+      run: make -C src/opencv PLATFORM=embedded/rp2350 --no-print-directory
     - name: Build firmware
       run: make BOARD=SPARKFUN_XRP_CONTROLLER
