@@ -12,6 +12,8 @@ jobs:
         submodules: true
     - name: Install packages
       run: sudo apt-get install gcc-arm-none-eabi libnewlib-arm-none-eabi
+    - name: Set Pico SDK path
+      run: export PICO_SDK_PATH=$GITHUB_WORKSPACE/micropython/lib/pico-sdk
     - name: Build OpenCV
       run: make -C src/opencv PLATFORM=embedded/rp2350
     - name: Build MPY Cross
