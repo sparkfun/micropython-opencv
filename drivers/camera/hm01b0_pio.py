@@ -289,14 +289,15 @@ class HM01B0_PIO():
         self.dma = rp2.DMA()
         req_num = ((self.sm_id // 4) << 3) + (self.sm_id % 4) + 4
         dma_ctrl = self.dma.pack_ctrl(
-            size = 0, # 0 = 8-bit, 1 = 16-bit, 2 = 32-bit
+            size = 2, # 0 = 8-bit, 1 = 16-bit, 2 = 32-bit
             inc_read = False,
-            treq_sel = req_num
+            treq_sel = req_num,
+            bswap = True
             # irq_quiet = False
         )
         self.dma.config(
             read = self.sm,
-            count = 244 * 324,
+            count = 244 * 324 // 4,
             ctrl = dma_ctrl
         )
         
@@ -340,7 +341,7 @@ class HM01B0_PIO():
         # Ensure PIO RX FIFO is empty (it's not emptied by `sm.restart()`)
         while self.sm.rx_fifo() > 0:
             self.sm.get()
-        
+
         # Reset the DMA write address
         self.dma.write = self.buffer
 
@@ -349,7 +350,7 @@ class HM01B0_PIO():
 
     @rp2.asm_pio(
             in_shiftdir = rp2.PIO.SHIFT_LEFT,
-            push_thresh = 8,
+            push_thresh = 32,
             autopush = True
         )
     def _pio_read_dvp():
