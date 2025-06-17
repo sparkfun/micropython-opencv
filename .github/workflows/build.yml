@@ -1,7 +1,7 @@
 name: Build firmware
 
 on:
-  pull:
+  pull_request:
     branches:
       - main
   push:
