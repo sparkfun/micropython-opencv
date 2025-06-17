@@ -1,5 +1,5 @@
-[submodule "src/opencv"]
-	path = src/opencv
+[submodule "src/opencv/opencv"]
+	path = src/opencv/opencv
 	url = https://github.com/sfe-SparkFro/opencv.git
 [submodule "src/ulab"]
 	path = src/ulab

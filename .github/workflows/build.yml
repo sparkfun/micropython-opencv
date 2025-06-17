@@ -17,12 +17,12 @@ jobs:
         sudo apt install cmake python3 build-essential gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
     - name: Build MPY Cross
       run: make -C micropython/mpy-cross
-    - name: Submodules
+    - name: MicroPython submodules
       run: make -C micropython/ports/rp2 BOARD=SPARKFUN_XRP_CONTROLLER submodules
     - name: Set Pico SDK path
       run: echo "PICO_SDK_PATH=$GITHUB_WORKSPACE/micropython/lib/pico-sdk" >> "$GITHUB_ENV"
     - name: Build OpenCV
-      run: make -C src/opencv PLATFORM=embedded/rp2350 --no-print-directory -j4
+      run: make -C src/opencv PLATFORM=rp2350 --no-print-directory -j4
     - name: Build firmware
       run: make BOARD=SPARKFUN_XRP_CONTROLLER -j4
     - name: Upload UF2

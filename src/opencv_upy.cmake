@@ -39,7 +39,7 @@ target_compile_definitions(usermod INTERFACE ULAB_MAX_DIMS=4)
 include(${CMAKE_CURRENT_LIST_DIR}/ulab/code/micropython.cmake)
 
 # Include OpenCV
-set(OpenCV_DIR ${CMAKE_CURRENT_LIST_DIR}/opencv/build)
+set(OpenCV_DIR ${CMAKE_CURRENT_LIST_DIR}/opencv/opencv/build)
 find_package(OpenCV REQUIRED)
 target_include_directories(usermod INTERFACE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(usermod INTERFACE ${OpenCV_LIBS})
