@@ -240,6 +240,20 @@ class HM01B0_PIO():
         """
         self.writeRegister(self.SW_RESET, self.HIMAX_RESET)
 
+    def setMode(self, mode):
+        """
+        Sets the operating mode of the HM01B0 sensor.
+        Args:
+            mode (int): The mode to set, e.g., MODE_STREAMING.
+        """
+        self.writeRegister(self.MODE_SELECT, mode)
+
+    def trigger(self):
+        self.writeRegister(self.MODE_SELECT, self.HIMAX_MODE_STREAMING_NFRAMES)
+
+    def set_n_frames(self, n_frames):
+        self.writeRegister(self.PMU_AUTOSLEEP_FRAMECNT, n_frames)
+
     def send_init(self):
         """
         Initializes the HM01B0 sensor with default settings.
@@ -248,9 +262,6 @@ class HM01B0_PIO():
         for reg, value in self.INIT_COMMANDS:
             self.writeRegister(reg, value)
             sleep_us(1000)
-        
-        # Ensure the sensor is in streaming mode
-        # self.writeRegister(self.MODE_SELECT, self.HIMAX_MODE_STREAMING)
 
     def readRegister(self, reg, nbytes=1):
         self.i2c.writeto(self.i2c_address, bytes([reg >> 8, reg & 0xFF]))
@@ -323,7 +334,10 @@ class HM01B0_PIO():
         # Disable DMA before reconfiguring it
         self.dma.active(False)
 
-        # Ensure PIO RX FIFO is empty
+        # Reset state machine to ensure ISR is cleared
+        self.sm.restart()
+
+        # Ensure PIO RX FIFO is empty (it's not emptied by `sm.restart()`)
         while self.sm.rx_fifo() > 0:
             self.sm.get()
         
