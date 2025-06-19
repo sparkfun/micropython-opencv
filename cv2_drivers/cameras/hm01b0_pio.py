@@ -1,5 +1,5 @@
 import rp2
-from machine import Pin, I2C
+from machine import Pin
 from ulab import numpy as np
 from time import sleep_us
 import cv2
@@ -7,8 +7,6 @@ import cv2
 # Derived from:
 # https://github.com/openmv/openmv/blob/5acf5baf92b4314a549bdd068138e5df6cc0bac7/drivers/sensors/hm01b0.c
 class HM01B0_PIO():
-    # Derived from:
-    # https://github.com/openmv/openmv/blob/5acf5baf92b4314a549bdd068138e5df6cc0bac7/drivers/sensors/hm01b0_regs.h
     
     # Read only registers
     MODEL_ID_H = 0x0000

@@ -7,6 +7,9 @@ CURRENT_DIR = $(shell pwd)
 # Set the MicroPython user C module path to the OpenCV module
 MAKE_ARGS = USER_C_MODULES="$(CURRENT_DIR)/src/opencv_upy.cmake"
 
+# Use the OpenCV driver manifest
+MAKE_ARGS += FROZEN_MANIFEST="$(CURRENT_DIR)/cv2_drivers/manifest.py"
+
 # Build MicroPython with the OpenCV module
 all:
 	@cd micropython/ports/rp2 && export CMAKE_ARGS="$(CMAKE_ARGS)" && make -f Makefile $(MAKEFLAGS) $(MAKE_ARGS)

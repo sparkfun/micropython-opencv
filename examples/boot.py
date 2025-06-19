@@ -15,7 +15,7 @@ try:
     # a very popular display driver for embedded systems. Moreover, this example
     # uses an SPI-based driver, so it should work on any platform, but it's not
     # always the fastest option
-    import st7789_spi
+    from cv2_drivers.displays import st7789_spi
 
     # Create a display object. This will depend on the display driver you are
     # using, and you may need to adjust the parameters based on your specific
@@ -75,7 +75,7 @@ try:
     # a popular camera module for embedded systems. This example uses a PIO
     # driver, which is a peripheral interface only available on Raspberry Pi RP2
     # processors
-    import hm01b0_pio
+    from cv2_drivers.cameras import hm01b0_pio
 
     # Create a camera object. This will depend on the camera driver you are
     # using, and you may need to adjust the parameters based on your specific
