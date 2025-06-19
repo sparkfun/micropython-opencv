@@ -169,7 +169,6 @@ class ST7789(CV2_Display):
         Send initialisation commands to display.
         """
         for command, data, delay in commands:
-            print(command, data, delay)
             self._write(command, data)
             sleep_ms(delay)
 

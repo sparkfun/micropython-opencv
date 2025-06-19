@@ -16,6 +16,7 @@ class ST7789_PIO(ST7789):
         pin_tx (Pin): Transmit pin number **Required**
         pin_dc (Pin): Data/Command pin number **Required**
         pin_cs (Pin): Chip Select pin number
+        freq (int): State machine frequency in Hz, default -1 (system clock)
         rotation (int): Orientation of display
           - 0-Portrait, default
           - 1-Landscape
@@ -36,47 +37,56 @@ class ST7789_PIO(ST7789):
         pin_tx,
         pin_dc,
         pin_cs=None,
+        freq=-1,
         rotation=0,
         color_order=ST7789.BGR,
         reverse_bytes_in_word=True,
     ):
         # Store PIO arguments
         self.sm_id = sm_id
-        self.pin_clk = pin_clk
-        self.pin_tx = pin_tx
-        # self.pin_dc = pin_dc
-        # self.pin_cs = pin_cs
-
-        self.clk = Pin(pin_clk, Pin.OUT) # Don't change mode/alt
-        self.tx = Pin(pin_tx, Pin.OUT) # Don't change mode/alt
-        self.clk = Pin(pin_clk, Pin.ALT, alt=Pin.ALT_PIO0) # Don't change mode/alt
-        self.tx = Pin(pin_tx, Pin.ALT, alt=Pin.ALT_PIO0) # Don't change mode/alt
-        self.dc = Pin(pin_dc, Pin.OUT) # Don't change mode/alt
+        self.clk = Pin(pin_clk) # Don't change mode/alt
+        self.tx = Pin(pin_tx) # Don't change mode/alt
+        self.dc = Pin(pin_dc) # Don't change mode/alt
         self.cs = Pin(pin_cs, Pin.OUT, value=1) if pin_cs else None
+        self.freq = freq
         
-        program = self._pio_write_spi
-        # program[0][0]=0x6001
-        # program[0][4]=0xb042
-        print(program)
+        # Get the current mode and alt of the pins so they can be restored
+        txMode, txAlt = self.savePinModeAlt(self.tx)
+        clkMode, clkAlt = self.savePinModeAlt(self.clk)
 
+        # Initialize the PIO state machine
         self.sm = rp2.StateMachine(
             self.sm_id,
-            program,
-            out_base = self.pin_tx,
-            sideset_base = self.pin_clk,
-            # out_shiftdir = rp2.PIO.SHIFT_LEFT,
+            self._pio_write_spi,
+            freq = self.freq,
+            out_base = self.tx,
+            sideset_base = self.clk,
         )
+
+        # The tx and clk pins just got their mode and alt set for PIO0 or PIO1,
+        # so we need to save them again to restore later when _write() is called
+        self.txMode, self.txAlt = self.savePinModeAlt(self.tx)
+        self.clkMode, self.clkAlt = self.savePinModeAlt(self.clk)
         
+        # Now restore the original mode and alt of the pins
+        self.tx.init(mode=txMode, alt=txAlt)
+        self.clk.init(mode=clkMode, alt=clkAlt)
+        
+        # Call the parent class constructor
         super().__init__(width, height, rotation, color_order, reverse_bytes_in_word)
 
     def _write(self, command=None, data=None):
         """SPI write to the device: commands and data."""
-        # Save the current mode and alt of the DC pin in case it's used by
+        # Save the current mode and alt of the spi pins in case they're used by
         # another device on the same SPI bus
-        # dcMode, dcAlt = self.savePinModeAlt(self.dc)
+        dcMode, dcAlt = self.savePinModeAlt(self.dc)
+        txMode, txAlt = self.savePinModeAlt(self.tx)
+        clkMode, clkAlt = self.savePinModeAlt(self.clk)
 
-        # Temporarily set the DC pin to output mode
+        # Temporarily set the SPI pins to the correct mode and alt for PIO
         self.dc.init(mode=Pin.OUT)
+        self.tx.init(mode=self.txMode, alt=self.txAlt)
+        self.clk.init(mode=self.clkMode, alt=self.clkAlt)
 
         # Write to the display
         if self.cs:
@@ -90,8 +100,10 @@ class ST7789_PIO(ST7789):
         if self.cs:
             self.cs.on()
 
-        # Restore the DC pin to its original mode and alt
-        # self.dc.init(mode=dcMode, alt=dcAlt)
+        # Restore the SPI pins to their original mode and alt
+        self.dc.init(mode=dcMode, alt=dcAlt)
+        self.tx.init(mode=txMode, alt=txAlt)
+        self.clk.init(mode=clkMode, alt=clkAlt)
 
     def _pio_write(self, data):
         """Write data to the display using PIO."""
@@ -105,7 +117,6 @@ class ST7789_PIO(ST7789):
         self.sm.active(0)
 
     @rp2.asm_pio(
-            # fifo_join = rp2.PIO.JOIN_TX,
             out_init = rp2.PIO.OUT_LOW,
             sideset_init = rp2.PIO.OUT_LOW,
             out_shiftdir = rp2.PIO.SHIFT_LEFT,
@@ -114,10 +125,4 @@ class ST7789_PIO(ST7789):
         )
     def _pio_write_spi():
         out(pins, 1).side(0)
-        nop()
-        nop()
-        nop()
         nop().side(1)
-        nop()
-        nop()
-        nop()

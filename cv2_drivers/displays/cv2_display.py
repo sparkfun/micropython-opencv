@@ -113,8 +113,8 @@ class CV2_Display():
             # Look up the mode in Pin class dictionary
             mode = Pin.__dict__[modeStr]
         else:
-            # No mode specified, just set to None
-            mode = None
+            # No mode specified, just set to -1 (default)
+            mode = -1
 
         # Extrct the "alt" parameter from the pin string
         if "alt=" in pinStr:
@@ -130,8 +130,8 @@ class CV2_Display():
                 # Convert the altStr to an integer
                 alt = int(altStr)
         else:
-            # No alt specified, just set to None
-            alt = None
+            # No alt specified, just set to -1 (default)
+            alt = -1
 
         # Return the mode and alt as a tuple
         return (mode, alt)
