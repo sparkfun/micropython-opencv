@@ -99,7 +99,7 @@ class ST7789_PIO(ST7789):
         self.sm.active(1)
         
         # Write data to the state machine
-        self.sm.put(data)
+        self.sm.put(data, 24)
 
         # Stop the state machine
         self.sm.active(0)
