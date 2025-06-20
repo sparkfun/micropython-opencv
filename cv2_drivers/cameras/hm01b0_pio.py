@@ -321,13 +321,13 @@ class HM01B0_PIO():
     def release(self):
         self.active(False)
 
-    def read(self):
+    def read(self, image = None):
         """
         Reads a frame from the camera.
         Returns:
             tuple: (success, frame)
         """
-        return (True, cv2.cvtColor(self.buffer, cv2.COLOR_BayerRG2BGR))
+        return (True, cv2.cvtColor(self.buffer, cv2.COLOR_BayerRG2BGR, image))
 
     def _vsync_handler(self):
         # Disable DMA before reconfiguring it
