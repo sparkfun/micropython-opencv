@@ -9,7 +9,7 @@ import cv2
 # card and change the path to point to the SD card
 # 
 # Note - only BMP and PNG formats are currently supported in MicroPython OpenCV
-print("Loading image, this may take a few seconds...")
+print("Loading image...")
 img = cv2.imread("test_images/sparkfun_logo.png")
 
 # Show the image for 1 second
