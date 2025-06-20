@@ -13,6 +13,9 @@ import cv2
 # `boot.py` script. See the example `boot.py` script for more details
 camera.open()
 
+# Prompt the user to press a key to continue
+print("Press any key to continue")
+
 # Loop to continuously read frames from the camera and display them
 while True:
     # Read a frame from the camera, just like any other Python environment! It
@@ -31,8 +34,8 @@ while True:
     # Check for key presses
     key = cv2.waitKey(1)
 
-    # If the 'q' key is pressed, exit the loop
-    if key == ord('q'):
+    # If any key is pressed, exit the loop
+    if key != -1:
         break
 
 # Release the camera, just like in any other Python environment!

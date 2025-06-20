@@ -17,7 +17,10 @@ img = cv2.imread("test_images/sparkfun_logo.png")
 # depend on the display driver. For example, the default ST7789 display driver
 # will crop large images, and show small images in the top-left corner
 cv2.imshow(display, img)
-key = cv2.waitKey(1000)
+
+# Prompt the user to press a key to continue
+print("Press any key to continue")
+key = cv2.waitKey(0)
 
 # Let's modify the image! Here we use `cv2.Canny()` to perform edge detection
 # on the image, which is a common operation in computer vision
