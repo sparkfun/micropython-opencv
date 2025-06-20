@@ -50,22 +50,9 @@ class ST7789_PIO(ST7789):
         self.dc = Pin(pin_dc) # Don't change mode/alt
         self.cs = Pin(pin_cs, Pin.OUT, value=1) if pin_cs else None
         self.freq = freq
-        
-        # Get the current mode and alt of the pins so they can be restored
-        txMode, txAlt = self.savePinModeAlt(self.tx)
-        clkMode, clkAlt = self.savePinModeAlt(self.clk)
 
         # Start the PIO state machine and DMA with 1 bytes per transfer
         self._setup_sm_and_dma(1)
-
-        # The tx and clk pins just got their mode and alt set for PIO0 or PIO1,
-        # so we need to save them again to restore later when _write() is called
-        self.txMode, self.txAlt = self.savePinModeAlt(self.tx)
-        self.clkMode, self.clkAlt = self.savePinModeAlt(self.clk)
-
-        # Now restore the original mode and alt of the pins
-        self.tx.init(mode=txMode, alt=txAlt)
-        self.clk.init(mode=clkMode, alt=clkAlt)
 
         # Call the parent class constructor
         super().__init__(width, height, rotation, color_order, reverse_bytes_in_word)
@@ -78,6 +65,10 @@ class ST7789_PIO(ST7789):
         # Store the bytes per transfer for later use
         self.bytes_per_transfer = bytes_per_transfer
 
+        # Get the current mode and alt of the pins so they can be restored
+        txMode, txAlt = self.savePinModeAlt(self.tx)
+        clkMode, clkAlt = self.savePinModeAlt(self.clk)
+
         # Initialize the PIO state machine
         self.sm = rp2.StateMachine(
             self.sm_id,
@@ -88,7 +79,18 @@ class ST7789_PIO(ST7789):
             pull_thresh = bytes_per_transfer * 8
         )
 
-         # Instantiate a DMA controller if not already done
+        # The tx and clk pins just got their mode and alt set for PIO0 or PIO1.
+        # We need to save them again to restore later when _write() is called,
+        # if we haven't already
+        if not hasattr(self, 'txMode'):
+            self.txMode, self.txAlt = self.savePinModeAlt(self.tx)
+            self.clkMode, self.clkAlt = self.savePinModeAlt(self.clk)
+
+        # Now restore the original mode and alt of the pins
+        self.tx.init(mode=txMode, alt=txAlt)
+        self.clk.init(mode=clkMode, alt=clkAlt)
+
+        # Instantiate a DMA controller if not already done
         if not hasattr(self, 'dma'):
             self.dma = rp2.DMA()
 
