@@ -1,6 +1,7 @@
 from .st7789 import ST7789
 from machine import Pin
 import rp2
+# import time
 
 # Derived from:
 # https://github.com/raspberrypi/pico-examples/tree/master/pio/st7789_lcd
@@ -67,11 +68,24 @@ class ST7789_PIO(ST7789):
         # so we need to save them again to restore later when _write() is called
         self.txMode, self.txAlt = self.savePinModeAlt(self.tx)
         self.clkMode, self.clkAlt = self.savePinModeAlt(self.clk)
-        
+
         # Now restore the original mode and alt of the pins
         self.tx.init(mode=txMode, alt=txAlt)
         self.clk.init(mode=clkMode, alt=clkAlt)
-        
+
+        # Set up DMA to transfer to the PIO state machine
+        self.dma = rp2.DMA()
+        req_num = ((self.sm_id // 4) << 3) + (self.sm_id % 4)
+        dma_ctrl = self.dma.pack_ctrl(
+            size = 0, # 0 = 8-bit, 1 = 16-bit, 2 = 32-bit
+            inc_write = False,
+            treq_sel = req_num
+        )
+        self.dma.config(
+            write = self.sm,
+            ctrl = dma_ctrl
+        )
+
         # Call the parent class constructor
         super().__init__(width, height, rotation, color_order, reverse_bytes_in_word)
 
@@ -109,9 +123,16 @@ class ST7789_PIO(ST7789):
         """Write data to the display using PIO."""
         # Start the state machine
         self.sm.active(1)
-        
-        # Write data to the state machine
-        self.sm.put(data, 24)
+
+        # Configure DMA to read from the buffer and write to the state machine
+        self.dma.read = data
+        count = len(data) if isinstance(data, (bytes, bytearray)) else data.size
+        self.dma.count = count
+
+        # Start the DMA transfer and wait for it to finish
+        self.dma.active(True)
+        while self.dma.active():
+            pass
 
         # Stop the state machine
         self.sm.active(0)
