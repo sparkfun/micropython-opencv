@@ -98,15 +98,30 @@ try:
     # a popular camera module for embedded systems. This example uses a PIO
     # driver, which is a peripheral interface only available on Raspberry Pi RP2
     # processors
-    from cv2_drivers.cameras import hm01b0_pio
+    import cv2_drivers.cameras as cameras
 
     # Create a camera object. This will depend on the camera driver you are
     # using, and you may need to adjust the parameters based on your specific
     # camera and board configuration
-    camera = hm01b0_pio.HM01B0_PIO(i2c,
-                                   pin_d0=12,
-                                   pin_vsync=13,
-                                   pin_hsync=14,
-                                   pin_pclk=15)
+    camera = cameras.hm01b0_pio.HM01B0_PIO(
+        i2c,
+        pin_d0=12,
+        pin_vsync=13,
+        pin_hsync=14,
+        pin_pclk=15,
+        pin_xclk=None, # Optional xclock pin, specify if needed
+        num_data_pins=1 # Number of data pins used by the camera (1, 4, or 8)
+    )
+
+    # camera = cameras.ov5640_pio.OV5640_PIO(
+    #     i2c,
+    #     pin_d0=8,
+    #     pin_vsync=22,
+    #     pin_hsync=21,
+    #     pin_pclk=20,
+    #     pin_xclk=None # Optional xclock pin, specify if needed
+    # )
 except ImportError:
     print("boot.py - Camera driver module not found, skipping camera initialization.")
+except OSError:
+    print("boot.py - Camera initialization failed, skipping camera initialization.")
