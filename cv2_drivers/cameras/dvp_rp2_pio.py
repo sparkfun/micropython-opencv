@@ -9,8 +9,11 @@ class DVP_RP2_PIO():
         pin_hsync,
         pin_pclk,
         pin_xclk,
+        xclk_freq,
         sm_id,
-        num_data_pins
+        num_data_pins,
+        bytes_per_frame,
+        byte_swap
     ):
         self.pin_d0 = pin_d0
         self.pin_vsync = pin_vsync
@@ -19,22 +22,22 @@ class DVP_RP2_PIO():
         self.pin_xclk = pin_xclk
         self.sm_id = sm_id
 
+        # Initialize DVP pins as inputs
         for i in range(num_data_pins):
             Pin(pin_d0+i, Pin.IN)
         Pin(pin_vsync, Pin.IN)
         Pin(pin_hsync, Pin.IN)
         Pin(pin_pclk, Pin.IN)
 
+        # Set up XCLK pin if provided
         if self.pin_xclk is not None:
             self.xclk = PWM(Pin(pin_xclk))
-            self.xclk.freq(25_000_000)
-            # self.xclk.freq(15_000_000) # Test for OV5640
-            self.xclk.duty_u16(32768)
+            self.xclk.freq(xclk_freq)
+            self.xclk.duty_u16(32768) # 50% duty cycle
 
-        self.start_pio_dma(num_data_pins)
-
-    def start_pio_dma(self, num_data_pins):
+        # Copy the PIO program
         program = self._pio_read_dvp
+
         # Mask in the GPIO pins
         program[0][0] |= self.pin_hsync & 0x1F
         program[0][1] |= self.pin_pclk & 0x1F
@@ -44,40 +47,45 @@ class DVP_RP2_PIO():
         program[0][2] &= 0xFFFFFFE0
         program[0][2] |= num_data_pins
 
+        # Create PIO state machine to capture DVP data
         self.sm = rp2.StateMachine(
             self.sm_id,
             program,
-            in_base = self.pin_d0
+            in_base = pin_d0
         )
-        self.sm.active(1)
 
+        # Create DMA controller to transfer data from PIO to buffer
         self.dma = rp2.DMA()
         req_num = ((self.sm_id // 4) << 3) + (self.sm_id % 4) + 4
+        bytes_per_transfer = 4
         dma_ctrl = self.dma.pack_ctrl(
-            size = 2, # 0 = 8-bit, 1 = 16-bit, 2 = 32-bit
+            # 0 = 1 byte, 1 = 2 bytes, 2 = 4 bytes
+            size = {1:0, 2:1, 4:2}[bytes_per_transfer],
             inc_read = False,
             treq_sel = req_num,
-            bswap = True
-            # bswap = False # Test for OV5640
+            bswap = byte_swap
         )
         self.dma.config(
             read = self.sm,
-            count = 244 * 324 // 4,
-            # count = 240 * 320 * 2 // 4, # Test for OV5640
+            count = bytes_per_frame // bytes_per_transfer,
             ctrl = dma_ctrl
         )
 
     def active(self, active = None):
+        # If no argument is provided, return the current active state
         if active == None:
             return self.sm.active()
         
+        # Set the active state of the state machine
         self.sm.active(active)
 
+        # If active, set up the VSYNC interrupt handler
         if active:
             Pin(self.pin_vsync).irq(
                 trigger = Pin.IRQ_FALLING,
                 handler = lambda pin: self._vsync_handler()
             )
+        # If not active, disable the VSYNC interrupt handler
         else:
             Pin(self.pin_vsync).irq(
                 handler = None
@@ -100,6 +108,9 @@ class DVP_RP2_PIO():
         # Start the DMA
         self.dma.active(True)
 
+    # Here is the PIO program, which is configurable to mask in the GPIO pins
+    # and the number of data pins. It must be configured before the state
+    # machine is created
     @rp2.asm_pio(
             in_shiftdir = rp2.PIO.SHIFT_LEFT,
             push_thresh = 32,

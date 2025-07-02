@@ -355,15 +355,15 @@ class OV5640(DVP_Camera):
 
     _ratio_table = [
         #  mw,   mh,  sx,  sy,   ex,   ey, ox, oy,   tx,   ty
-        [2560, 1920, 0, 0, 2623, 1951, 32, 16, 2844, 1968],  # 4x3
-        [2560, 1704, 0, 110, 2623, 1843, 32, 16, 2844, 1752],  # 3x2
-        [2560, 1600, 0, 160, 2623, 1791, 32, 16, 2844, 1648],  # 16x10
-        [2560, 1536, 0, 192, 2623, 1759, 32, 16, 2844, 1584],  # 5x3
-        [2560, 1440, 0, 240, 2623, 1711, 32, 16, 2844, 1488],  # 16x9
-        [2560, 1080, 0, 420, 2623, 1531, 32, 16, 2844, 1128],  # 21x9
-        [2400, 1920, 80, 0, 2543, 1951, 32, 16, 2684, 1968],  # 5x4
-        [1920, 1920, 320, 0, 2543, 1951, 32, 16, 2684, 1968],  # 1x1
-        [1088, 1920, 736, 0, 1887, 1951, 32, 16, 1884, 1968],  # 9x16
+        [2560, 1920,   0,   0, 2623, 1951, 32, 16, 2844, 1968],  # 4x3
+        [2560, 1704,   0, 110, 2623, 1843, 32, 16, 2844, 1752],  # 3x2
+        [2560, 1600,   0, 160, 2623, 1791, 32, 16, 2844, 1648],  # 16x10
+        [2560, 1536,   0, 192, 2623, 1759, 32, 16, 2844, 1584],  # 5x3
+        [2560, 1440,   0, 240, 2623, 1711, 32, 16, 2844, 1488],  # 16x9
+        [2560, 1080,   0, 420, 2623, 1531, 32, 16, 2844, 1128],  # 21x9
+        [2400, 1920,  80,   0, 2543, 1951, 32, 16, 2684, 1968],  # 5x4
+        [1920, 1920, 320,   0, 2543, 1951, 32, 16, 2684, 1968],  # 1x1
+        [1088, 1920, 736,   0, 1887, 1951, 32, 16, 1884, 1968],  # 9x16
     ]
 
     _pll_pre_div2x_factors = [1, 1, 2, 3, 4, 1.5, 6, 2.5, 8]
@@ -875,13 +875,10 @@ class OV5640(DVP_Camera):
     def __init__(
         self,
         i2c,
-        i2c_address = 0x3C,
-        num_data_pins = 1
+        i2c_address = 0x3C
     ):
-        super().__init__(i2c, i2c_address, (240, 320, 2))
+        super().__init__(i2c, i2c_address)
 
-        # self.soft_reset()
-        # sleep_us(1_000_000)
         self.write_list(self._sensor_default_regs)
 
         self._colorspace = self.OV5640_COLOR_RGB
@@ -950,7 +947,6 @@ class OV5640(DVP_Camera):
         for i in range(len(data) // 2):
             reg = data[i * 2]
             value = data[i * 2 + 1]
-            print(i, reg, value)
             if reg == self._REG_DLY:
                 sleep_us(value)
             else:
@@ -999,16 +995,15 @@ class OV5640(DVP_Camera):
 
         self._set_image_options()
 
-        # if self._colorspace == self.OV5640_COLOR_JPEG:
-        #     sys_mul = 200
-        #     if size < self.OV5640_SIZE_QVGA:
-        #         sys_mul = 160
-        #     if size < self.OV5640_SIZE_XGA:
-        #         sys_mul = 180
-        #     self._set_pll(False, sys_mul, 4, 2, False, 2, True, 4)
-        # else:
-        #     self._set_pll(False, 32, 1, 1, False, 1, True, 4)
-        self._set_pll(False, 32, 1, 1, False, 1, True, 4)
+        if self._colorspace == self.OV5640_COLOR_JPEG:
+            sys_mul = 200
+            if size < self.OV5640_SIZE_QVGA:
+                sys_mul = 160
+            if size < self.OV5640_SIZE_XGA:
+                sys_mul = 180
+            self._set_pll(False, sys_mul, 4, 2, False, 2, True, 4)
+        else:
+            self._set_pll(False, 32, 1, 1, False, 1, True, 4)
 
         self._set_colorspace()
 
@@ -1121,4 +1116,11 @@ class OV5640(DVP_Camera):
         Returns:
             tuple: (success, frame)
         """
-        return (True, cv2.cvtColor(self.buffer, cv2.COLOR_BayerRG2BGR, image))
+        if self._colorspace == self.OV5640_COLOR_RGB:
+            return (True, cv2.cvtColor(self.buffer, cv2.COLOR_BGR5652BGR, image))
+        elif self._colorspace == self.OV5640_COLOR_GRAYSCALE:
+            return (True, cv2.cvtColor(self.buffer, cv2.COLOR_GRAY2BGR, image))
+        else:
+            NotImplementedError(
+                f"OV5640:Reading images in colorspace {self._colorspace} is not yet implemented."
+            )

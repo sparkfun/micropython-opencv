@@ -6,10 +6,9 @@ class DVP_Camera(CV2_Camera):
     def __init__(
         self,
         i2c,
-        i2c_address,
-        buffer_size
+        i2c_address
     ):
-        super().__init__(buffer_size)
+        super().__init__()
 
         self.i2c = i2c
         self.i2c_address = i2c_address

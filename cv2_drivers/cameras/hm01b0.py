@@ -184,16 +184,7 @@ class HM01B0(DVP_Camera):
         i2c_address = 0x24,
         num_data_pins = 1
     ):
-        super().__init__(i2c, i2c_address, (244, 324))
-
-        # for i in range(len(self.INIT_COMMANDS)):
-        #     if self.INIT_COMMANDS[i][0] == 0x3059:
-        #         if num_data_pins == 1:
-        #             self.INIT_COMMANDS[i][1] = 0x22
-        #         elif num_data_pins == 4:
-        #             self.INIT_COMMANDS[i][1] = 0x42
-        #         else:
-        #             self.INIT_COMMANDS[i][1] = 0x02
+        super().__init__(i2c, i2c_address)
 
         self.soft_reset()
         self.send_init(num_data_pins)
