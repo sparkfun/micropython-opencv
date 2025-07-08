@@ -201,6 +201,61 @@ Size mp_obj_to_size(mp_obj_t obj)
     return size;
 }
 
+Size2f mp_obj_to_size2f(mp_obj_t obj)
+{
+    // Check for None object
+    if(obj == mp_const_none)
+    {
+        // Create an empty Size2f object
+        return Size2f();
+    }
+
+    // Assume the object is a ndarray, or can be converted to one. Will raise an
+    // exception if not
+    ndarray_obj_t *ndarray = ndarray_from_mp_obj(obj, 0);
+    
+    // Validate the length of the ndarray
+    if(ndarray->len != 2)
+    {
+        mp_raise_TypeError(MP_ERROR_TEXT("Size2f must be length 2"));
+    }
+
+    // Compute the size, checking the type of the ndarray
+    Size2f size;
+    switch(ndarray->dtype)
+    {
+        case NDARRAY_UINT8:
+            size.width = ((uint8_t*) ndarray->array)[0];
+            size.height = ((uint8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT8:
+            size.width = ((int8_t*) ndarray->array)[0];
+            size.height = ((int8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_UINT16:
+            size.width = ((uint16_t*) ndarray->array)[0];
+            size.height = ((uint16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT16:
+            size.width = ((int16_t*) ndarray->array)[0];
+            size.height = ((int16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_FLOAT:
+            size.width = ((float*) ndarray->array)[0];
+            size.height = ((float*) ndarray->array)[1];
+            break;
+        case NDARRAY_BOOL:
+            size.width = ((bool*) ndarray->array)[0];
+            size.height = ((bool*) ndarray->array)[1];
+            break;
+        default:
+            mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
+            break;
+    }
+
+    return size;
+}
+
 Point mp_obj_to_point(mp_obj_t obj)
 {
     // Check for None object
@@ -222,6 +277,61 @@ Point mp_obj_to_point(mp_obj_t obj)
 
     // Compute the point, checking the type of the ndarray
     Point point;
+    switch(ndarray->dtype)
+    {
+        case NDARRAY_UINT8:
+            point.x = ((uint8_t*) ndarray->array)[0];
+            point.y = ((uint8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT8:
+            point.x = ((int8_t*) ndarray->array)[0];
+            point.y = ((int8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_UINT16:
+            point.x = ((uint16_t*) ndarray->array)[0];
+            point.y = ((uint16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT16:
+            point.x = ((int16_t*) ndarray->array)[0];
+            point.y = ((int16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_FLOAT:
+            point.x = ((float*) ndarray->array)[0];
+            point.y = ((float*) ndarray->array)[1];
+            break;
+        case NDARRAY_BOOL:
+            point.x = ((bool*) ndarray->array)[0];
+            point.y = ((bool*) ndarray->array)[1];
+            break;
+        default:
+            mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
+            break;
+    }
+
+    return point;
+}
+
+Point2f mp_obj_to_point2f(mp_obj_t obj)
+{
+    // Check for None object
+    if(obj == mp_const_none)
+    {
+        // Create an empty Point2f object
+        return Point2f();
+    }
+
+    // Assume the object is a ndarray, or can be converted to one. Will raise an
+    // exception if not
+    ndarray_obj_t *ndarray = ndarray_from_mp_obj(obj, 0);
+
+    // Validate the length of the ndarray
+    if(ndarray->len != 2)
+    {
+        mp_raise_TypeError(MP_ERROR_TEXT("Point2f must be length 2"));
+    }
+
+    // Compute the point, checking the type of the ndarray
+    Point2f point;
     switch(ndarray->dtype)
     {
         case NDARRAY_UINT8:

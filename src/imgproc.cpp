@@ -49,6 +49,35 @@ mp_obj_t cv2_imgproc_adaptiveThreshold(size_t n_args, const mp_obj_t *pos_args, 
     return mat_to_mp_obj(dst);
 }
 
+mp_obj_t cv2_imgproc_arcLength(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_curve, ARG_closed };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_curve, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_closed, MP_ARG_REQUIRED | MP_ARG_BOOL, { .u_bool = false } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat curve = mp_obj_to_mat(args[ARG_curve].u_obj);
+    bool closed = args[ARG_closed].u_bool;
+
+    mp_float_t retval;
+
+    // Call the corresponding OpenCV function
+    try {
+        retval = arcLength(curve, closed);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mp_obj_new_float(retval);
+}
+
 mp_obj_t cv2_imgproc_arrowedLine(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
     enum { ARG_img, ARG_pt1, ARG_pt2, ARG_color, ARG_thickness, ARG_line_type, ARG_shift, ARG_tipLength };
@@ -90,6 +119,70 @@ mp_obj_t cv2_imgproc_arrowedLine(size_t n_args, const mp_obj_t *pos_args, mp_map
 
     // Return the result
     return mat_to_mp_obj(img);
+}
+
+mp_obj_t cv2_imgproc_approxPolyDP(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_curve, ARG_epsilon, ARG_closed, ARG_approxCurve };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_curve, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_epsilon, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_closed, MP_ARG_BOOL, { .u_bool = false } },
+        { MP_QSTR_approxCurve, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat curve = mp_obj_to_mat(args[ARG_curve].u_obj);
+    double epsilon = mp_obj_get_float(args[ARG_epsilon].u_obj);
+    bool closed = args[ARG_closed].u_bool;
+    Mat approxCurve = mp_obj_to_mat(args[ARG_approxCurve].u_obj);
+
+    // Call the corresponding OpenCV function
+    try {
+        approxPolyDP(curve, approxCurve, epsilon, closed);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mat_to_mp_obj(approxCurve);
+}
+
+mp_obj_t cv2_imgproc_approxPolyN(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_curve, ARG_nsides, ARG_approxCurve, ARG_epsilon_percentage, ARG_ensure_convex };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_curve, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_nsides, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_approxCurve, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_epsilon_percentage, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_ensure_convex, MP_ARG_BOOL, { .u_bool = true } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat curve = mp_obj_to_mat(args[ARG_curve].u_obj);
+    int nsides = args[ARG_nsides].u_int;
+    Mat approxCurve = mp_obj_to_mat(args[ARG_approxCurve].u_obj);
+    mp_float_t epsilon_percentage = args[ARG_epsilon_percentage].u_obj == mp_const_none ? -1.0 : mp_obj_get_float(args[ARG_epsilon_percentage].u_obj);
+    bool ensure_convex = args[ARG_ensure_convex].u_bool;
+
+    // Call the corresponding OpenCV function
+    try {
+        approxPolyN(curve, approxCurve, nsides, epsilon_percentage, ensure_convex);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mat_to_mp_obj(approxCurve);
 }
 
 mp_obj_t cv2_imgproc_bilateralFilter(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -160,6 +253,39 @@ mp_obj_t cv2_imgproc_blur(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
     return mat_to_mp_obj(dst);
 }
 
+mp_obj_t cv2_imgproc_boundingRect(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_array };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_array, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat array = mp_obj_to_mat(args[ARG_array].u_obj);
+
+    Rect retval;
+
+    // Call the corresponding OpenCV function
+    try {
+        retval = boundingRect(array);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result as a tuple
+    mp_obj_t retval_tuple[4];
+    retval_tuple[0] = mp_obj_new_int(retval.x);
+    retval_tuple[1] = mp_obj_new_int(retval.y);
+    retval_tuple[2] = mp_obj_new_int(retval.width);
+    retval_tuple[3] = mp_obj_new_int(retval.height);
+    mp_obj_t result = mp_obj_new_tuple(4, retval_tuple);
+    return result;
+}
+
 mp_obj_t cv2_imgproc_boxFilter(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
     enum { ARG_src, ARG_ddepth, ARG_ksize, ARG_dst, ARG_anchor, ARG_normalize, ARG_borderType };
@@ -195,6 +321,37 @@ mp_obj_t cv2_imgproc_boxFilter(size_t n_args, const mp_obj_t *pos_args, mp_map_t
 
     // Return the result
     return mat_to_mp_obj(dst);
+}
+
+mp_obj_t cv2_imgproc_boxPoints(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_box, ARG_points };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_box, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_points, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    mp_obj_tuple_t *box_tuple = (mp_obj_tuple_t*) args[ARG_box].u_obj;
+    RotatedRect box;
+    box.center = mp_obj_to_point2f(box_tuple->items[0]);
+    box.size = mp_obj_to_size2f(box_tuple->items[1]);
+    box.angle = mp_obj_get_float(box_tuple->items[2]);
+    Mat points = mp_obj_to_mat(args[ARG_points].u_obj);
+
+    // Call the corresponding OpenCV function
+    try {
+        boxPoints(box, points);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mat_to_mp_obj(points);
 }
 
 mp_obj_t cv2_imgproc_Canny(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -311,6 +468,115 @@ mp_obj_t cv2_imgproc_connectedComponents(size_t n_args, const mp_obj_t *pos_args
 //     result[3] = mat_to_mp_obj(centroids);
 //     return mp_obj_new_tuple(4, result);
 // }
+
+mp_obj_t cv2_imgproc_contourArea(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_contour, ARG_oriented };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_contour, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_oriented, MP_ARG_BOOL, { .u_bool = false } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat contour = mp_obj_to_mat(args[ARG_contour].u_obj);
+    bool oriented = args[ARG_oriented].u_bool;
+
+    mp_float_t retval;
+
+    // Call the corresponding OpenCV function
+    try {
+        retval = contourArea(contour, oriented);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mp_obj_new_float(retval);
+}
+
+mp_obj_t cv2_imgproc_convexHull(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_points, ARG_hull, ARG_clockwise, ARG_returnPoints };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_points, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_hull, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_clockwise, MP_ARG_BOOL, { .u_bool = false } },
+        { MP_QSTR_returnPoints, MP_ARG_BOOL, { .u_bool = true } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat points = mp_obj_to_mat(args[ARG_points].u_obj);
+    Mat hull; // TODO: Allow user input
+    bool clockwise = args[ARG_clockwise].u_bool;
+    bool returnPoints = args[ARG_returnPoints].u_bool;
+
+    // Call the corresponding OpenCV function
+    try {
+        convexHull(points, hull, clockwise, returnPoints);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // If hull is 32S, convert it to float
+    if (hull.type() == CV_32S) {
+        Mat hullFloat;
+        hull.convertTo(hullFloat, CV_32F);
+        hull = hullFloat;
+    }
+
+    // Return the result
+    return mat_to_mp_obj(hull);
+}
+
+mp_obj_t cv2_imgproc_convexityDefects(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_contour, ARG_convexhull, ARG_convexityDefects };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_contour, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_convexhull, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_convexityDefects, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat contour = mp_obj_to_mat(args[ARG_contour].u_obj);
+    Mat convexhull = mp_obj_to_mat(args[ARG_convexhull].u_obj);
+    Mat convexityDefects32S; // TODO: Allow user input
+
+    // contour must be of type CV_32S
+    Mat contour32S;
+    contour.convertTo(contour32S, CV_32S);
+
+    // convexhull must be of type CV_32S
+    Mat convexhull32S;
+    convexhull.convertTo(convexhull32S, CV_32S);
+
+    // Call the corresponding OpenCV function
+    try {
+        cv::convexityDefects(contour32S, convexhull32S, convexityDefects32S);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Convert the convexityDefects32S to float
+    Mat convexityDefects;
+    convexityDefects.allocator = &GetNumpyAllocator();
+    convexityDefects32S.convertTo(convexityDefects, CV_32F);
+
+    // Return the result
+    return mat_to_mp_obj(convexityDefects);
+}
 
 mp_obj_t cv2_imgproc_circle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
@@ -766,6 +1032,78 @@ mp_obj_t cv2_imgproc_findContours(size_t n_args, const mp_obj_t *pos_args, mp_ma
     return mp_obj_new_tuple(2, result_tuple);
 }
 
+mp_obj_t cv2_imgproc_fitEllipse(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_points };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_points, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat points = mp_obj_to_mat(args[ARG_points].u_obj);
+
+    RotatedRect ellipse;
+
+    // Call the corresponding OpenCV function
+    try {
+        ellipse = fitEllipse(points);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Convert the result to a tuple
+    mp_obj_t center[2];
+    center[0] = mp_obj_new_float(ellipse.center.x);
+    center[1] = mp_obj_new_float(ellipse.center.y);
+    mp_obj_t size[2];
+    size[0] = mp_obj_new_float(ellipse.size.width);
+    size[1] = mp_obj_new_float(ellipse.size.height);
+    mp_obj_t result[3];
+    result[0] = mp_obj_new_tuple(2, center);
+    result[1] = mp_obj_new_tuple(2, size);
+    result[2] = mp_obj_new_float(ellipse.angle);
+    return mp_obj_new_tuple(3, result);
+}
+
+mp_obj_t cv2_imgproc_fitLine(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_points, ARG_distType, ARG_param, ARG_reps, ARG_aeps, ARG_line };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_points, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_distType, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_param, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_reps, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_aeps, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_line, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat points = mp_obj_to_mat(args[ARG_points].u_obj);
+    int distType = args[ARG_distType].u_int;
+    mp_float_t param = mp_obj_get_float(args[ARG_param].u_obj);
+    mp_float_t reps = mp_obj_get_float(args[ARG_reps].u_obj);
+    mp_float_t aeps = mp_obj_get_float(args[ARG_aeps].u_obj);
+    Mat line = mp_obj_to_mat(args[ARG_line].u_obj);
+
+    // Call the corresponding OpenCV function
+    try {
+        fitLine(points, line, distType, param, reps, aeps);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mat_to_mp_obj(line);
+}
+
 mp_obj_t cv2_imgproc_GaussianBlur(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
     enum { ARG_src, ARG_ksize, ARG_sigmaX, ARG_dst, ARG_sigmaY, ARG_borderType, ARG_hint };
@@ -1126,6 +1464,32 @@ mp_obj_t cv2_imgproc_HoughLinesWithAccumulator(size_t n_args, const mp_obj_t *po
     return mat_to_mp_obj(lines);
 }
 
+mp_obj_t cv2_imgproc_isContourConvex(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_contour };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_contour, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat contour = mp_obj_to_mat(args[ARG_contour].u_obj);
+
+    // Call the corresponding OpenCV function
+    bool isConvex;
+    try {
+        isConvex = isContourConvex(contour);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mp_obj_new_bool(isConvex);
+}
+
 mp_obj_t cv2_imgproc_Laplacian(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
     enum { ARG_src, ARG_ddepth, ARG_dst, ARG_ksize, ARG_scale, ARG_delta, ARG_borderType };
@@ -1200,6 +1564,39 @@ mp_obj_t cv2_imgproc_line(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
     return mat_to_mp_obj(img);
 }
 
+mp_obj_t cv2_imgproc_matchShapes(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_contour1, ARG_contour2, ARG_method, ARG_parameter };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_contour1, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_contour2, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_method, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_parameter, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat contour1 = mp_obj_to_mat(args[ARG_contour1].u_obj);
+    Mat contour2 = mp_obj_to_mat(args[ARG_contour2].u_obj);
+    int method = args[ARG_method].u_int;
+    mp_float_t parameter = mp_obj_get_float(args[ARG_parameter].u_obj);
+
+    mp_float_t retval;
+
+    // Call the corresponding OpenCV function
+    try {
+        retval = matchShapes(contour1, contour2, method, parameter);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mp_obj_new_float(retval);
+}
+
 mp_obj_t cv2_imgproc_matchTemplate(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
     enum { ARG_img, ARG_templ, ARG_method, ARG_result, ARG_mask };
@@ -1260,6 +1657,109 @@ mp_obj_t cv2_imgproc_medianBlur(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
     // Return the result
     return mat_to_mp_obj(dst);
+}
+
+mp_obj_t cv2_imgproc_minAreaRect(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_points };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_points, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat points = mp_obj_to_mat(args[ARG_points].u_obj);
+
+    RotatedRect retval;
+
+    // Call the corresponding OpenCV function
+    try {
+        retval = minAreaRect(points);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result as a tuple
+    mp_obj_t center_tuple[2];
+    center_tuple[0] = mp_obj_new_float(retval.center.x);
+    center_tuple[1] = mp_obj_new_float(retval.center.y);
+    mp_obj_t size_tuple[2];
+    size_tuple[0] = mp_obj_new_float(retval.size.width);
+    size_tuple[1] = mp_obj_new_float(retval.size.height);
+    mp_obj_t result_tuple[3];
+    result_tuple[0] = mp_obj_new_tuple(2, center_tuple);
+    result_tuple[1] = mp_obj_new_tuple(2, size_tuple);
+    result_tuple[2] = mp_obj_new_float(retval.angle);
+    return mp_obj_new_tuple(3, result_tuple);
+}
+
+mp_obj_t cv2_imgproc_minEnclosingCircle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_points };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_points, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat points = mp_obj_to_mat(args[ARG_points].u_obj);
+
+    Point2f center;
+    float radius;
+
+    // Call the corresponding OpenCV function
+    try {
+        minEnclosingCircle(points, center, radius);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result as a tuple
+    mp_obj_t center_tuple[2];
+    center_tuple[0] = mp_obj_new_float(center.x);
+    center_tuple[1] = mp_obj_new_float(center.y);
+    mp_obj_t result_tuple[3];
+    result_tuple[0] = mp_obj_new_tuple(2, center_tuple);
+    result_tuple[1] = mp_obj_new_float(radius);
+    return mp_obj_new_tuple(2, result_tuple);
+}
+
+mp_obj_t cv2_imgproc_minEnclosingTriangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_points, ARG_triangle };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_points, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_triangle, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat points = mp_obj_to_mat(args[ARG_points].u_obj);
+    Mat triangle = mp_obj_to_mat(args[ARG_triangle].u_obj);
+
+    mp_float_t retval;
+
+    // Call the corresponding OpenCV function
+    try {
+        retval = minEnclosingTriangle(points, triangle);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result as a tuple
+    mp_obj_t result_tuple[2];
+    result_tuple[0] = mp_obj_new_float(retval);
+    result_tuple[1] = mat_to_mp_obj(triangle);
+    return mp_obj_new_tuple(2, result_tuple);
 }
 
 mp_obj_t cv2_imgproc_morphologyEx(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -1362,6 +1862,37 @@ mp_obj_t cv2_imgproc_moments(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
 
     // Return the moments dictionary
     return moments_dict;
+}
+
+mp_obj_t cv2_imgproc_pointPolygonTest(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_contour, ARG_pt, ARG_measureDist };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_contour, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_pt, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_measureDist, MP_ARG_REQUIRED | MP_ARG_BOOL, { .u_bool = false } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat contour = mp_obj_to_mat(args[ARG_contour].u_obj);
+    Point pt = mp_obj_to_point(args[ARG_pt].u_obj);
+    bool measureDist = args[ARG_measureDist].u_bool;
+
+    mp_float_t retval;
+
+    // Call the corresponding OpenCV function
+    try {
+        retval = pointPolygonTest(contour, pt, measureDist);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mp_obj_new_float(retval);
 }
 
 mp_obj_t cv2_imgproc_putText(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {

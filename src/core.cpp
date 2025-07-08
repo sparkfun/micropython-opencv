@@ -122,3 +122,47 @@ mp_obj_t cv2_core_inRange(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
     // Return the result
     return mat_to_mp_obj(dst);
 }
+
+mp_obj_t cv2_core_minMaxLoc(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_src, ARG_mask };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_src, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_mask, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat src = mp_obj_to_mat(args[ARG_src].u_obj);
+    Mat mask = mp_obj_to_mat(args[ARG_mask].u_obj);
+
+    double minVal, maxVal;
+    Point minLoc, maxLoc;
+
+    // Call the corresponding OpenCV function
+    try {
+        minMaxLoc(src, &minVal, &maxVal, &minLoc, &maxLoc, mask);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    mp_obj_t min_loc_tuple[2] = {
+        mp_obj_new_float(minLoc.x),
+        mp_obj_new_float(minLoc.y)
+    };
+    mp_obj_t max_loc_tuple[2] = {
+        mp_obj_new_float(maxLoc.x),
+        mp_obj_new_float(maxLoc.y)
+    };
+    mp_obj_t result_tuple[4] = {
+        mp_obj_new_float(minVal),
+        mp_obj_new_float(maxVal),
+        mp_obj_new_tuple(2, min_loc_tuple),
+        mp_obj_new_tuple(2, max_loc_tuple)
+    };
+    return mp_obj_new_tuple(4, result_tuple);
+}

@@ -24,9 +24,11 @@ Mat mp_obj_to_mat(mp_obj_t obj);
 
 // Conversion functions between Size and mp_obj_t
 Size mp_obj_to_size(mp_obj_t obj);
+Size2f mp_obj_to_size2f(mp_obj_t obj);
 
 // Conversion functions between Point and mp_obj_t
 Point mp_obj_to_point(mp_obj_t obj);
+Point2f mp_obj_to_point2f(mp_obj_t obj);
 
 // Conversion functions between Scalar and mp_obj_t
 Scalar mp_obj_to_scalar(mp_obj_t obj);

@@ -3,13 +3,21 @@
 
 // Function declarations
 extern mp_obj_t cv2_imgproc_adaptiveThreshold(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_arcLength(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_arrowedLine(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_approxPolyDP(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_approxPolyN(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_bilateralFilter(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_blur(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_boundingRect(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_boxFilter(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_boxPoints(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_Canny(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_connectedComponents(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 // extern mp_obj_t cv2_imgproc_connectedComponentsWithStats(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_contourArea(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_convexHull(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_convexityDefects(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_circle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_cvtColor(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_dilate(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
@@ -21,6 +29,8 @@ extern mp_obj_t cv2_imgproc_fillConvexPoly(size_t n_args, const mp_obj_t *pos_ar
 extern mp_obj_t cv2_imgproc_fillPoly(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_filter2D(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_findContours(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_fitEllipse(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_fitLine(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_GaussianBlur(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_getStructuringElement(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_HoughCircles(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
@@ -28,12 +38,18 @@ extern mp_obj_t cv2_imgproc_HoughCirclesWithAccumulator(size_t n_args, const mp_
 extern mp_obj_t cv2_imgproc_HoughLines(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 // extern mp_obj_t cv2_imgproc_HoughLinesP(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_HoughLinesWithAccumulator(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_isContourConvex(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_Laplacian(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_line(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_matchShapes(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_matchTemplate(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_medianBlur(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_minAreaRect(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_minEnclosingCircle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_minEnclosingTriangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_morphologyEx(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_moments(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_pointPolygonTest(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_putText(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_rectangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_Scharr(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
@@ -43,13 +59,21 @@ extern mp_obj_t cv2_imgproc_threshold(size_t n_args, const mp_obj_t *pos_args, m
 
 // Python references to the functions
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_adaptiveThreshold_obj, 6, cv2_imgproc_adaptiveThreshold);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_arcLength_obj, 2, cv2_imgproc_arcLength);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_arrowedLine_obj, 4, cv2_imgproc_arrowedLine);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_approxPolyDP_obj, 3, cv2_imgproc_approxPolyDP);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_approxPolyN_obj, 2, cv2_imgproc_approxPolyN);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_bilateralFilter_obj, 4, cv2_imgproc_bilateralFilter);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_blur_obj, 2, cv2_imgproc_blur);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_boundingRect_obj, 1, cv2_imgproc_boundingRect);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_boxFilter_obj, 3, cv2_imgproc_boxFilter);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_boxPoints_obj, 1, cv2_imgproc_boxPoints);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_Canny_obj, 3, cv2_imgproc_Canny);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_connectedComponents_obj, 1, cv2_imgproc_connectedComponents);
 // static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_connectedComponentsWithStats_obj, 1, cv2_imgproc_connectedComponentsWithStats);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_contourArea_obj, 1, cv2_imgproc_contourArea);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_convexHull_obj, 1, cv2_imgproc_convexHull);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_convexityDefects_obj, 1, cv2_imgproc_convexityDefects);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_circle_obj, 4, cv2_imgproc_circle);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_cvtColor_obj, 2, cv2_imgproc_cvtColor);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_dilate_obj, 2, cv2_imgproc_dilate);
@@ -61,6 +85,8 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_fillConvexPoly_obj, 3, cv2_imgproc
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_fillPoly_obj, 3, cv2_imgproc_fillPoly);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_filter2D_obj, 3, cv2_imgproc_filter2D);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_findContours_obj, 3, cv2_imgproc_findContours);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_fitEllipse_obj, 1, cv2_imgproc_fitEllipse);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_fitLine_obj, 5, cv2_imgproc_fitLine);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_GaussianBlur_obj, 3, cv2_imgproc_GaussianBlur);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_getStructuringElement_obj, 2, cv2_imgproc_getStructuringElement);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughCircles_obj, 4, cv2_imgproc_HoughCircles);
@@ -68,12 +94,18 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughCirclesWithAccumulator_obj, 4
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughLines_obj, 4, cv2_imgproc_HoughLines);
 // static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughLinesP_obj, 4, cv2_imgproc_HoughLinesP);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughLinesWithAccumulator_obj, 4, cv2_imgproc_HoughLinesWithAccumulator);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_isContourConvex_obj, 1, cv2_imgproc_isContourConvex);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_Laplacian_obj, 2, cv2_imgproc_Laplacian);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_line_obj, 4, cv2_imgproc_line);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_matchShapes_obj, 3, cv2_imgproc_matchShapes);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_matchTemplate_obj, 3, cv2_imgproc_matchTemplate);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_medianBlur_obj, 2, cv2_imgproc_medianBlur);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_minAreaRect_obj, 1, cv2_imgproc_minAreaRect);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_minEnclosingCircle_obj, 1, cv2_imgproc_minEnclosingCircle);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_minEnclosingTriangle_obj, 1, cv2_imgproc_minEnclosingTriangle);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_morphologyEx_obj, 3, cv2_imgproc_morphologyEx);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_moments_obj, 1, cv2_imgproc_moments);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_pointPolygonTest_obj, 3, cv2_imgproc_pointPolygonTest);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_putText_obj, 6, cv2_imgproc_putText);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_rectangle_obj, 4, cv2_imgproc_rectangle);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_Scharr_obj, 4, cv2_imgproc_Scharr);
@@ -85,13 +117,21 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_threshold_obj, 4, cv2_imgproc_thre
 #define OPENCV_IMGPROC_GLOBALS \
     /* Functions */ \
     { MP_ROM_QSTR(MP_QSTR_adaptiveThreshold), MP_ROM_PTR(&cv2_imgproc_adaptiveThreshold_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_arcLength), MP_ROM_PTR(&cv2_imgproc_arcLength_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_arrowedLine), MP_ROM_PTR(&cv2_imgproc_arrowedLine_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_approxPolyDP), MP_ROM_PTR(&cv2_imgproc_approxPolyDP_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_approxPolyN), MP_ROM_PTR(&cv2_imgproc_approxPolyN_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_bilateralFilter), MP_ROM_PTR(&cv2_imgproc_bilateralFilter_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_blur), MP_ROM_PTR(&cv2_imgproc_blur_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_boundingRect), MP_ROM_PTR(&cv2_imgproc_boundingRect_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_boxFilter), MP_ROM_PTR(&cv2_imgproc_boxFilter_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_boxPoints), MP_ROM_PTR(&cv2_imgproc_boxPoints_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_Canny), MP_ROM_PTR(&cv2_imgproc_Canny_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_connectedComponents), MP_ROM_PTR(&cv2_imgproc_connectedComponents_obj) }, \
     /* { MP_ROM_QSTR(MP_QSTR_connectedComponentsWithStats), MP_ROM_PTR(&cv2_imgproc_connectedComponentsWithStats_obj) }, */ \
+    { MP_ROM_QSTR(MP_QSTR_contourArea), MP_ROM_PTR(&cv2_imgproc_contourArea_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_convexHull), MP_ROM_PTR(&cv2_imgproc_convexHull_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_convexityDefects), MP_ROM_PTR(&cv2_imgproc_convexityDefects_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_circle), MP_ROM_PTR(&cv2_imgproc_circle_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_cvtColor), MP_ROM_PTR(&cv2_imgproc_cvtColor_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_dilate), MP_ROM_PTR(&cv2_imgproc_dilate_obj) }, \
@@ -103,6 +143,8 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_threshold_obj, 4, cv2_imgproc_thre
     { MP_ROM_QSTR(MP_QSTR_fillPoly), MP_ROM_PTR(&cv2_imgproc_fillPoly_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_filter2D), MP_ROM_PTR(&cv2_imgproc_filter2D_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_findContours), MP_ROM_PTR(&cv2_imgproc_findContours_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_fitEllipse), MP_ROM_PTR(&cv2_imgproc_fitEllipse_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_fitLine), MP_ROM_PTR(&cv2_imgproc_fitLine_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_GaussianBlur), MP_ROM_PTR(&cv2_imgproc_GaussianBlur_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_getStructuringElement), MP_ROM_PTR(&cv2_imgproc_getStructuringElement_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_HoughCircles), MP_ROM_PTR(&cv2_imgproc_HoughCircles_obj) }, \
@@ -110,12 +152,18 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_threshold_obj, 4, cv2_imgproc_thre
     { MP_ROM_QSTR(MP_QSTR_HoughLines), MP_ROM_PTR(&cv2_imgproc_HoughLines_obj) },   \
     /* { MP_ROM_QSTR(MP_QSTR_HoughLinesP), MP_ROM_PTR(&cv2_imgproc_HoughLinesP_obj) }, */ \
     { MP_ROM_QSTR(MP_QSTR_HoughLinesWithAccumulator), MP_ROM_PTR(&cv2_imgproc_HoughLinesWithAccumulator_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_isContourConvex), MP_ROM_PTR(&cv2_imgproc_isContourConvex_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_Laplacian), MP_ROM_PTR(&cv2_imgproc_Laplacian_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&cv2_imgproc_line_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_matchShapes), MP_ROM_PTR(&cv2_imgproc_matchShapes_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_matchTemplate), MP_ROM_PTR(&cv2_imgproc_matchTemplate_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_medianBlur), MP_ROM_PTR(&cv2_imgproc_medianBlur_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_minAreaRect), MP_ROM_PTR(&cv2_imgproc_minAreaRect_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_minEnclosingCircle), MP_ROM_PTR(&cv2_imgproc_minEnclosingCircle_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_minEnclosingTriangle), MP_ROM_PTR(&cv2_imgproc_minEnclosingTriangle_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_morphologyEx), MP_ROM_PTR(&cv2_imgproc_morphologyEx_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_moments), MP_ROM_PTR(&cv2_imgproc_moments_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_pointPolygonTest), MP_ROM_PTR(&cv2_imgproc_pointPolygonTest_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_putText), MP_ROM_PTR(&cv2_imgproc_putText_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_rectangle), MP_ROM_PTR(&cv2_imgproc_rectangle_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_Scharr), MP_ROM_PTR(&cv2_imgproc_Scharr_obj) }, \
@@ -137,6 +185,16 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_threshold_obj, 4, cv2_imgproc_thre
     { MP_ROM_QSTR(MP_QSTR_MORPH_RECT), MP_ROM_INT(0) }, \
     { MP_ROM_QSTR(MP_QSTR_MORPH_CROSS), MP_ROM_INT(1) }, \
     { MP_ROM_QSTR(MP_QSTR_MORPH_ELLIPSE), MP_ROM_INT(2) }, \
+    \
+    /* Distance types, from opencv2/imgproc.hpp */ \
+    { MP_ROM_QSTR(MP_QSTR_DIST_USER), MP_ROM_INT(-1) }, \
+    { MP_ROM_QSTR(MP_QSTR_DIST_L1), MP_ROM_INT(1) }, \
+    { MP_ROM_QSTR(MP_QSTR_DIST_L2), MP_ROM_INT(2) }, \
+    { MP_ROM_QSTR(MP_QSTR_DIST_C), MP_ROM_INT(3) }, \
+    { MP_ROM_QSTR(MP_QSTR_DIST_L12), MP_ROM_INT(4) }, \
+    { MP_ROM_QSTR(MP_QSTR_DIST_FAIR), MP_ROM_INT(5) }, \
+    { MP_ROM_QSTR(MP_QSTR_DIST_WELSCH), MP_ROM_INT(6) }, \
+    { MP_ROM_QSTR(MP_QSTR_DIST_HUBER), MP_ROM_INT(7) }, \
     \
     /* Threshold types, from opencv2/imgproc.hpp */ \
     { MP_ROM_QSTR(MP_QSTR_THRESH_BINARY), MP_ROM_INT(0) }, \
@@ -166,6 +224,11 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_threshold_obj, 4, cv2_imgproc_thre
     { MP_ROM_QSTR(MP_QSTR_CHAIN_APPROX_TC89_L1), MP_ROM_INT(3) }, \
     { MP_ROM_QSTR(MP_QSTR_CHAIN_APPROX_TC89_KCOS), MP_ROM_INT(4) }, \
     { MP_ROM_QSTR(MP_QSTR_LINK_RUNS), MP_ROM_INT(5) }, \
+    \
+    /* Shape match modes, from opencv2/imgproc.hpp */ \
+    { MP_ROM_QSTR(MP_QSTR_CONTOURS_MATCH_I1), MP_ROM_INT(1) }, \
+    { MP_ROM_QSTR(MP_QSTR_CONTOURS_MATCH_I2), MP_ROM_INT(2) }, \
+    { MP_ROM_QSTR(MP_QSTR_CONTOURS_MATCH_I3), MP_ROM_INT(3) }, \
     \
     /* Hough modes, from opencv2/imgproc.hpp */ \
     { MP_ROM_QSTR(MP_QSTR_HOUGH_STANDARD), MP_ROM_INT(0) }, \
