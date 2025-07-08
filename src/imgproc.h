@@ -14,7 +14,7 @@ extern mp_obj_t cv2_imgproc_boxFilter(size_t n_args, const mp_obj_t *pos_args, m
 extern mp_obj_t cv2_imgproc_boxPoints(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_Canny(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_connectedComponents(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
-// extern mp_obj_t cv2_imgproc_connectedComponentsWithStats(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_connectedComponentsWithStats(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_contourArea(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_convexHull(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_convexityDefects(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
@@ -70,7 +70,7 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_boxFilter_obj, 3, cv2_imgproc_boxF
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_boxPoints_obj, 1, cv2_imgproc_boxPoints);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_Canny_obj, 3, cv2_imgproc_Canny);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_connectedComponents_obj, 1, cv2_imgproc_connectedComponents);
-// static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_connectedComponentsWithStats_obj, 1, cv2_imgproc_connectedComponentsWithStats);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_connectedComponentsWithStats_obj, 1, cv2_imgproc_connectedComponentsWithStats);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_contourArea_obj, 1, cv2_imgproc_contourArea);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_convexHull_obj, 1, cv2_imgproc_convexHull);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_convexityDefects_obj, 1, cv2_imgproc_convexityDefects);
@@ -128,7 +128,7 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_threshold_obj, 4, cv2_imgproc_thre
     { MP_ROM_QSTR(MP_QSTR_boxPoints), MP_ROM_PTR(&cv2_imgproc_boxPoints_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_Canny), MP_ROM_PTR(&cv2_imgproc_Canny_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_connectedComponents), MP_ROM_PTR(&cv2_imgproc_connectedComponents_obj) }, \
-    /* { MP_ROM_QSTR(MP_QSTR_connectedComponentsWithStats), MP_ROM_PTR(&cv2_imgproc_connectedComponentsWithStats_obj) }, */ \
+    { MP_ROM_QSTR(MP_QSTR_connectedComponentsWithStats), MP_ROM_PTR(&cv2_imgproc_connectedComponentsWithStats_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_contourArea), MP_ROM_PTR(&cv2_imgproc_contourArea_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_convexHull), MP_ROM_PTR(&cv2_imgproc_convexHull_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_convexityDefects), MP_ROM_PTR(&cv2_imgproc_convexityDefects_obj) }, \
