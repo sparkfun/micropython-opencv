@@ -36,7 +36,7 @@ extern mp_obj_t cv2_imgproc_getStructuringElement(size_t n_args, const mp_obj_t 
 extern mp_obj_t cv2_imgproc_HoughCircles(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_HoughCirclesWithAccumulator(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_HoughLines(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
-// extern mp_obj_t cv2_imgproc_HoughLinesP(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t cv2_imgproc_HoughLinesP(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_HoughLinesWithAccumulator(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_isContourConvex(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t cv2_imgproc_Laplacian(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
@@ -92,7 +92,7 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_getStructuringElement_obj, 2, cv2_
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughCircles_obj, 4, cv2_imgproc_HoughCircles);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughCirclesWithAccumulator_obj, 4, cv2_imgproc_HoughCirclesWithAccumulator);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughLines_obj, 4, cv2_imgproc_HoughLines);
-// static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughLinesP_obj, 4, cv2_imgproc_HoughLinesP);
+static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughLinesP_obj, 4, cv2_imgproc_HoughLinesP);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_HoughLinesWithAccumulator_obj, 4, cv2_imgproc_HoughLinesWithAccumulator);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_isContourConvex_obj, 1, cv2_imgproc_isContourConvex);
 static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_Laplacian_obj, 2, cv2_imgproc_Laplacian);
@@ -149,8 +149,8 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_threshold_obj, 4, cv2_imgproc_thre
     { MP_ROM_QSTR(MP_QSTR_getStructuringElement), MP_ROM_PTR(&cv2_imgproc_getStructuringElement_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_HoughCircles), MP_ROM_PTR(&cv2_imgproc_HoughCircles_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_HoughCirclesWithAccumulator), MP_ROM_PTR(&cv2_imgproc_HoughCirclesWithAccumulator_obj) }, \
-    { MP_ROM_QSTR(MP_QSTR_HoughLines), MP_ROM_PTR(&cv2_imgproc_HoughLines_obj) },   \
-    /* { MP_ROM_QSTR(MP_QSTR_HoughLinesP), MP_ROM_PTR(&cv2_imgproc_HoughLinesP_obj) }, */ \
+    { MP_ROM_QSTR(MP_QSTR_HoughLines), MP_ROM_PTR(&cv2_imgproc_HoughLines_obj) }, \
+    { MP_ROM_QSTR(MP_QSTR_HoughLinesP), MP_ROM_PTR(&cv2_imgproc_HoughLinesP_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_HoughLinesWithAccumulator), MP_ROM_PTR(&cv2_imgproc_HoughLinesWithAccumulator_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_isContourConvex), MP_ROM_PTR(&cv2_imgproc_isContourConvex_obj) }, \
     { MP_ROM_QSTR(MP_QSTR_Laplacian), MP_ROM_PTR(&cv2_imgproc_Laplacian_obj) }, \

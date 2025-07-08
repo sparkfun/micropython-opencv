@@ -1348,50 +1348,55 @@ mp_obj_t cv2_imgproc_HoughLines(size_t n_args, const mp_obj_t *pos_args, mp_map_
     return mat_to_mp_obj(lines);
 }
 
-// mp_obj_t cv2_imgproc_HoughLinesP(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-//     // Define the arguments
-//     enum { ARG_image, ARG_rho, ARG_theta, ARG_threshold, ARG_lines, ARG_minLineLength, ARG_maxLineGap };
-//     static const mp_arg_t allowed_args[] = {
-//         { MP_QSTR_image, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
-//         { MP_QSTR_rho, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
-//         { MP_QSTR_theta, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
-//         { MP_QSTR_threshold, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 100 } },
-//         { MP_QSTR_lines, MP_ARG_OBJ, { .u_obj = mp_const_none } },
-//         { MP_QSTR_minLineLength, MP_ARG_OBJ, { .u_obj = mp_const_none } },
-//         { MP_QSTR_maxLineGap, MP_ARG_OBJ, { .u_obj = mp_const_none } },
-//     };
+mp_obj_t cv2_imgproc_HoughLinesP(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_image, ARG_rho, ARG_theta, ARG_threshold, ARG_lines, ARG_minLineLength, ARG_maxLineGap };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_image, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_rho, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_theta, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_threshold, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 100 } },
+        { MP_QSTR_lines, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_minLineLength, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_maxLineGap, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+    };
 
-//     // Parse the arguments
-//     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-//     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-//     // Convert arguments to required types
-//     Mat image = mp_obj_to_mat(args[ARG_image].u_obj);
-//     mp_float_t rho = mp_obj_get_float(args[ARG_rho].u_obj);
-//     mp_float_t theta = mp_obj_get_float(args[ARG_theta].u_obj);
-//     int threshold = args[ARG_threshold].u_int;
-//     Mat lines = mp_obj_to_mat(args[ARG_lines].u_obj);
-//     mp_float_t minLineLength;
-//     if(args[ARG_minLineLength].u_obj == mp_const_none)
-//         minLineLength = 0; // Default value
-//     else
-//         minLineLength = mp_obj_get_float(args[ARG_minLineLength].u_obj);
-//     mp_float_t maxLineGap;
-//     if(args[ARG_maxLineGap].u_obj == mp_const_none)
-//         maxLineGap = 0; // Default value
-//     else
-//         maxLineGap = mp_obj_get_float(args[ARG_maxLineGap].u_obj);  
+    // Convert arguments to required types
+    Mat image = mp_obj_to_mat(args[ARG_image].u_obj);
+    mp_float_t rho = mp_obj_get_float(args[ARG_rho].u_obj);
+    mp_float_t theta = mp_obj_get_float(args[ARG_theta].u_obj);
+    int threshold = args[ARG_threshold].u_int;
+    Mat lines32S; // TODO: Allow user input
+    mp_float_t minLineLength;
+    if(args[ARG_minLineLength].u_obj == mp_const_none)
+        minLineLength = 0; // Default value
+    else
+        minLineLength = mp_obj_get_float(args[ARG_minLineLength].u_obj);
+    mp_float_t maxLineGap;
+    if(args[ARG_maxLineGap].u_obj == mp_const_none)
+        maxLineGap = 0; // Default value
+    else
+        maxLineGap = mp_obj_get_float(args[ARG_maxLineGap].u_obj);  
 
-//     // Call the corresponding OpenCV function
-//     try {
-//         HoughLinesP(image, lines, rho, theta, threshold, minLineLength, maxLineGap);
-//     } catch(Exception& e) {
-//         mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
-//     }
+    // Call the corresponding OpenCV function
+    try {
+        HoughLinesP(image, lines32S, rho, theta, threshold, minLineLength, maxLineGap);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
 
-//     // Return the result
-//     return mat_to_mp_obj(lines);
-// }
+    // Convert lines to float
+    Mat lines;
+    lines.allocator = &GetNumpyAllocator();
+    lines32S.convertTo(lines, CV_32F);
+
+    // Return the result
+    return mat_to_mp_obj(lines);
+}
 
 mp_obj_t cv2_imgproc_HoughLinesWithAccumulator(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
