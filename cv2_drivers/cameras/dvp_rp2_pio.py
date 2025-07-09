@@ -76,6 +76,9 @@ class DVP_RP2_PIO():
         if active == None:
             return self.sm.active()
         
+        # Disable the DMA, the VSYNC handler will re-enable it when needed
+        self.dma.active(False)
+
         # Set the active state of the state machine
         self.sm.active(active)
 
