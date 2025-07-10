@@ -1,5 +1,6 @@
-# Import OpenCV
+# Import OpenCV and hardware initialization module
 import cv2
+from cv2_hardware_init import *
 
 # Open a camera, similar to any other Python environment! In standard OpenCV,
 # you would use `cv2.VideoCapture(0)` or similar, and OpenCV would leverage the

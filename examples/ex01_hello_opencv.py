@@ -1,6 +1,14 @@
 # Import OpenCV, just as you would in any other Python environment!
 import cv2
 
+# Standard OpenCV leverages the host operating system to access hardware, but we
+# don't have that luxury in MicroPython. Instead, drivers are provided for
+# various hardware components, which need to be initialized before using them.
+# The exmples import a module called `cv2_hardware_init`, which initializes the
+# drivers. You may need to edit the contents of the `cv2_hardware_init` module
+# based on your specific board and hardware configuration
+from cv2_hardware_init import *
+
 # Import NumPy, almost like any other Python environment! The only difference is
 # the addition of `from ulab` since MicroPython does not have a full NumPy
 # implementation; ulab NumPy is a lightweight version of standard NumPy
