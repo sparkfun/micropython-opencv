@@ -31,8 +31,8 @@ set(MICROPY_C_HEAP_SIZE 65536)
 # functions
 set(MICROPY_TRACKED_ALLOC 1)
 
-# Set ULAB max number of dimensions to 4 (default is 2). TODO: See if 4 is
-# actually needed, or if we can get away with 2.
+# Set ULAB max number of dimensions to 4 (default is 2), which is needed for
+# some OpenCV functions
 target_compile_definitions(usermod INTERFACE ULAB_MAX_DIMS=4)
 
 # Include ULAB
