@@ -34,4 +34,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: firmware.uf2
-        path: micropython/ports/rp2/build-SPARKFUN_XRP_CONTROLLER/firmware.uf2
+        path: micropython/ports/rp2/build-SPARKFUN_XRP_CONTROLLER-LARGE_BINARY/firmware.uf2

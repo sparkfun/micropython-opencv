@@ -7,6 +7,9 @@ CURRENT_DIR = $(shell pwd)
 # Set the MicroPython user C module path to the OpenCV module
 MAKE_ARGS = USER_C_MODULES="$(CURRENT_DIR)/src/opencv_upy.cmake"
 
+# Ensure we're building the OpenCV board variant
+MAKE_ARGS += BOARD_VARIANT=LARGE_BINARY
+
 # Use the OpenCV driver manifest
 MAKE_ARGS += FROZEN_MANIFEST="$(CURRENT_DIR)/manifest.py"
 
@@ -16,8 +19,8 @@ all:
 
 # Clean the MicroPython build
 clean:
-	@cd micropython/ports/rp2 && make -f Makefile $(MAKEFLAGS) clean
+	@cd micropython/ports/rp2 && make -f Makefile $(MAKEFLAGS) $(MAKE_ARGS) clean
 
 # Load the MicroPython submodules
 submodules:
-	@cd micropython/ports/rp2 && make -f Makefile $(MAKEFLAGS) submodules
+	@cd micropython/ports/rp2 && make -f Makefile $(MAKEFLAGS) $(MAKE_ARGS) submodules
