@@ -3,7 +3,7 @@
 include("$(BOARD_DIR)/manifest.py")
 
 # Include this directory as one package
-package("cv2_drivers", base_path="..")
+package("cv2_drivers")
 
 # Include the SD card module
 require("sdcard")
