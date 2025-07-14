@@ -9,9 +9,6 @@ from cv2_hardware_init import *
 # so a camera driver is required instead. Any camera driver can be used, as long
 # as it implements the same methods as the standard OpenCV `cv2.VideoCapture`
 # class, such as `open()`, `read()`, and `release()`
-# 
-# This example assumes a camera driver called `camera` has been initialized by a
-# `boot.py` script. See the example `boot.py` script for more details
 camera.open()
 
 # Prompt the user to press a key to continue

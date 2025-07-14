@@ -40,15 +40,11 @@ img = cv2.putText(img, "Hello OpenCV!", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, 
 # Once we have an image ready to show, just call `cv2.imshow()`, almost like any
 # other Python environment! However, there is one important difference:
 # 
-# Standard OpenCV leverages the host operating system to display images in
-# windows, but we don't have that luxury in MicroPython. So there is an API
-# change to `cv2.imshow()` to accommodate this: instead of passing a window name
-# string as the first argument to `cv2.imshow()`, we pass a display driver. Any
+# Standard OpenCV takes a window name string in `cv2.imshow()`, which is used
+# to display the image in a window. We don't have windows in MicroPython, so
+# there is an API change where the first argument must be a display driver. Any
 # display driver can be used, as long as it implements an `imshow()` method that
 # takes a NumPy array as input
-# 
-# This example assumes a display driver called `display` has been initialized by
-# a `boot.py` script. See the example `boot.py` script for more details
 cv2.imshow(display, img) # Can alternatively call `display.imshow(img)`
 
 # Standard OpenCV requires a call to `cv2.waitKey()` to process events and
