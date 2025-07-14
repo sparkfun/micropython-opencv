@@ -49,6 +49,70 @@ mp_obj_t cv2_imgproc_adaptiveThreshold(size_t n_args, const mp_obj_t *pos_args, 
     return mat_to_mp_obj(dst);
 }
 
+mp_obj_t cv2_imgproc_approxPolyDP(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_curve, ARG_epsilon, ARG_closed, ARG_approxCurve };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_curve, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_epsilon, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_closed, MP_ARG_BOOL, { .u_bool = false } },
+        { MP_QSTR_approxCurve, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat curve = mp_obj_to_mat(args[ARG_curve].u_obj);
+    double epsilon = mp_obj_get_float(args[ARG_epsilon].u_obj);
+    bool closed = args[ARG_closed].u_bool;
+    Mat approxCurve = mp_obj_to_mat(args[ARG_approxCurve].u_obj);
+
+    // Call the corresponding OpenCV function
+    try {
+        approxPolyDP(curve, approxCurve, epsilon, closed);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mat_to_mp_obj(approxCurve);
+}
+
+mp_obj_t cv2_imgproc_approxPolyN(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_curve, ARG_nsides, ARG_approxCurve, ARG_epsilon_percentage, ARG_ensure_convex };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_curve, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_nsides, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_approxCurve, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_epsilon_percentage, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_ensure_convex, MP_ARG_BOOL, { .u_bool = true } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat curve = mp_obj_to_mat(args[ARG_curve].u_obj);
+    int nsides = args[ARG_nsides].u_int;
+    Mat approxCurve = mp_obj_to_mat(args[ARG_approxCurve].u_obj);
+    mp_float_t epsilon_percentage = args[ARG_epsilon_percentage].u_obj == mp_const_none ? -1.0 : mp_obj_get_float(args[ARG_epsilon_percentage].u_obj);
+    bool ensure_convex = args[ARG_ensure_convex].u_bool;
+
+    // Call the corresponding OpenCV function
+    try {
+        approxPolyN(curve, approxCurve, nsides, epsilon_percentage, ensure_convex);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mat_to_mp_obj(approxCurve);
+}
+
 mp_obj_t cv2_imgproc_arcLength(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
     enum { ARG_curve, ARG_closed };
@@ -119,70 +183,6 @@ mp_obj_t cv2_imgproc_arrowedLine(size_t n_args, const mp_obj_t *pos_args, mp_map
 
     // Return the result
     return mat_to_mp_obj(img);
-}
-
-mp_obj_t cv2_imgproc_approxPolyDP(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    // Define the arguments
-    enum { ARG_curve, ARG_epsilon, ARG_closed, ARG_approxCurve };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_curve, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
-        { MP_QSTR_epsilon, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = mp_const_none } },
-        { MP_QSTR_closed, MP_ARG_BOOL, { .u_bool = false } },
-        { MP_QSTR_approxCurve, MP_ARG_OBJ, { .u_obj = mp_const_none } },
-    };
-
-    // Parse the arguments
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    // Convert arguments to required types
-    Mat curve = mp_obj_to_mat(args[ARG_curve].u_obj);
-    double epsilon = mp_obj_get_float(args[ARG_epsilon].u_obj);
-    bool closed = args[ARG_closed].u_bool;
-    Mat approxCurve = mp_obj_to_mat(args[ARG_approxCurve].u_obj);
-
-    // Call the corresponding OpenCV function
-    try {
-        approxPolyDP(curve, approxCurve, epsilon, closed);
-    } catch(Exception& e) {
-        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
-    }
-
-    // Return the result
-    return mat_to_mp_obj(approxCurve);
-}
-
-mp_obj_t cv2_imgproc_approxPolyN(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    // Define the arguments
-    enum { ARG_curve, ARG_nsides, ARG_approxCurve, ARG_epsilon_percentage, ARG_ensure_convex };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_curve, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
-        { MP_QSTR_nsides, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
-        { MP_QSTR_approxCurve, MP_ARG_OBJ, { .u_obj = mp_const_none } },
-        { MP_QSTR_epsilon_percentage, MP_ARG_OBJ, { .u_obj = mp_const_none } },
-        { MP_QSTR_ensure_convex, MP_ARG_BOOL, { .u_bool = true } },
-    };
-
-    // Parse the arguments
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    // Convert arguments to required types
-    Mat curve = mp_obj_to_mat(args[ARG_curve].u_obj);
-    int nsides = args[ARG_nsides].u_int;
-    Mat approxCurve = mp_obj_to_mat(args[ARG_approxCurve].u_obj);
-    mp_float_t epsilon_percentage = args[ARG_epsilon_percentage].u_obj == mp_const_none ? -1.0 : mp_obj_get_float(args[ARG_epsilon_percentage].u_obj);
-    bool ensure_convex = args[ARG_ensure_convex].u_bool;
-
-    // Call the corresponding OpenCV function
-    try {
-        approxPolyN(curve, approxCurve, nsides, epsilon_percentage, ensure_convex);
-    } catch(Exception& e) {
-        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
-    }
-
-    // Return the result
-    return mat_to_mp_obj(approxCurve);
 }
 
 mp_obj_t cv2_imgproc_bilateralFilter(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -389,6 +389,43 @@ mp_obj_t cv2_imgproc_Canny(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
     return mat_to_mp_obj(edges);
 }
 
+mp_obj_t cv2_imgproc_circle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_img, ARG_center, ARG_radius, ARG_color, ARG_thickness, ARG_lineType, ARG_shift };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_img, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_center, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_radius, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_color, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_thickness, MP_ARG_INT, { .u_int = 1 } },
+        { MP_QSTR_lineType, MP_ARG_INT, { .u_int = LINE_8 } },
+        { MP_QSTR_shift, MP_ARG_INT, { .u_int = 0 } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat img = mp_obj_to_mat(args[ARG_img].u_obj);
+    Point center = mp_obj_to_point(args[ARG_center].u_obj);
+    int radius = args[ARG_radius].u_int;
+    Scalar color = mp_obj_to_scalar(args[ARG_color].u_obj);
+    int thickness = args[ARG_thickness].u_int;
+    int lineType = args[ARG_lineType].u_int;
+    int shift = args[ARG_shift].u_int;
+
+    // Call the corresponding OpenCV function
+    try {
+        circle(img, center, radius, color, thickness, lineType, shift);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mat_to_mp_obj(img);
+}
+
 mp_obj_t cv2_imgproc_connectedComponents(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
     enum { ARG_image, ARG_labels, ARG_connectivity, ARG_ltype };
@@ -585,43 +622,6 @@ mp_obj_t cv2_imgproc_convexityDefects(size_t n_args, const mp_obj_t *pos_args, m
 
     // Return the result
     return mat_to_mp_obj(convexityDefects);
-}
-
-mp_obj_t cv2_imgproc_circle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    // Define the arguments
-    enum { ARG_img, ARG_center, ARG_radius, ARG_color, ARG_thickness, ARG_lineType, ARG_shift };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_img, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
-        { MP_QSTR_center, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
-        { MP_QSTR_radius, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
-        { MP_QSTR_color, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
-        { MP_QSTR_thickness, MP_ARG_INT, { .u_int = 1 } },
-        { MP_QSTR_lineType, MP_ARG_INT, { .u_int = LINE_8 } },
-        { MP_QSTR_shift, MP_ARG_INT, { .u_int = 0 } },
-    };
-
-    // Parse the arguments
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    // Convert arguments to required types
-    Mat img = mp_obj_to_mat(args[ARG_img].u_obj);
-    Point center = mp_obj_to_point(args[ARG_center].u_obj);
-    int radius = args[ARG_radius].u_int;
-    Scalar color = mp_obj_to_scalar(args[ARG_color].u_obj);
-    int thickness = args[ARG_thickness].u_int;
-    int lineType = args[ARG_lineType].u_int;
-    int shift = args[ARG_shift].u_int;
-
-    // Call the corresponding OpenCV function
-    try {
-        circle(img, center, radius, color, thickness, lineType, shift);
-    } catch(Exception& e) {
-        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
-    }
-
-    // Return the result
-    return mat_to_mp_obj(img);
 }
 
 mp_obj_t cv2_imgproc_cvtColor(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -1776,53 +1776,6 @@ mp_obj_t cv2_imgproc_minEnclosingTriangle(size_t n_args, const mp_obj_t *pos_arg
     return mp_obj_new_tuple(2, result_tuple);
 }
 
-mp_obj_t cv2_imgproc_morphologyEx(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    // Define the arguments
-    enum { ARG_src, ARG_op, ARG_kernel, ARG_dst, ARG_anchor, ARG_iterations, ARG_borderType, ARG_borderValue };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_src, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
-        { MP_QSTR_op, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
-        { MP_QSTR_kernel, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
-        { MP_QSTR_dst, MP_ARG_OBJ, { .u_obj = mp_const_none } },
-        { MP_QSTR_anchor, MP_ARG_OBJ, { .u_obj = mp_const_none } },
-        { MP_QSTR_iterations, MP_ARG_INT, { .u_int = 1 } },
-        { MP_QSTR_borderType, MP_ARG_INT, { .u_int = BORDER_CONSTANT } },
-        { MP_QSTR_borderValue, MP_ARG_OBJ, { .u_obj = mp_const_none } },
-    };
-
-    // Parse the arguments
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    // Convert arguments to required types
-    Mat src = mp_obj_to_mat(args[ARG_src].u_obj);
-    int op = args[ARG_op].u_int;
-    Mat kernel = mp_obj_to_mat(args[ARG_kernel].u_obj);
-    Mat dst = mp_obj_to_mat(args[ARG_dst].u_obj);
-    Point anchor;
-    if(args[ARG_anchor].u_obj == mp_const_none)
-        anchor = Point(-1, -1); // Default value
-    else
-        anchor = mp_obj_to_point(args[ARG_anchor].u_obj);
-    int iterations = args[ARG_iterations].u_int;
-    int borderType = args[ARG_borderType].u_int;
-    Scalar borderValue;
-    if(args[ARG_borderValue].u_obj == mp_const_none)
-        borderValue = morphologyDefaultBorderValue(); // Default value
-    else
-        borderValue = mp_obj_to_scalar(args[ARG_borderValue].u_obj);
-
-    // Call the corresponding OpenCV function
-    try {
-        morphologyEx(src, dst, op, kernel, anchor, iterations, borderType, borderValue);
-    } catch(Exception& e) {
-        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
-    }
-
-    // Return the result
-    return mat_to_mp_obj(dst);
-}
-
 mp_obj_t cv2_imgproc_moments(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
     enum { ARG_src, ARG_binary };
@@ -1876,6 +1829,53 @@ mp_obj_t cv2_imgproc_moments(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
 
     // Return the moments dictionary
     return moments_dict;
+}
+
+mp_obj_t cv2_imgproc_morphologyEx(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Define the arguments
+    enum { ARG_src, ARG_op, ARG_kernel, ARG_dst, ARG_anchor, ARG_iterations, ARG_borderType, ARG_borderValue };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_src, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_op, MP_ARG_REQUIRED | MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_kernel, MP_ARG_REQUIRED | MP_ARG_OBJ, { .u_obj = MP_OBJ_NULL } },
+        { MP_QSTR_dst, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_anchor, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_iterations, MP_ARG_INT, { .u_int = 1 } },
+        { MP_QSTR_borderType, MP_ARG_INT, { .u_int = BORDER_CONSTANT } },
+        { MP_QSTR_borderValue, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+    };
+
+    // Parse the arguments
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Convert arguments to required types
+    Mat src = mp_obj_to_mat(args[ARG_src].u_obj);
+    int op = args[ARG_op].u_int;
+    Mat kernel = mp_obj_to_mat(args[ARG_kernel].u_obj);
+    Mat dst = mp_obj_to_mat(args[ARG_dst].u_obj);
+    Point anchor;
+    if(args[ARG_anchor].u_obj == mp_const_none)
+        anchor = Point(-1, -1); // Default value
+    else
+        anchor = mp_obj_to_point(args[ARG_anchor].u_obj);
+    int iterations = args[ARG_iterations].u_int;
+    int borderType = args[ARG_borderType].u_int;
+    Scalar borderValue;
+    if(args[ARG_borderValue].u_obj == mp_const_none)
+        borderValue = morphologyDefaultBorderValue(); // Default value
+    else
+        borderValue = mp_obj_to_scalar(args[ARG_borderValue].u_obj);
+
+    // Call the corresponding OpenCV function
+    try {
+        morphologyEx(src, dst, op, kernel, anchor, iterations, borderType, borderValue);
+    } catch(Exception& e) {
+        mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
+    }
+
+    // Return the result
+    return mat_to_mp_obj(dst);
 }
 
 mp_obj_t cv2_imgproc_pointPolygonTest(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
