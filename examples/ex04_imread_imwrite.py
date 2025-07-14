@@ -32,7 +32,7 @@ edges = cv2.Canny(img, 100, 200)
 # Display the modified image
 cv2.imshow(display, edges)
 
-# Now we'll save the modified image to the MicroPyhton filesystem using
+# Now we'll save the modified image to the MicroPython filesystem using
 # `cv2.imwrite()`, just like in any other Python environment!
 # 
 # Again, SD cards are supported, just change the path to point to the SD card
