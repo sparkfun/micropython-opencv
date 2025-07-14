@@ -250,6 +250,8 @@ If you need help understanding how to use these functions, see the documentation
 | --- | --- |
 | `cv.matchTemplate(image, templ, method[, result[, mask]]) -> result`<br>Compares a template against overlapped image regions.<br>[Documentation](https://docs.opencv.org/4.11.0/df/dfb/group__imgproc__object.html#ga586ebfb0a7fb604b35a23d85391329be) | |
 
+## [`imgcodecs`](https://docs.opencv.org/4.11.0/d4/da8/group__imgcodecs.html)
+
 | Function | Notes |
 | --- | --- |
 | `cv.imread(filename[, flags]) -> retval`<br>Loads an image from a file.<br>[Documentation](https://docs.opencv.org/4.11.0/d4/da8/group__imgcodecs.html#gacbaa02cffc4ec2422dfa2e24412a99e2) | `filename` can be anywhere in the full MicroPython filesystem, including SD cards if mounted.<br>Only BMP and PNG formats are currently supported. |
