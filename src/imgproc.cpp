@@ -2127,13 +2127,18 @@ mp_obj_t cv2_imgproc_threshold(size_t n_args, const mp_obj_t *pos_args, mp_map_t
     int type = args[ARG_type].u_int;
     Mat dst = mp_obj_to_mat(args[ARG_dst].u_obj);
 
+    mp_float_t retval;
+
     // Call the corresponding OpenCV function
     try {
-        threshold(src, dst, thresh, maxval, type);
+        retval = threshold(src, dst, thresh, maxval, type);
     } catch(Exception& e) {
         mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT(e.what()));
     }
 
-    // Return the result
-    return mat_to_mp_obj(dst);
+    // Return the result as a tuple
+    mp_obj_t result_tuple[2];
+    result_tuple[0] = mp_obj_new_float(retval);
+    result_tuple[1] = mat_to_mp_obj(dst);
+    return mp_obj_new_tuple(2, result_tuple);
 }
