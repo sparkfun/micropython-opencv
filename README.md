@@ -263,6 +263,7 @@ If you need help understanding how to use these functions, see the documentation
 | --- | --- |
 | `cv.imshow(winname, mat) -> None`<br>Displays an image in the specified window.<br>[Documentation](https://docs.opencv.org/4.11.0/d7/dfc/group__highgui.html#ga453d42fe4cb60e5723281a89973ee563) | `winname` must actually be a display driver object that implements an `imshow()` method that takes a NumPy array as input. |
 | `cv.waitKey([, delay]) -> retval`<br>Waits for a pressed key.<br>[Documentation](https://docs.opencv.org/4.11.0/d7/dfc/group__highgui.html#ga5628525ad33f52eab17feebcfba38bd7) | Input is taken from `sys.stdin`, which is typically the REPL. |
+| `cv.waitKeyEx([, delay]) -> retval`<br>Similar to waitKey, but returns full key code.<br>[Documentation](https://docs.opencv.org/4.11.0/d7/dfc/group__highgui.html#ga5628525ad33f52eab17feebcfba38bd7) | Input is taken from `sys.stdin`, which is typically the REPL.<br>Full key code is implementation specific, so special key codes in MicroPython will not match other Python environments. |
 
 # Building
 

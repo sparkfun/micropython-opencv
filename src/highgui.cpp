@@ -46,6 +46,23 @@ mp_obj_t cv2_highgui_imshow(size_t n_args, const mp_obj_t *pos_args, mp_map_t *k
 }
 
 mp_obj_t cv2_highgui_waitKey(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    // Call waitKeyEx to do the heavy lifting
+    mp_obj_t key = cv2_highgui_waitKeyEx(n_args, pos_args, kw_args);
+
+    // Get the key code as an integer
+    int32_t key_code = mp_obj_get_int(key);
+
+    // If the key code is -1, it means no key was pressed
+    if (key_code == -1) {
+        // Return the original key object
+        return key;
+    } else {
+        // Return the last byte of the key code
+        return MP_OBJ_NEW_SMALL_INT(key_code & 0xFF);
+    }
+}
+
+mp_obj_t cv2_highgui_waitKeyEx(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     // Define the arguments
     enum { Arg_delay };
     static const mp_arg_t allowed_args[] = {
@@ -88,35 +105,79 @@ mp_obj_t cv2_highgui_waitKey(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
     // of 0 to wait indefinitely, whereas `select.poll` uses -1
     mp_obj_t timeout = MP_OBJ_NEW_SMALL_INT(delay <= 0 ? -1 : delay);
 
-    // TODO: Some key presses return multiple characters (eg. up arrow key
-    // returns 3 characters: "\x1b[A"). Need to handle this case properly.
-    // Should also look into implementing waitKeyEx() for these extra cases
-
-    // Call `poll.poll(timeout)`
+    // Load the `poll.poll()` method to check for key presses
     mp_obj_t poll_poll_method[3];
     mp_load_method(poll_obj, MP_QSTR_poll, poll_poll_method);
-    poll_poll_method[2] = timeout;
-    mp_obj_t result = mp_call_method_n_kw(1, 0, poll_poll_method);
 
-    // Extract the items from the result list
-    mp_obj_t *items;
-    size_t len;
-    mp_obj_list_get(result, &len, &items);
-
-    // Check if any items were returned
-    if(len == 0) {
-        // If no items were returned, return -1 to indicate no key was pressed
-        return MP_OBJ_NEW_SMALL_INT(-1);
-    }
-
-    // Since something was returned, a key was pressed. We need to extract it
-    // with `sys.stdin.read(1)`
+    // Load the `sys.stdin.read(1)` method to read a single character
     mp_obj_t read_method[3];
     mp_load_method(stdin_obj, MP_QSTR_read, read_method);
     read_method[2] = MP_OBJ_NEW_SMALL_INT(1);
-    mp_obj_t key_str = mp_call_method_n_kw(1, 0, read_method);
 
-    // Convert the key character to an integer and return it
-    const char *key_chars = mp_obj_str_get_str(key_str);
-    return MP_OBJ_NEW_SMALL_INT(key_chars[0]);
+    // Initialize key code to -1, which indicates no key was pressed
+    int32_t key_code = -1;
+
+    // Some key presses return multiple bytes (eg. up arrow key returns 3 bytes:
+    // `\x1b[A`). To handle this, we will loop until no more bytes are available
+    for (int i = 0; true; i++) {
+        // Call `poll.poll(timeout)` if this is the first iteration, otherwise
+        // call `poll.poll(1)` to quickly check for any remaining bytes. Can't
+        // wait 0ms, because it takes a moment for all bytes to arrive
+        poll_poll_method[2] = i == 0 ? timeout : MP_OBJ_NEW_SMALL_INT(1);
+        mp_obj_t result = mp_call_method_n_kw(1, 0, poll_poll_method);
+
+        // Extract the items from the result list
+        mp_obj_t *items;
+        size_t len;
+        mp_obj_list_get(result, &len, &items);
+
+        // Check if any items were returned
+        if(len == 0) {
+            // No more bytes available, so we're done. If multiple bytes were
+            // read, we want the last byte to be 0 so it doesn't get confused
+            // in `waitKey()` with a normal key press. So we can simply shift
+            // the key code left by 8 bits again
+            if (i > 1) {
+                key_code <<= 8;
+            }
+            break;
+        }
+
+        // Since something was returned, a byte is available. We need to
+        // extract it by calling `sys.stdin.read(1)`
+        mp_obj_t byte_str = mp_call_method_n_kw(1, 0, read_method);
+
+        // Convert the byte object to an actual byte
+        uint8_t byte_val = mp_obj_str_get_str(byte_str)[0];
+
+        // Check which iteration this is
+        if(i == 0) {
+            // This is the first iteration, set the key code to this byte
+            key_code = byte_val;
+            
+            // Special keys always start with an escape character (0x1b). If
+            // this is not the escape character, we can assume it's a normal key
+            // press and break immediately. This helps mitigate the problem of
+            // interpreting 2 key simultaneous key presses as 1 special key
+            if (byte_val != 0x1b) {
+                break;
+            }
+        } else if (i == 1) {
+            // This is the second iteration, meaning the first byte was the
+            // escape character. We don't want that to be part of the key code
+            // (special keys will be indicated by having multiple bytes, and the
+            // last byte being zero), so we'll just overwrite the key code with
+            // the second byte
+            key_code = byte_val;
+        } else {
+            // This is a subsequent iteration, meaning we have already read the
+            // escape character and the second byte. For all subsequent bytes,
+            // we will shift the key code left by 8 bits and add the new byte to
+            // it to create a multi-byte key
+            key_code = (key_code << 8) | byte_val;
+        }
+    }
+
+    // Return the final key code
+    return MP_OBJ_NEW_SMALL_INT(key_code);
 }
