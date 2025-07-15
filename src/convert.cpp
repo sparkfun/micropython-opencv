@@ -60,6 +60,7 @@ Mat ndarray_to_mat(ndarray_obj_t *ndarray)
     // We have an ndarray_obj_t, so these checks have already been done.
 
     // https://github.com/opencv/opencv/blob/aee828ac6ed3e45d7ca359d125349a570ca4e098/modules/python/src2/cv2_convert.cpp#L130-L172
+    bool needcopy = false;
     int type = ndarray_type_to_mat_depth(ndarray->dtype);
 
     int ndims = ndarray->ndim;
@@ -71,15 +72,39 @@ Mat ndarray_to_mat(ndarray_obj_t *ndarray)
         _strides[i] = ndarray->strides[ULAB_MAX_DIMS - ndarray->ndim + i];
     }
 
-    // https://github.com/opencv/opencv/blob/aee828ac6ed3e45d7ca359d125349a570ca4e098/modules/python/src2/cv2_convert.cpp#L176-L221
+    // https://github.com/opencv/opencv/blob/aee828ac6ed3e45d7ca359d125349a570ca4e098/modules/python/src2/cv2_convert.cpp#L176-L241
     bool ismultichannel = ndims == 3;
+
+    for( int i = ndims-1; i >= 0 && !needcopy; i-- )
+    {
+        // these checks handle cases of
+        //  a) multi-dimensional (ndims > 2) arrays, as well as simpler 1- and 2-dimensional cases
+        //  b) transposed arrays, where _strides[] elements go in non-descending order
+        //  c) flipped arrays, where some of _strides[] elements are negative
+        // the _sizes[i] > 1 is needed to avoid spurious copies when NPY_RELAXED_STRIDES is set
+        if( (i == ndims-1 && _sizes[i] > 1 && (size_t)_strides[i] != elemsize) ||
+            (i < ndims-1 && _sizes[i] > 1 && _strides[i] < _strides[i+1]) )
+            needcopy = true;
+    }
 
     if (ismultichannel)
     {
         int channels = ndims >= 1 ? (int)_sizes[ndims - 1] : 1;
         ndims--;
         type |= CV_MAKETYPE(0, channels);
+
+        if (ndims >= 1 && _strides[ndims - 1] != (size_t)elemsize*_sizes[ndims])
+            needcopy = true;
+
         elemsize = CV_ELEM_SIZE(type);
+    }
+
+    if (needcopy)
+    {
+        ndarray = ndarray_from_mp_obj(ndarray_copy(ndarray), 0);
+        for (int i = 0; i < ndarray->ndim; i++) {
+            _strides[i] = ndarray->strides[ULAB_MAX_DIMS - ndarray->ndim + i];
+        }
     }
 
     // https://github.com/opencv/opencv/blob/aee828ac6ed3e45d7ca359d125349a570ca4e098/modules/python/src2/cv2_convert.cpp#L243-L261
