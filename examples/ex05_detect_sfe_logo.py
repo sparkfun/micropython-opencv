@@ -3,7 +3,7 @@
 # 
 # Copyright (c) 2025 SparkFun Electronics
 #-------------------------------------------------------------------------------
-# ex05_detect_sfe_logo.py
+# ex06_detect_sfe_logo.py
 # 
 # This example demonstrates a basic vision processing pipeline. A pipeline is
 # just a sequence of steps used to extract meaningful data from an image. The
@@ -136,15 +136,18 @@ def my_pipeline(frame):
             center_x = left + width // 2
             center_y = top + height // 2
 
-            # Now we could use this data for some task! For example, if we had
-            # a robot that needed to drive up to the logo, we could turn to face
-            # the logo with the center point, then drive towards it until the
-            # size is big enough.
-            # 
+            # Now we could use this data for some task! For example, if we were
+            # detecting an object that a robot needs to drive in front of, we
+            # could turn to face it with the center point, then drive forwards
+            # until the size is big enough (meaning we're close enough to it).
+            #
             # This example doesn't actually make use of the data, so we'll just
-            # draw the bounding box and center of the logo for visualization
+            # draw the bounding box and center of the logo for visualization,
+            # and add text of the position and size of the logo
             frame = cv.rectangle(frame, (left, top), (left + width, top + height), (255, 0, 0), 2)
-            frame = cv.circle(frame, (center_x, center_y), 5, (0, 255, 0), -1)
+            frame = cv.circle(frame, (center_x, center_y), 3, (0, 255, 0), -1)
+            frame = cv.putText(frame, f"({center_x}, {center_y})", (center_x - 45, center_y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            frame = cv.putText(frame, f"{width}x{height}", (left, top - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
 # Initialize a loop timer to calculate processing speed in FPS
 loop_time = time.ticks_us()
@@ -168,7 +171,7 @@ while True:
 
     # All processing is done! Calculate the frame rate and display it
     current_time = time.ticks_us()
-    fps = 1000000 / (current_time - loop_time)
+    fps = 1_000_000 / (current_time - loop_time)
     loop_time = current_time
     frame = cv.putText(frame, f"FPS: {fps:.2f}", (40, 30), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
