@@ -5,12 +5,34 @@
 #-------------------------------------------------------------------------------
 # ex05_detect_sfe_logo.py
 # 
-# This example demonstrates a basic vision processing pipeline. It reads frames
-# from the camera, finds contours in the image, and compares them to a reference
-# contour to detect the SparkFun flame logo. Below is some (bad) ASCII art of
-# the logo for reference. The example draws the actual contour that it's looking
-# for in the top left corner of the display.
-# 
+# This example demonstrates a basic vision processing pipeline. A pipeline is
+# just a sequence of steps used to extract meaningful data from an image. The
+# pipeline in this example attempts to detect the SparkFun flame logo using
+# contour matching. If it's detected, it will be outlined on the display for
+# visualization. The bounding box and center of the logo will also be drawn,
+# demonstrating how to acquire useful numerical data from an image (eg. the
+# position and size of an object).
+#
+# Note that this pipeline is very simple and does not include many of the steps
+# that would typically be included in more robust pipelines. This was done for
+# simplicity and performance, so it may produce false positives or miss the logo
+# entirely sometimes.
+#-------------------------------------------------------------------------------
+
+# Import OpenCV and hardware initialization module
+import cv2 as cv
+from cv2_hardware_init import *
+
+# Import NumPy
+from ulab import numpy as np
+
+# Import time for frame rate calculation
+import time
+
+# Here we define a reference contour for the SparkFun flame logo. This was
+# created manually by picking points on the boundary of a small image of the
+# logo in an image editor. Below is also ASCII art of the logo for reference,
+# but the actual contour is drawn in the top left corner of the display.
 #     ___
 #    /  _\
 #    \  \
@@ -21,24 +43,6 @@
 # |  _____/
 # | /
 # |/
-# 
-# If the logo is detected, it will be highlighted in red on the display. Note
-# that this vision pipeline is very simple and does not include many of the
-# steps that would typically be included in more robust pipelines for the sake
-# of simplicity and performance. So it may produce false positives or miss the
-# logo entirely in some cases.
-#-------------------------------------------------------------------------------
-
-# Import OpenCV
-import cv2 as cv
-from cv2_hardware_init import *
-from ulab import numpy as np
-import time
-
-# Here we define a reference contour for the SparkFun flame logo. This was
-# created manually by picking points on the boundary of a small image of the
-# logo in an image editor. This gets drawn in the top left corner of the
-# display for reference
 logo_contour = np.array(
     [[[0,48]],
      [[0,22]],
@@ -65,20 +69,9 @@ logo_contour = np.array(
      [[20,36]],
      [[12,36]]], dtype=np.float)
 
-# Initialize a loop timer to calculate processing speed in FPS
-loop_time = time.ticks_us()
-
-# Open the camera
-camera.open()
-
-# Prompt the user to press a key to continue
-print("Press any key to continue")
-
-# Loop to continuously read frames from the camera and display them
-while True:
-    # Read a frame from the camera
-    success, frame = camera.read()
-
+# This is the pipeline implementation. This gets called for each frame captured
+# by the camera in the main loop
+def my_pipeline(frame):
     # Here we binarize the image. There are many ways to do this, but here we
     # simply convert the image to grayscale and then apply Otsu's thresholding
     # method to create a binary image. This means it will only detect a dark
@@ -87,9 +80,9 @@ while True:
     gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     ret, thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)
 
-    # Find contours in the binary image, which represent the boundaries of
-    # shapes. Contours are a powerful tool in OpenCV for shape analysis and
-    # object detection
+    # Find contours in the binary image, which are simply lists of points around
+    # the boundaries of shapes. Contours are a powerful tool in OpenCV for shape
+    # analysis and object detection
     contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
     # It's possible that no contours were found, so first check if any were
@@ -130,8 +123,48 @@ while True:
         # that good matches are usually around 0.5, so we'll use a slightly
         # higher threshold of 1.0
         if best_similarity < 1.0:
-            # Now we'll draw the best contour found on the original image
+            # The best contour found is a good match, so we'll draw it on the
+            # frame to outline the detected logo for visualization
             frame = cv.drawContours(frame, [best_contour], -1, (0, 0, 255), 2)
+
+            # Visualization is great, but the purpose of most real pipelines is
+            # to extract useful data from the image. For example, suppose we
+            # want to know where the logo is located in the image and how large
+            # it is. We can use the bounding rectangle of the contour to get the
+            # position and size of the logo
+            left, top, width, height = cv.boundingRect(best_contour)
+            center_x = left + width // 2
+            center_y = top + height // 2
+
+            # Now we could use this data for some task! For example, if we had
+            # a robot that needed to drive up to the logo, we could turn to face
+            # the logo with the center point, then drive towards it until the
+            # size is big enough.
+            # 
+            # This example doesn't actually make use of the data, so we'll just
+            # draw the bounding box and center of the logo for visualization
+            frame = cv.rectangle(frame, (left, top), (left + width, top + height), (255, 0, 0), 2)
+            frame = cv.circle(frame, (center_x, center_y), 5, (0, 255, 0), -1)
+
+# Initialize a loop timer to calculate processing speed in FPS
+loop_time = time.ticks_us()
+
+# Open the camera
+camera.open()
+
+# Prompt the user to press a key to continue
+print("Press any key to continue")
+
+# Loop to continuously read frames from the camera and display them
+while True:
+    # Read a frame from the camera
+    success, frame = camera.read()
+    if not success:
+        print("Failed to read frame from camera")
+        break
+    
+    # Call the pipeline function to process the frame
+    my_pipeline(frame)
 
     # All processing is done! Calculate the frame rate and display it
     current_time = time.ticks_us()
