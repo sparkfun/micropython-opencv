@@ -70,10 +70,22 @@ class CST816(CV2_Touch_Screen):
     def getChipID(self):
         return self.read_register_value(self._REG_CHIP_ID)
 
-    def get_touch(self):
+    def is_touched(self):
+        """
+        Check if the touch screen is currently being touched.
+
+        Returns:
+            bool: True if touching, False otherwise
+        """
+        # Read the number of touches
+        touch_num = self.read_register_value(self._REG_FINGER_NUM)
+
+        # If there are any touches, return True
+        return touch_num > 0
+
+    def get_touch_xy(self):
         x = self.read_register_value(self._REG_X_POS_H, 2) & 0x0FFF
         y = self.read_register_value(self._REG_Y_POS_H, 2) & 0x0FFF
-        touch_num = self.read_register_value(self._REG_FINGER_NUM)
 
         # Adjust for the rotation
         if self.rotation == 0:
@@ -85,7 +97,7 @@ class CST816(CV2_Touch_Screen):
         elif self.rotation == 3:
             x,y = self.height - y, x
 
-        return (x, y, touch_num)
+        return (x, y)
 
     def read_register_value(self, reg, num_bytes=1):
         """

@@ -28,32 +28,35 @@ print("Press any key to continue")
 
 # Create variables to store touch coordinates and state
 x0, y0, x1, y1 = 0, 0, 0, 0
-touching = False
+touch_input = False
 
 # Loop to continuously read touch input and draw on the image
 while True:
-    # Read touch input
-    x, y, touch_num = touch_screen.get_touch()
-
-    # Update the touch coordinates and state
-    if touch_num > 0:
-        if not touching:
-            x0 = x
-            y0 = y
-            x1 = x
-            y1 = y
-            touching = True
+    # Check if there is touch input
+    if touch_screen.is_touched():
+        # Check if this is the first touch or a continuation
+        if not touch_input:
+            # This is the first touch, set both (x0, y0) and (x1, y1) to the
+            # initial touch coordinates. This will draw a point at the touch
+            # location if no further touch inputs are made
+            x0, y0 = touch_screen.get_touch_xy()
+            x1, y1 = x0, y0
+            # Set the state to indicate there is touch input
+            touch_input = True
         else:
-            x0 = x1
-            y0 = y1
-            x1 = x
-            y1 = y
+            # This is a continuation of the touch, set (x0, y0) to the previous
+            # coordinates and set (x1, y1) to the current touch coordinates so
+            # we can draw a line between them
+            x0, y0 = x1, y1
+            x1, y1 = touch_screen.get_touch_xy()
     else:
-        if touching:
-            touching = False
+        # Check if there was touch input before
+        if touch_input:
+            # There was touch input before, but not any more
+            touch_input = False
 
-    # Draw a line if touching
-    if touching:
+    # Draw a line if there was touch input
+    if touch_input:
         img = cv.line(img, (x0, y0), (x1, y1), (255, 255, 255), 2)
 
     # Display the frame
