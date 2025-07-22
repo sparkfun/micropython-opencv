@@ -26,7 +26,7 @@ from cv2_hardware_init import *
 print("Loading image...")
 img = cv.imread("test_images/sparkfun_logo.png")
 
-# Show the image for 1 second
+# Show the image
 # 
 # Note - If the image is larger or smaller than the display, the behavior will
 # depend on the display driver. For example, the default ST7789 display driver

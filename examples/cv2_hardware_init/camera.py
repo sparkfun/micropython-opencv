@@ -31,9 +31,10 @@ camera = hm01b0_pio.HM01B0_PIO(
 # PIO interface, only available on Raspberry Pi RP2 processors
 # camera = ov5640_pio.OV5640_PIO(
 #     i2c,
+#     sm_id = 5,
 #     pin_d0 = 8,
 #     pin_vsync = 22,
 #     pin_hsync = 21,
 #     pin_pclk = 20,
-#     pin_xclk = None # Optional xclock pin, specify if needed
+#     pin_xclk = 3 # Optional xclock pin, specify if needed
 # )

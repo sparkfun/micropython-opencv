@@ -1,33 +1,13 @@
 from .st7789 import ST7789
 from machine import Pin
 import rp2
-# import time
 
 # Derived from:
 # https://github.com/raspberrypi/pico-examples/tree/master/pio/st7789_lcd
 class ST7789_PIO(ST7789):
     """
-    OpenCV PIO driver for ST7789 displays
-
-    Args:
-        width (int): display width **Required**
-        height (int): display height **Required**
-        sm_id (int): State Machine ID for PIO **Required**
-        pin_clk (Pin): Clock pin number **Required**
-        pin_tx (Pin): Transmit pin number **Required**
-        pin_dc (Pin): Data/Command pin number **Required**
-        pin_cs (Pin): Chip Select pin number
-        freq (int): State machine frequency in Hz, default -1 (system clock)
-        rotation (int): Orientation of display
-          - 0-Portrait, default
-          - 1-Landscape
-          - 2-Inverted Portrait
-          - 3-Inverted Landscape
-        color_order (int):
-          - RGB: Red, Green Blue, default
-          - BGR: Blue, Green, Red
-        reverse_bytes_in_word (bool):
-          - Enable if the display uses LSB byte order for color words
+    OpenCV ST7789 display driver using a PIO interface. Only available on
+    Raspberry Pi RP2 processors.
     """
     def __init__(
         self,
@@ -40,42 +20,72 @@ class ST7789_PIO(ST7789):
         pin_cs=None,
         freq=-1,
         rotation=0,
-        color_order=ST7789.BGR,
+        bgr_order=True,
         reverse_bytes_in_word=True,
     ):
+        """
+        Initializes the ST7789 PIO display driver.
+
+        Args:
+            width (int): Display width in pixels
+            height (int): Display height in pixels
+            sm_id (int): PIO state machine ID
+            pin_clk (int): Clock pin number
+            pin_tx (int): Data pin number
+            pin_dc (int): Data/Command pin number
+            pin_cs (int, optional): Chip Select pin number
+            freq (int, optional): Frequency in Hz for the PIO state machine
+                Default is -1, which uses the default frequency of 125MHz
+            rotation (int, optional): Orientation of display
+              - 0: Portrait (default)
+              - 1: Landscape
+              - 2: Inverted portrait
+              - 3: Inverted landscape
+            bgr_order (bool, optional): Color order
+              - True: BGR (default)
+              - False: RGB
+            reverse_bytes_in_word (bool, optional):
+              - Enable if the display uses LSB byte order for color words
+        """
         # Store PIO arguments
-        self.sm_id = sm_id
-        self.clk = Pin(pin_clk) # Don't change mode/alt
-        self.tx = Pin(pin_tx) # Don't change mode/alt
-        self.dc = Pin(pin_dc) # Don't change mode/alt
-        self.cs = Pin(pin_cs, Pin.OUT, value=1) if pin_cs else None
-        self.freq = freq
+        self._sm_id = sm_id
+        self._clk = Pin(pin_clk) # Don't change mode/alt
+        self._tx = Pin(pin_tx) # Don't change mode/alt
+        self._dc = Pin(pin_dc) # Don't change mode/alt
+        self._cs = Pin(pin_cs, Pin.OUT, value=1) if pin_cs else None
+        self._freq = freq
 
         # Start the PIO state machine and DMA with 1 bytes per transfer
         self._setup_sm_and_dma(1)
 
         # Call the parent class constructor
-        super().__init__(width, height, rotation, color_order, reverse_bytes_in_word)
+        super().__init__(width, height, rotation, bgr_order, reverse_bytes_in_word)
 
         # Change the transfer size to 2 bytes for faster throughput. Can't do 4
         # bytes, because then pairs of pixels get swapped
         self._setup_sm_and_dma(2)
 
     def _setup_sm_and_dma(self, bytes_per_transfer):
+        """
+        Sets up the PIO state machine and DMA for writing to the display.
+
+        Args:
+            bytes_per_transfer (int): Number of bytes to transfer in each write
+        """
         # Store the bytes per transfer for later use
-        self.bytes_per_transfer = bytes_per_transfer
+        self._bytes_per_transfer = bytes_per_transfer
 
         # Get the current mode and alt of the pins so they can be restored
-        txMode, txAlt = self.savePinModeAlt(self.tx)
-        clkMode, clkAlt = self.savePinModeAlt(self.clk)
+        txMode, txAlt = self._save_pin_mode_alt(self._tx)
+        clkMode, clkAlt = self._save_pin_mode_alt(self._clk)
 
         # Initialize the PIO state machine
-        self.sm = rp2.StateMachine(
-            self.sm_id,
+        self._sm = rp2.StateMachine(
+            self._sm_id,
             self._pio_write_spi,
-            freq = self.freq,
-            out_base = self.tx,
-            sideset_base = self.clk,
+            freq = self._freq,
+            out_base = self._tx,
+            sideset_base = self._clk,
             pull_thresh = bytes_per_transfer * 8
         )
 
@@ -83,75 +93,83 @@ class ST7789_PIO(ST7789):
         # We need to save them again to restore later when _write() is called,
         # if we haven't already
         if not hasattr(self, 'txMode'):
-            self.txMode, self.txAlt = self.savePinModeAlt(self.tx)
-            self.clkMode, self.clkAlt = self.savePinModeAlt(self.clk)
+            self._txMode, self._txAlt = self._save_pin_mode_alt(self._tx)
+            self._clkMode, self._clkAlt = self._save_pin_mode_alt(self._clk)
 
         # Now restore the original mode and alt of the pins
-        self.tx.init(mode=txMode, alt=txAlt)
-        self.clk.init(mode=clkMode, alt=clkAlt)
+        self._tx.init(mode=txMode, alt=txAlt)
+        self._clk.init(mode=clkMode, alt=clkAlt)
 
         # Instantiate a DMA controller if not already done
         if not hasattr(self, 'dma'):
-            self.dma = rp2.DMA()
+            self._dma = rp2.DMA()
 
         # Configure up DMA to write to the PIO state machine
-        req_num = ((self.sm_id // 4) << 3) + (self.sm_id % 4)
-        dma_ctrl = self.dma.pack_ctrl(
+        req_num = ((self._sm_id // 4) << 3) + (self._sm_id % 4)
+        dma_ctrl = self._dma.pack_ctrl(
             size = {1:0, 2:1, 4:2}[bytes_per_transfer], # 0 = 8-bit, 1 = 16-bit, 2 = 32-bit
             inc_write = False,
             treq_sel = req_num,
             bswap = False
         )
-        self.dma.config(
-            write = self.sm,
+        self._dma.config(
+            write = self._sm,
             ctrl = dma_ctrl
         )
 
     def _write(self, command=None, data=None):
-        """SPI write to the device: commands and data."""
+        """
+        Writes commands and data to the display.
+
+        Args:
+            command (bytes, optional): Command to send to the display
+            data (bytes, optional): Data to send to the display
+        """
         # Save the current mode and alt of the spi pins in case they're used by
         # another device on the same SPI bus
-        dcMode, dcAlt = self.savePinModeAlt(self.dc)
-        txMode, txAlt = self.savePinModeAlt(self.tx)
-        clkMode, clkAlt = self.savePinModeAlt(self.clk)
+        dcMode, dcAlt = self._save_pin_mode_alt(self._dc)
+        txMode, txAlt = self._save_pin_mode_alt(self._tx)
+        clkMode, clkAlt = self._save_pin_mode_alt(self._clk)
 
         # Temporarily set the SPI pins to the correct mode and alt for PIO
-        self.dc.init(mode=Pin.OUT)
-        self.tx.init(mode=self.txMode, alt=self.txAlt)
-        self.clk.init(mode=self.clkMode, alt=self.clkAlt)
+        self._dc.init(mode=Pin.OUT)
+        self._tx.init(mode=self._txMode, alt=self._txAlt)
+        self._clk.init(mode=self._clkMode, alt=self._clkAlt)
 
         # Write to the display
-        if self.cs:
-            self.cs.off()
+        if self._cs:
+            self._cs.off()
         if command is not None:
-            self.dc.off()
+            self._dc.off()
             self._pio_write(command)
         if data is not None:
-            self.dc.on()
+            self._dc.on()
             self._pio_write(data)
-        if self.cs:
-            self.cs.on()
+        if self._cs:
+            self._cs.on()
 
         # Restore the SPI pins to their original mode and alt
-        self.dc.init(mode=dcMode, alt=dcAlt)
-        self.tx.init(mode=txMode, alt=txAlt)
-        self.clk.init(mode=clkMode, alt=clkAlt)
+        self._dc.init(mode=dcMode, alt=dcAlt)
+        self._tx.init(mode=txMode, alt=txAlt)
+        self._clk.init(mode=clkMode, alt=clkAlt)
 
     def _pio_write(self, data):
-        """Write data to the display using PIO."""
+        """
+        Writes data to the display using the PIO.
+        """
         # Configure the DMA transfer count and read address
         count = len(data) if isinstance(data, (bytes, bytearray)) else data.size
-        self.dma.count = count // self.bytes_per_transfer
-        self.dma.read = data
+        self._dma.count = count // self._bytes_per_transfer
+        self._dma.read = data
         
         # Start the state machine and DMA transfer, and wait for it to finish
-        self.sm.active(1)
-        self.dma.active(True)
-        while self.dma.active():
+        self._sm.active(1)
+        self._dma.active(True)
+        while self._dma.active():
             pass
 
         # Stop the state machine
-        self.sm.active(0)
+        self._sm.active(0)
 
     @rp2.asm_pio(
             out_init = rp2.PIO.OUT_LOW,
@@ -160,5 +178,8 @@ class ST7789_PIO(ST7789):
             autopull = True
         )
     def _pio_write_spi():
+        """
+        PIO program to write data to the display.
+        """
         out(pins, 1).side(0)
         nop().side(1)

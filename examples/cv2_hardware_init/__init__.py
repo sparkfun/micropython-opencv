@@ -11,9 +11,7 @@ except:
 
 # Optional - show a splash image on the display if one is available, or clear
 # the display of any previous content
-if not display.splash():
-    if hasattr(display, 'clear'):
-        display.clear()
+display.splash()
 
 # Import the camera driver
 try:

@@ -71,7 +71,7 @@ logo_contour = np.array(
 
 # This is the pipeline implementation. This gets called for each frame captured
 # by the camera in the main loop
-def my_pipeline(frame):
+def sfe_logo_detection_pipeline(frame):
     # Here we binarize the image. There are many ways to do this, but here we
     # simply convert the image to grayscale and then apply Otsu's thresholding
     # method to create a binary image. This means it will only detect a dark
@@ -167,7 +167,7 @@ while True:
         break
     
     # Call the pipeline function to process the frame
-    my_pipeline(frame)
+    sfe_logo_detection_pipeline(frame)
 
     # All processing is done! Calculate the frame rate and display it
     current_time = time.ticks_us()

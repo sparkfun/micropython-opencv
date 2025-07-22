@@ -1,16 +1,19 @@
 from .dvp_camera import DVP_Camera
 from time import sleep_us
 import cv2
-# from micropython import const
 
-# Derived from:
+# This class is derived from:
 # https://github.com/adafruit/Adafruit_CircuitPython_OV5640
+# Released under the MIT license.
+# Copyright (c) 2021 Jeff Epler for Adafruit Industries
 class OV5640(DVP_Camera):
-
-    OV5640_COLOR_RGB = 0
-    OV5640_COLOR_YUV = 1
-    OV5640_COLOR_GRAYSCALE = 2
-    OV5640_COLOR_JPEG = 3
+    """
+    Base class for OpenCV OV5640 camera drivers.
+    """
+    _OV5640_COLOR_RGB = 0
+    _OV5640_COLOR_YUV = 1
+    _OV5640_COLOR_GRAYSCALE = 2
+    _OV5640_COLOR_JPEG = 3
 
     # fmt: off
 
@@ -301,24 +304,24 @@ class OV5640(DVP_Camera):
     _TIMING_TC_REG21_HMIRROR = 0x06
     # Horizontal mirror enable
 
-    OV5640_SIZE_96X96 = 0  # 96x96
-    OV5640_SIZE_QQVGA = 1  # 160x120
-    OV5640_SIZE_QCIF = 2  # 176x144
-    OV5640_SIZE_HQVGA = 3  # 240x176
-    OV5640_SIZE_240X240 = 4  # 240x240
-    OV5640_SIZE_QVGA = 5  # 320x240
-    OV5640_SIZE_CIF = 6  # 400x296
-    OV5640_SIZE_HVGA = 7  # 480x320
-    OV5640_SIZE_VGA = 8  # 640x480
-    OV5640_SIZE_SVGA = 9  # 800x600
-    OV5640_SIZE_XGA = 10  # 1024x768
-    OV5640_SIZE_HD = 11  # 1280x720
-    OV5640_SIZE_SXGA = 12  # 1280x1024
-    OV5640_SIZE_UXGA = 13  # 1600x1200
-    OV5640_SIZE_QHDA = 14  # 2560x1440
-    OV5640_SIZE_WQXGA = 15  # 2560x1600
-    OV5640_SIZE_PFHD = 16  # 1088x1920
-    OV5640_SIZE_QSXGA = 17  # 2560x1920
+    _OV5640_SIZE_96X96 = 0  # 96x96
+    _OV5640_SIZE_QQVGA = 1  # 160x120
+    _OV5640_SIZE_QCIF = 2  # 176x144
+    _OV5640_SIZE_HQVGA = 3  # 240x176
+    _OV5640_SIZE_240X240 = 4  # 240x240
+    _OV5640_SIZE_QVGA = 5  # 320x240
+    _OV5640_SIZE_CIF = 6  # 400x296
+    _OV5640_SIZE_HVGA = 7  # 480x320
+    _OV5640_SIZE_VGA = 8  # 640x480
+    _OV5640_SIZE_SVGA = 9  # 800x600
+    _OV5640_SIZE_XGA = 10  # 1024x768
+    _OV5640_SIZE_HD = 11  # 1280x720
+    _OV5640_SIZE_SXGA = 12  # 1280x1024
+    _OV5640_SIZE_UXGA = 13  # 1600x1200
+    _OV5640_SIZE_QHDA = 14  # 2560x1440
+    _OV5640_SIZE_WQXGA = 15  # 2560x1600
+    _OV5640_SIZE_PFHD = 16  # 1088x1920
+    _OV5640_SIZE_QSXGA = 17  # 2560x1920
 
     _ASPECT_RATIO_4X3 = 0
     _ASPECT_RATIO_3X2 = 1
@@ -725,10 +728,10 @@ class OV5640(DVP_Camera):
     ]
 
     _ov5640_color_settings = {
-        OV5640_COLOR_RGB: _sensor_format_rgb565,
-        OV5640_COLOR_YUV: _sensor_format_yuv422,
-        OV5640_COLOR_GRAYSCALE: _sensor_format_grayscale,
-        OV5640_COLOR_JPEG: _sensor_format_jpeg,
+        _OV5640_COLOR_RGB: _sensor_format_rgb565,
+        _OV5640_COLOR_YUV: _sensor_format_yuv422,
+        _OV5640_COLOR_GRAYSCALE: _sensor_format_grayscale,
+        _OV5640_COLOR_JPEG: _sensor_format_jpeg,
     }
 
     _contrast_settings = [
@@ -763,11 +766,11 @@ class OV5640(DVP_Camera):
         [0x30, 0x28, 0x61, 0x30, 0x28, 0x10], # -1
     ]
 
-    OV5640_WHITE_BALANCE_AUTO = 0
-    OV5640_WHITE_BALANCE_SUNNY = 1
-    OV5640_WHITE_BALANCE_FLUORESCENT = 2
-    OV5640_WHITE_BALANCE_CLOUDY = 3
-    OV5640_WHITE_BALANCE_INCANDESCENT = 4
+    _OV5640_WHITE_BALANCE_AUTO = 0
+    _OV5640_WHITE_BALANCE_SUNNY = 1
+    _OV5640_WHITE_BALANCE_FLUORESCENT = 2
+    _OV5640_WHITE_BALANCE_CLOUDY = 3
+    _OV5640_WHITE_BALANCE_INCANDESCENT = 4
 
     _light_registers = [0x3406, 0x3400, 0x3401, 0x3402, 0x3403, 0x3404, 0x3405]
     _light_modes = [
@@ -779,13 +782,13 @@ class OV5640(DVP_Camera):
 
     ]
 
-    OV5640_SPECIAL_EFFECT_NONE = 0
-    OV5640_SPECIAL_EFFECT_NEGATIVE = 1
-    OV5640_SPECIAL_EFFECT_GRAYSCALE = 2
-    OV5640_SPECIAL_EFFECT_RED_TINT = 3
-    OV5640_SPECIAL_EFFECT_GREEN_TINT = 4
-    OV5640_SPECIAL_EFFECT_BLUE_TINT = 5
-    OV5640_SPECIAL_EFFECT_SEPIA = 6
+    _OV5640_SPECIAL_EFFECT_NONE = 0
+    _OV5640_SPECIAL_EFFECT_NEGATIVE = 1
+    _OV5640_SPECIAL_EFFECT_GRAYSCALE = 2
+    _OV5640_SPECIAL_EFFECT_RED_TINT = 3
+    _OV5640_SPECIAL_EFFECT_GREEN_TINT = 4
+    _OV5640_SPECIAL_EFFECT_BLUE_TINT = 5
+    _OV5640_SPECIAL_EFFECT_SEPIA = 6
 
     _sensor_special_effects = [
         [0x06, 0x40, 0x10, 0x08],  # Normal
@@ -817,7 +820,7 @@ class OV5640(DVP_Camera):
         0x5490, 0x1D,
     ]
 
-    sensor_regs_gamma1 = [
+    _sensor_regs_gamma1 = [
         0x5480, 0x1,
         0x5481, 0x0,
         0x5482, 0x1E,
@@ -837,7 +840,7 @@ class OV5640(DVP_Camera):
         0x5490, 0x1D,
     ]
 
-    sensor_regs_awb0 = [
+    _sensor_regs_awb0 = [
         0x5180, 0xFF,
         0x5181, 0xF2,
         0x5182, 0x00,
@@ -877,16 +880,23 @@ class OV5640(DVP_Camera):
         i2c,
         i2c_address = 0x3C
     ):
+        """
+        Initializes the OV5640 camera sensor with default settings.
+
+        Args:
+            i2c (I2C): I2C object for communication
+            i2c_address (int, optional): I2C address (default: 0x3C)
+        """
         super().__init__(i2c, i2c_address)
 
-        self.write_list(self._sensor_default_regs)
+        self._write_list(self._sensor_default_regs)
 
-        self._colorspace = self.OV5640_COLOR_RGB
+        self._colorspace = self._OV5640_COLOR_RGB
         self._flip_x = False
         self._flip_y = False
         self._w = None
         self._h = None
-        self._size = self.OV5640_SIZE_QVGA
+        self._size = self._OV5640_SIZE_QVGA
         self._test_pattern = False
         self._binning = False
         self._scale = False
@@ -895,11 +905,18 @@ class OV5640(DVP_Camera):
 
         self._set_size_and_colorspace()
     
-    def is_connected(self):
+    def _is_connected(self):
+        """
+        Checks if the camera is connected by reading the chip ID.
+
+        Returns:
+            bool: True if the camera is connected and the chip ID is correct,
+                  otherwise False.
+        """
         try:
             # Try to read the chip ID
             # If it throws an I/O error - the device isn't connected
-            id = self.getChipID()
+            id = self._get_chip_id()
             
             # Confirm the chip ID is correct
             if id == 0x5640:
@@ -909,39 +926,26 @@ class OV5640(DVP_Camera):
         except:
             return False
 
-    def getChipID(self):
+    def _get_chip_id(self):
         """
-        Reads the chip ID from the HM01B0 sensor.
+        Reads the chip ID.
+
         Returns:
-            int: The chip ID as a 16-bit integer.
+            int: The chip ID of the OV5640 (should be 0x5640).
         """
-        data = self.readRegister(self._CHIP_ID_HIGH, 2)
+        data = self._read_register(self._CHIP_ID_HIGH, 2)
         return (data[0] << 8) | data[1]
 
-    def soft_reset(self):
+    def _soft_reset(self):
         """
-        Performs a software reset of the HM01B0 sensor.
+        Performs a software reset of the OV5640 sensor.
         This resets the sensor to its default state.
         """
-        self.writeRegister(self._SYSTEM_CTROL0, 0x82)
+        self._write_register(self._SYSTEM_CTROL0, 0x82)
 
-    # def setMode(self, mode):
-    #     """
-    #     Sets the operating mode of the HM01B0 sensor.
-    #     Args:
-    #         mode (int): The mode to set, e.g., MODE_STREAMING.
-    #     """
-    #     self.writeRegister(self.MODE_SELECT, mode)
-
-    # def trigger(self):
-    #     self.writeRegister(self.MODE_SELECT, self.HIMAX_MODE_STREAMING_NFRAMES)
-
-    # def set_n_frames(self, n_frames):
-    #     self.writeRegister(self.PMU_AUTOSLEEP_FRAMECNT, n_frames)
-
-    def write_list(self, data):
+    def _write_list(self, data):
         """
-        Initializes the HM01B0 sensor with default settings.
+        Initializes the OV5640 sensor with default settings.
         This includes setting up exposure, gain, and frame timing.
         """
         for i in range(len(data) // 2):
@@ -950,10 +954,13 @@ class OV5640(DVP_Camera):
             if reg == self._REG_DLY:
                 sleep_us(value)
             else:
-                self.writeRegister(reg, value)
+                self._write_register(reg, value)
                 sleep_us(1000)
  
     def _set_size_and_colorspace(self) -> None:
+        """
+        Sets the camera resolution and colorspace based on the current size.
+        """
         size = self._size
         width, height, ratio = self._resolution_info[size]
         self._w = width
@@ -995,11 +1002,11 @@ class OV5640(DVP_Camera):
 
         self._set_image_options()
 
-        if self._colorspace == self.OV5640_COLOR_JPEG:
+        if self._colorspace == self._OV5640_COLOR_JPEG:
             sys_mul = 200
-            if size < self.OV5640_SIZE_QVGA:
+            if size < self._OV5640_SIZE_QVGA:
                 sys_mul = 160
-            if size < self.OV5640_SIZE_XGA:
+            if size < self._OV5640_SIZE_XGA:
                 sys_mul = 180
             self._set_pll(False, sys_mul, 4, 2, False, 2, True, 4)
         else:
@@ -1018,6 +1025,9 @@ class OV5640(DVP_Camera):
         pclk_manual: bool,
         pclk_div: int,
     ) -> None:
+        """
+        Sets the PLL (Phase-Locked Loop) configuration for the OV5640 camera.
+        """
         if (
             multiplier > 252
             or multiplier < 4
@@ -1028,25 +1038,32 @@ class OV5640(DVP_Camera):
         ):
             raise ValueError("Invalid argument to internal function")
 
-        self.writeRegister(0x3039, 0x80 if bypass else 0)
-        self.writeRegister(0x3034, 0x1A)
-        self.writeRegister(0x3035, 1 | ((sys_div & 0xF) << 4))
-        self.writeRegister(0x3036, multiplier & 0xFF)
-        self.writeRegister(0x3037, (pre_div & 0xF) | (0x10 if root_2x else 0))
-        self.writeRegister(0x3108, (pclk_root_div & 3) << 4 | 0x06)
-        self.writeRegister(0x3824, pclk_div & 0x1F)
-        self.writeRegister(0x460C, 0x22 if pclk_manual else 0x22)
-        self.writeRegister(0x3103, 0x13)
+        self._write_register(0x3039, 0x80 if bypass else 0)
+        self._write_register(0x3034, 0x1A)
+        self._write_register(0x3035, 1 | ((sys_div & 0xF) << 4))
+        self._write_register(0x3036, multiplier & 0xFF)
+        self._write_register(0x3037, (pre_div & 0xF) | (0x10 if root_2x else 0))
+        self._write_register(0x3108, (pclk_root_div & 3) << 4 | 0x06)
+        self._write_register(0x3824, pclk_div & 0x1F)
+        self._write_register(0x460C, 0x22 if pclk_manual else 0x22)
+        self._write_register(0x3103, 0x13)
 
     def _set_colorspace(self) -> None:
+        """
+        Sets the colorspace of the OV5640 camera based on the current colorspace
+        setting.
+        """
         colorspace = self._colorspace
         settings = self._ov5640_color_settings[colorspace]
 
-        self.write_list(settings)
+        self._write_list(settings)
 
     def _set_image_options(self) -> None:
+        """
+        Sets the image options such as binning, flipping, and colorspace.
+        """
         reg20 = reg21 = reg4514 = reg4514_test = 0
-        if self._colorspace == self.OV5640_COLOR_JPEG:
+        if self._colorspace == self._OV5640_COLOR_JPEG:
             reg21 |= 0x20
 
         if self._binning:
@@ -1081,21 +1098,24 @@ class OV5640(DVP_Camera):
         elif reg4514_test == 7:
             reg4514 = 0xAA
 
-        self.writeRegister(self._TIMING_TC_REG20, reg20)
-        self.writeRegister(self._TIMING_TC_REG21, reg21)
-        self.writeRegister(0x4514, reg4514)
+        self._write_register(self._TIMING_TC_REG20, reg20)
+        self._write_register(self._TIMING_TC_REG21, reg21)
+        self._write_register(0x4514, reg4514)
 
         if self._binning:
-            self.writeRegister(0x4520, 0x0B)
-            self.writeRegister(self._X_INCREMENT, 0x31)
-            self.writeRegister(self._Y_INCREMENT, 0x31)
+            self._write_register(0x4520, 0x0B)
+            self._write_register(self._X_INCREMENT, 0x31)
+            self._write_register(self._Y_INCREMENT, 0x31)
         else:
-            self.writeRegister(0x4520, 0x10)
-            self.writeRegister(self._X_INCREMENT, 0x11)
-            self.writeRegister(self._Y_INCREMENT, 0x11)
+            self._write_register(0x4520, 0x10)
+            self._write_register(self._X_INCREMENT, 0x11)
+            self._write_register(self._Y_INCREMENT, 0x11)
 
     def _write_addr_reg(self, reg: int, x_value: int, y_value: int) -> None:
-        self.writeRegister(reg, [
+        """
+        Writes 2 16-bit values to 4 8-bit registers.
+        """
+        self._write_register(reg, [
             (x_value >> 8) & 0xFF,
             x_value & 0xFF,
             (y_value >> 8) & 0xFF,
@@ -1103,24 +1123,33 @@ class OV5640(DVP_Camera):
         ])
 
     def _write_reg_bits(self, reg: int, mask: int, enable: bool) -> None:
-        val = self.readRegister(reg)[0]
+        """
+        Writes a bitmask to a register, enabling or disabling specific bits.
+        """
+        val = self._read_register(reg)[0]
         if enable:
             val |= mask
         else:
             val &= ~mask
-        self.writeRegister(reg, val)
+        self._write_register(reg, val)
 
     def read(self, image = None):
         """
-        Reads a frame from the camera.
+        Reads an image from the camera.
+
+        Args:
+            image (ndarray, optional): Image to read into
+
         Returns:
-            tuple: (success, frame)
+            tuple: (success, image)
+                - success (bool): True if the image was read, otherwise False
+                - image (ndarray): The captured image, or None if reading failed
         """
-        if self._colorspace == self.OV5640_COLOR_RGB:
-            return (True, cv2.cvtColor(self.buffer, cv2.COLOR_BGR5652BGR, image))
-        elif self._colorspace == self.OV5640_COLOR_GRAYSCALE:
-            return (True, cv2.cvtColor(self.buffer, cv2.COLOR_GRAY2BGR, image))
+        if self._colorspace == self._OV5640_COLOR_RGB:
+            return (True, cv2.cvtColor(self._buffer, cv2.COLOR_BGR5652BGR, image))
+        elif self._colorspace == self._OV5640_COLOR_GRAYSCALE:
+            return (True, cv2.cvtColor(self._buffer, cv2.COLOR_GRAY2BGR, image))
         else:
             NotImplementedError(
-                f"OV5640:Reading images in colorspace {self._colorspace} is not yet implemented."
+                f"OV5640: Reading images in colorspace {self._colorspace} is not yet implemented."
             )

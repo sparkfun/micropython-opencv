@@ -2,27 +2,17 @@ from .cv2_display import CV2_Display
 from time import sleep_ms
 import struct
 
-# Derived from:
+# This class is derived from:
 # https://github.com/easytarget/st7789-framebuffer/blob/main/st7789_purefb.py
+# Released under the MIT license.
+# Copyright (c) 2024 Owen Carter
+# Copyright (c) 2024 Ethan Lacasse
+# Copyright (c) 2020-2023 Russ Hughes
+# Copyright (c) 2019 Ivan Belokobylskiy
 class ST7789(CV2_Display):
     """
-    OpenCV driver for ST7789 displays
-
-    Args:
-        width (int): display width **Required**
-        height (int): display height **Required**
-        rotation (int): Orientation of display
-          - 0-Portrait, default
-          - 1-Landscape
-          - 2-Inverted Portrait
-          - 3-Inverted Landscape
-        color_order (int):
-          - RGB: Red, Green Blue, default
-          - BGR: Blue, Green, Red
-        reverse_bytes_in_word (bool):
-          - Enable if the display uses LSB byte order for color words
+    Base class for OpenCV ST7789 display drivers.
     """
-
     # ST7789 commands
     _ST7789_SWRESET = b"\x01"
     _ST7789_SLPIN = b"\x10"
@@ -49,19 +39,6 @@ class ST7789(CV2_Display):
     _ST7789_MADCTL_BGR = 0x08
     _ST7789_MADCTL_MH = 0x04
     _ST7789_MADCTL_RGB = 0x00
-
-    RGB = 0x00
-    BGR = 0x08
-
-    # 8 basic color definitions
-    BLACK = 0x0000
-    BLUE = 0x001F
-    RED = 0xF800
-    GREEN = 0x07E0
-    CYAN = 0x07FF
-    MAGENTA = 0xF81F
-    YELLOW = 0xFFE0
-    WHITE = 0xFFFF
 
     _ENCODE_POS = ">HH"
 
@@ -134,123 +111,151 @@ class ST7789(CV2_Display):
         width,
         height,
         rotation=0,
-        color_order=BGR,
+        bgr_order=True,
         reverse_bytes_in_word=True,
     ):
+        """
+        Initializes the ST7789 display driver.
+
+        Args:
+            width (int): Display width in pixels
+            height (int): Display height in pixels
+            rotation (int, optional): Orientation of display
+              - 0: Portrait (default)
+              - 1: Landscape
+              - 2: Inverted portrait
+              - 3: Inverted landscape
+            bgr_order (bool, optional): Color order
+              - True: BGR (default)
+              - False: RGB
+            reverse_bytes_in_word (bool, optional):
+              - Enable if the display uses LSB byte order for color words
+        """
         # Initial dimensions and offsets; will be overridden when rotation applied
-        self.width = width
-        self.height = height
-        self.xstart = 0
-        self.ystart = 0
+        self._width = width
+        self._height = height
+        self._xstart = 0
+        self._ystart = 0
         # Check display is known and get rotation table
-        self.rotations = self._find_rotations(width, height)
-        if not self.rotations:
+        self._rotations = self._find_rotations(width, height)
+        if not self._rotations:
             supported_displays = ", ".join(
                 [f"{display[0]}x{display[1]}" for display in self._SUPPORTED_DISPLAYS])
             raise ValueError(
                 f"Unsupported {width}x{height} display. Supported displays: {supported_displays}")
         # Colors
-        self.color_order = color_order
-        self.needs_swap = reverse_bytes_in_word
+        self._bgr_order = bgr_order
+        self._needs_swap = reverse_bytes_in_word
         # Reset the display
-        self.soft_reset()
+        self._soft_reset()
         # Yes, send init twice, once is not always enough
-        self.send_init(self._ST7789_INIT_CMDS)
-        self.send_init(self._ST7789_INIT_CMDS)
+        self._send_init(self._ST7789_INIT_CMDS)
+        self._send_init(self._ST7789_INIT_CMDS)
         # Initial rotation
         self._rotation = rotation % 4
         # Apply rotation
-        self.rotation(self._rotation)
+        self._set_rotation(self._rotation)
         # Create the framebuffer for the correct rotation
-        super().__init__((self.height, self.width, 2))
+        super().__init__((self._height, self._width, 2))
 
-    def send_init(self, commands):
+    def _send_init(self, commands):
         """
-        Send initialisation commands to display.
+        Sends initialization commands to display.
+
+        Args:
+            commands (list): List of tuples (command, data, delay_ms)
         """
-        for command, data, delay in commands:
+        for command, data, delay_ms in commands:
             self._write(command, data)
-            sleep_ms(delay)
+            sleep_ms(delay_ms)
 
-    def soft_reset(self):
+    def _soft_reset(self):
         """
-        Soft reset display.
+        Sends a software reset command to the display.
         """
         self._write(self._ST7789_SWRESET)
         sleep_ms(150)
 
     def _find_rotations(self, width, height):
-        """ Find the correct rotation for our display or return None """
+        """
+        Find the correct rotation for our display or returns None.
+
+        Args:
+            width (int): Display width in pixels
+            height (int): Display height in pixels
+        Returns:
+            list: Rotation table for the display or None if not found
+        """
         for display in self._SUPPORTED_DISPLAYS:
             if display[0] == width and display[1] == height:
                 return display[2]
         return None
 
-    def rotation(self, rotation):
+    def _set_rotation(self, rotation):
         """
-        Set display rotation.
+        Sets display rotation.
 
         Args:
             rotation (int):
-                - 0-Portrait
-                - 1-Landscape
-                - 2-Inverted Portrait
-                - 3-Inverted Landscape
+                - 0: Portrait
+                - 1: Landscape
+                - 2: Inverted portrait
+                - 3: Inverted landscape
         """
-        if ((rotation % 2) != (self._rotation % 2)) and (self.width != self.height):
+        if ((rotation % 2) != (self._rotation % 2)) and (self._width != self._height):
             # non-square displays can currently only be rotated by 180 degrees
             # TODO: can framebuffer of super class be destroyed and re-created
             #       to match the new dimensions? or it's width/height changed?
             return
 
         # find rotation parameters and send command
-        rotation %= len(self.rotations)
+        rotation %= len(self._rotations)
         (   madctl,
-            self.width,
-            self.height,
-            self.xstart,
-            self.ystart, ) = self.rotations[rotation]
-        if self.color_order == self.BGR:
+            self._width,
+            self._height,
+            self._xstart,
+            self._ystart, ) = self._rotations[rotation]
+        if self._bgr_order:
             madctl |= self._ST7789_MADCTL_BGR
         else:
             madctl &= ~self._ST7789_MADCTL_BGR
         self._write(self._ST7789_MADCTL, bytes([madctl]))
         # Set window for writing into
         self._write(self._ST7789_CASET,
-            struct.pack(self._ENCODE_POS, self.xstart, self.width + self.xstart - 1))
+            struct.pack(self._ENCODE_POS, self._xstart, self._width + self._xstart - 1))
         self._write(self._ST7789_RASET,
-            struct.pack(self._ENCODE_POS, self.ystart, self.height + self.ystart - 1))
+            struct.pack(self._ENCODE_POS, self._ystart, self._height + self._ystart - 1))
         self._write(self._ST7789_RAMWR)
         # TODO: Can we swap (modify) framebuffer width/height in the super() class?
         self._rotation = rotation
 
     def imshow(self, image):
         """
-        Display a NumPy image on the screen.
+        Shows a NumPy image on the display.
 
         Args:
-            image (ndarray): Image to display
+            image (ndarray): Image to show
         """
         # Get the common ROI between the image and internal display buffer
         image_roi, buffer_roi = self._get_common_roi_with_buffer(image)
 
         # Ensure the image is in uint8 format
-        image_roi = self._convert_image_to_uint8(image_roi)
+        image_roi = self._convert_to_uint8(image_roi)
 
         # Convert the image to BGR565 format and write it to the buffer
-        self._write_image_to_buffer_bgr565(image_roi, buffer_roi)
+        self._convert_to_bgr565(image_roi, buffer_roi)
 
         # Write buffer to display. Swap bytes if needed
-        if self.needs_swap:
-            self._write(None, self.buffer[:, :, ::-1])
+        if self._needs_swap:
+            self._write(None, self._buffer[:, :, ::-1])
         else:
-            self._write(None, self.buffer)
+            self._write(None, self._buffer)
 
     def clear(self):
         """
-        Clear the display by filling it with black color.
+        Clears the display by filling it with black color.
         """
         # Clear the buffer by filling it with zeros (black)
-        self.buffer[:] = 0
+        self._buffer[:] = 0
         # Write the buffer to the display
-        self._write(None, self.buffer)
+        self._write(None, self._buffer)

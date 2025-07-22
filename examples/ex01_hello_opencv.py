@@ -75,3 +75,9 @@ key = cv.waitKey(0) # Not necessary to display image, can remove if desired
 
 # Print the key pressed
 print("Key pressed:", chr(key))
+
+# Normally at the end of OpenCV scripts, you would call `cv.destroyAllWindows()`
+# to close all OpenCV windows. That function doesn't exist in the MicroPython
+# port of OpenCV, but you can instead call `display.clear()` to set the display
+# to a blank state, or `display.splash()` to show the splash screen
+display.clear() # Can instead call `display.splash()` with optional filename
