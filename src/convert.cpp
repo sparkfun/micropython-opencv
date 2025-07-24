@@ -1,3 +1,16 @@
+/*
+ *------------------------------------------------------------------------------
+ * SPDX-License-Identifier: MIT
+ * 
+ * Copyright (c) 2025 SparkFun Electronics
+ *------------------------------------------------------------------------------
+ * convert.cpp
+ * 
+ * Helper functions to convert between various data types from MicroPython, ulab
+ * NumPy, and OpenCV
+ *------------------------------------------------------------------------------
+ */
+
 // C++ headers
 #include "convert.h"
 #include "numpy.h"

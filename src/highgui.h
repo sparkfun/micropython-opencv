@@ -1,3 +1,15 @@
+/*
+ *------------------------------------------------------------------------------
+ * SPDX-License-Identifier: MIT
+ * 
+ * Copyright (c) 2025 SparkFun Electronics
+ *------------------------------------------------------------------------------
+ * highgui.h
+ * 
+ * MicroPython wrappers for functions from the OpenCV highgui module.
+ *------------------------------------------------------------------------------
+ */
+
 // C headers
 #include "py/runtime.h"
 

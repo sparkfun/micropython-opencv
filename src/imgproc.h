@@ -1,3 +1,15 @@
+/*
+ *------------------------------------------------------------------------------
+ * SPDX-License-Identifier: MIT
+ * 
+ * Copyright (c) 2025 SparkFun Electronics
+ *------------------------------------------------------------------------------
+ * imgproc.h
+ * 
+ * MicroPython wrappers for functions from the OpenCV imgproc module.
+ *------------------------------------------------------------------------------
+ */
+
 // C headers
 #include "py/runtime.h"
 

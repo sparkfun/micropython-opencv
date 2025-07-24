@@ -1,3 +1,13 @@
+#-------------------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+# 
+# Copyright (c) 2025 SparkFun Electronics
+#-------------------------------------------------------------------------------
+# opencv_upy.cmake
+# 
+# CMake file for the MicroPython port of OpenCV.
+#-------------------------------------------------------------------------------
+
 # Create an INTERFACE library for our CPP module.
 add_library(usermod_cv2 INTERFACE)
 
