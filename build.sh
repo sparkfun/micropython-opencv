@@ -7,8 +7,8 @@ fi
 # TODO: Could also make these opts into the build_micropython_opencv function if we care...
 FROZEN_MODULES_DIR="$(dirname "$0")/frozen_modules"
 FROZEN_EXAMPLES_ARCHIVE_SCRIPT="frozen_examples.py"
-FROZEN_EXAMPLES_UNPACKED_DIR="micropython-opencv-examples"
-PERSISTENT_FILE_FOR_UNPACK="/keep_opencv_example_changes"
+FROZEN_EXAMPLES_UNPACKED_DIR="opencv-examples"
+PERSISTENT_FILE_FOR_UNPACK="/${FROZEN_EXAMPLES_UNPACKED_DIR}/reset_examples.txt"
 
 # Uses freezefs to create a frozen filesystem archive for the provided directory.
 # See https://github.com/bixb922/freezefs for more details on freezefs
