@@ -39,11 +39,11 @@ try:
     vfs = uos.VfsFat(sd_card)
     uos.mount(vfs, "/sd")
 except ImportError:
-    print("sdcard module not found, skipping SD card initialization...")
+    print("`sdcard` module not found, skipping SD card initialization...")
 except OSError as e:
     eStr = str(e)
     if "no SD card" in eStr:
-        print("no SD card found, skipping SD card initialization...")
+        print("No SD card found, skipping SD card initialization...")
     elif "Errno 1" in eStr:
         print("SD card already mounted, skipping SD card initialization...")
     else:
