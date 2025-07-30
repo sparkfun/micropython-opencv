@@ -14,7 +14,13 @@
 # year, but this example assumes there is an orange ring in front of the robot
 # that needs to be grabbed. This example demonstrates how to detect the ring,
 # calculate its distance and position relative to the robot in real-world units,
-# then drive the robot to grab it.
+# then drive the robot to grab it. This requires the servo arm to be mounted to
+# the front of the chassis right next to the camera, so it can reach through the
+# ring to grab it.
+# 
+# The ring used in this example is from the 2020-2021 FIRST Tech Challenge game
+# Ultimate Goal, and can be purchased here:
+# https://andymark.com/products/5-in-foam-ring
 #-------------------------------------------------------------------------------
 
 # Import XRPLib defaults
@@ -31,9 +37,9 @@ import time
 import math
 
 # This is the pipeline implementation that attempts to find an orange ring in
-# an image, and returns the real-world distance to the object and its left/right
+# an image, and returns the real-world distance to the ring and its left/right
 # position relative to the center of the image in centimeters
-def my_pipeline(frame):
+def find_orange_ring_pipeline(frame):
     # Convert the frame to HSV color space, which is often more effective for
     # color-based segmentation tasks than RGB or BGR color spaces
     hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
@@ -49,7 +55,7 @@ def my_pipeline(frame):
     # Value: Anything above 30 is bright enough
     lower_bound = (15, 50, 30)
     upper_bound = (25, 255, 255)
-    inRange = cv.inRange(hsv, lower_bound, upper_bound)
+    in_range = cv.inRange(hsv, lower_bound, upper_bound)
 
     # Noise in the image often causes `cv.inRange()` to return false positives
     # and false negatives, meaning there are some incorrect pixels in the binary
@@ -57,12 +63,12 @@ def my_pipeline(frame):
     # effectively grow and shrink regions in the binary image to remove tiny
     # blobs of noise
     kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    morphOpen = cv.morphologyEx(inRange, cv.MORPH_OPEN, kernel)
-    morphClose = cv.morphologyEx(morphOpen, cv.MORPH_CLOSE, kernel)
+    morph_open = cv.morphologyEx(in_range, cv.MORPH_OPEN, kernel)
+    morph_close = cv.morphologyEx(morph_open, cv.MORPH_CLOSE, kernel)
 
     # Now we use `cv.findContours()` to find the contours in the binary image,
     # which are the boundaries of the regions in the binary image
-    contours, hierarchy = cv.findContours(morphClose, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(morph_close, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
     # It's possible that no contours were found, so first check if any were
     # found before proceeding
@@ -85,15 +91,15 @@ def my_pipeline(frame):
     
     # If no contour was found, return invalid values to indicate that
     if best_contour is None:
-        return (-1, -1)
+        return -1, -1
 
     # Calculate the bounding rectangle of the contour, and use that to calculate
-    # the center coordinates of the object
+    # the center coordinates of the ring
     left, top, width, height = cv.boundingRect(best_contour)
     center_x = left + width // 2
     center_y = top + height // 2
 
-    # Now we can calculate the real-world distance to the object based on its
+    # Now we can calculate the real-world distance to the ring based on its
     # size. We'll first estimate the diameter of the ring in pixels by taking
     # the maximum of the width and height of the bounding rectangle. This
     # compensates for the fact that the ring may be tilted
@@ -103,16 +109,21 @@ def my_pipeline(frame):
     # 
     # distance_cm = diameter_cm * focal_length_px / diameter_px
     # 
-    # However almost every camera lens has some distortion, so there are
-    # corrections needed to account for that. This example has been tested with
-    # the HM01B0, and the calculation below gives a decent estimate of the
-    # distance in centimeters
-    focal_length_px = 180
+    # Almost every camera lens has some distortion, so this may not be perfect,
+    # but testing with the HM01B0 has shown it to be good enough. Note that this
+    # distance is measured from the camera lens
+    # 
+    # The focal length depends on the exact camera being used. This example
+    # assumes the HM01B0 camera board sold by SparkFun, which has an effective
+    # focal length (EFL) of 0.66mm, and a pixel size of 3.6um. We can calculate
+    # the focal length in pixels from these, which were found in the datasheet:
+    # https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/5458/HM01B0-ANA-00FT870.pdf
+    focal_length_px = 660 / 3.6
     diameter_cm = 12.7
-    distance_cm = diameter_cm * focal_length_px / diameter_px - 10
+    distance_cm = diameter_cm * focal_length_px / diameter_px
 
     # Now with our distance estimate, we can calculate how far left or right the
-    # object is from the center in the same real-world units. Assuming a perfect
+    # ring is from the center in the same real-world units. Assuming a perfect
     # lens, the position can be calculated as:
     #
     # position_x_cm = distance_cm * position_x_px / focal_length_px
@@ -128,12 +139,17 @@ def my_pipeline(frame):
     frame = cv.putText(frame, f"D={distance_cm:.1f}cm", (left, top - 25), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
     frame = cv.putText(frame, f"X={position_x_cm:.1f}cm", (left, top - 40), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
-    # Now we can return the distance and position of the object in cm, since
+    # Now we can return the distance and position of the ring in cm, since
     # that's the only data we need from this pipeline
-    return (distance_cm, position_x_cm)
+    return distance_cm, position_x_cm
 
 # Move the servo out of the way of the camera
 servo_one.set_angle(90)
+
+# Wait for user button to be pressed to start the example
+print("Press the user button to start the example")
+while not board.is_button_pressed():
+    pass
 
 # Open the camera and wait a moment for at least one frame to be captured
 camera.open()
@@ -142,16 +158,16 @@ time.sleep(0.1)
 # Prompt the user to press a key to continue
 print("Detecting ring...")
 
-# Loop until the object is found or the user presses a key
+# Loop until the ring is found or the user presses a key
 while True:
     # Read a frame from the camera
     success, frame = camera.read()
-    if success == False:
+    if not success:
         print("Error reading frame from camera")
         break
 
-    # Call the pipeline function to find the object
-    distance_cm, position_x_cm = my_pipeline(frame)
+    # Call the pipeline function to find the ring
+    distance_cm, position_x_cm = find_orange_ring_pipeline(frame)
 
     # Display the frame
     cv.imshow(display, frame)
@@ -167,27 +183,30 @@ while True:
     if key != -1:
         break
 
-# Print the distance and position of the object
-print(f"Found object at distance {distance_cm:.1f} cm, position {position_x_cm:.1f} cm from center")
+# Print the distance and position of the ring
+print(f"Found ring at distance {distance_cm:.1f} cm, X position {position_x_cm:.1f} cm from center")
 
 # Release the camera, we're done with it
 camera.release()
 
-# Move the servo to pick up the object
+# Wait for user button to be pressed to continue
+print("Press the user button to continue")
+while not board.is_button_pressed():
+    pass
+
+# Move the servo to go through the center of the ring
 servo_one.set_angle(45)
 
-# Turn to face the object. We first calculate the angle to turn based on the
-# position of the object
+# Turn to face the ring. We first calculate the angle to turn based on the
+# position of the ring
 angle = -math.atan2(position_x_cm, distance_cm) * 180 / math.pi
 drivetrain.turn(angle)
 
-# Drive forwards to the object. Drive a bit further than the distance to the
-# object to ensure the arm goes through the ring
-distance_cm += 10
+# Drive forwards to put the arm through the ring
 drivetrain.straight(distance_cm)
 
 # Rotate the servo to pick up the ring
 servo_one.set_angle(90)
 
-# Drive backwards to pull the ring off the rung
+# Drive backwards to grab the ring
 drivetrain.straight(-10)

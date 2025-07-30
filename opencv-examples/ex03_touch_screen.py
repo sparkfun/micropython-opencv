@@ -52,7 +52,7 @@ while True:
     else:
         # Check if there was touch input before
         if touch_input:
-            # There was touch input before, but not any more
+            # There was touch input before, but not anymore
             touch_input = False
 
     # Draw a line if there was touch input

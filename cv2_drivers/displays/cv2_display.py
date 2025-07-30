@@ -1,15 +1,49 @@
+#-------------------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+# 
+# Copyright (c) 2025 SparkFun Electronics
+#-------------------------------------------------------------------------------
+# cv2_display.py
+# 
+# Base class for OpenCV display drivers.
+#-------------------------------------------------------------------------------
+
 import cv2
 from ulab import numpy as np
 from machine import Pin
 
 class CV2_Display():
-    def __init__(self, buffer_size):
+    """
+    Base class for OpenCV display drivers.
+    """
+    def __init__(self, buffer_shape):
+        """
+        Initializes the display.
+
+        Args:
+            buffer_shape (tuple): Shape of the buffer as (rows, cols, channels)
+        """
         # Create the frame buffer
-        self.buffer = np.zeros(buffer_size, dtype=np.uint8)
+        self._buffer = np.zeros(buffer_shape, dtype=np.uint8)
+
+    def imshow(self, image):
+        """
+        Shows a NumPy image on the display.
+
+        Args:
+            image (ndarray): Image to show
+        """
+        raise NotImplementedError("imshow() must be implemented by driver")
+
+    def clear(self):
+        """
+        Clears the display by filling it with black color.
+        """
+        raise NotImplementedError("clear() must be implemented by driver")
 
     def _get_common_roi_with_buffer(self, image):
         """
-        Get the common region of interest (ROI) between the image and the 
+        Gets the common region of interest (ROI) between the image and the 
         display's internal buffer.
 
         Args:
@@ -17,6 +51,8 @@ class CV2_Display():
         
         Returns:
             tuple: (image_roi, buffer_roi)
+                - image_roi (ndarray): ROI of the image
+                - buffer_roi (ndarray): ROI of the display's buffer
         """
         # Ensure image is a NumPy ndarray
         if type(image) is not np.ndarray:
@@ -30,15 +66,15 @@ class CV2_Display():
             image_cols = image.shape[1]
         
         # Get the common ROI between the image and the buffer
-        row_max = min(image_rows, self.height)
-        col_max = min(image_cols, self.width)
+        row_max = min(image_rows, self._buffer.shape[0])
+        col_max = min(image_cols, self._buffer.shape[1])
         img_roi = image[:row_max, :col_max]
-        buffer_roi = self.buffer[:row_max, :col_max]
+        buffer_roi = self._buffer[:row_max, :col_max]
         return img_roi, buffer_roi
 
-    def _convert_image_to_uint8(self, image):
+    def _convert_to_uint8(self, image):
         """
-        Convert the image to uint8 format if necessary.
+        Converts the image to uint8 format if necessary.
 
         Args:
             image (ndarray): Image to convert
@@ -65,37 +101,39 @@ class CV2_Display():
         else:
             raise ValueError(f"Unsupported image dtype: {image.dtype}")
 
-    def _write_image_to_buffer_bgr565(self, image_roi, buffer_roi):
+    def _convert_to_bgr565(self, src, dst):
         """
-        Convert the image ROI to BGR565 format and write it to the buffer ROI.
+        Converts an image to BGR565 format.
 
         Args:
-            image_roi (ndarray): Image region of interest
-            buffer_roi (ndarray): Buffer region of interest
+            src (ndarray): Input image
+            dst (ndarray): Output BGR565 buffer
         """
         # Determine the number of channels in the image
-        if image_roi.ndim < 3:
+        if src.ndim < 3:
             ch = 1
         else:
-            ch = image_roi.shape[2]
+            ch = src.shape[2]
 
+        # Convert the image to BGR565 format based on the number of channels
         if ch == 1: # Grayscale
-            buffer_roi = cv2.cvtColor(image_roi, cv2.COLOR_GRAY2BGR565, buffer_roi)
+            dst = cv2.cvtColor(src, cv2.COLOR_GRAY2BGR565, dst)
         elif ch == 2: # Already in BGR565 format
             # For some reason, this is relatively slow and creates a new buffer:
             # https://github.com/v923z/micropython-ulab/issues/726
-            buffer_roi[:] = image_roi
+            dst[:] = src
         elif ch == 3: # BGR
-            buffer_roi = cv2.cvtColor(image_roi, cv2.COLOR_BGR2BGR565, buffer_roi)
+            dst = cv2.cvtColor(src, cv2.COLOR_BGR2BGR565, dst)
         else:
             raise ValueError("Image must be 1, 2 or 3 channels (grayscale, BGR565, or BGR)")
 
-    def savePinModeAlt(self, pin):
+    def _save_pin_mode_alt(self, pin):
         """
         Saves the current `mode` and `alt` of the pin so it can be restored
-        later. Mostly used to restore the SPI mode (MISO) of the DC pin after
-        communication with the display in case another device is using the same
-        SPI bus.
+        later. Mostly used for SPI displays on a shared SPI bus with a driver
+        that needs non-SPI pin modes, such as the RP2 PIO driver. This allows
+        other devices on the bus to continue using the SPI interface after the
+        display driver finishes communicating with the display.
 
         Returns:
             tuple: (mode, alt)
@@ -139,8 +177,17 @@ class CV2_Display():
         return (mode, alt)
 
     def splash(self, filename="splash.png"):
+        """
+        Shows a splash image on the display if one is available, otherwise
+        clears the display of any previous content.
+
+        Args:
+            filename (str, optional): Path to a splash image file. Defaults to
+                            "splash.png"
+        """
         try:
+            # Attempt to load and show the splash image
             self.imshow(cv2.imread(filename))
-            return True
         except Exception:
-            return False
+            # Couldn't load the image, just clear the display as a fallback
+            self.clear()

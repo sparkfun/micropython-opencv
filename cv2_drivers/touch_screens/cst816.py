@@ -1,8 +1,24 @@
+#-------------------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+# 
+# Copyright (c) 2025 SparkFun Electronics
+#-------------------------------------------------------------------------------
+# st7789.py
+#
+# Base class for OpenCV ST7789 display drivers.
+# 
+# This class is derived from:
+# https://github.com/fbiego/CST816S
+# Released under the MIT license.
+# Copyright (c) 2021 Felix Biego
+#-------------------------------------------------------------------------------
+
 from .cv2_touch_screen import CV2_Touch_Screen
 
-# Derived from:
-# https://github.com/fbiego/CST816S
 class CST816(CV2_Touch_Screen):
+    """
+    OpenCV CST816 touch screen driver using an I2C interface.
+    """
     _I2C_ADDRESS = 0x15
     _CHIP_ID = 0xB6
     
@@ -40,24 +56,42 @@ class CST816(CV2_Touch_Screen):
     _REG_IO_CTL = 0xFD
     _REG_DIS_AUTO_SLEEP = 0xFE
 
-    def __init__(self, i2c, address=_I2C_ADDRESS, width=240, height=320, rotation=1):
+    def __init__(self, i2c, width=240, height=320, rotation=1, address=_I2C_ADDRESS):
+        """
+        Initializes the CST816 driver.
+
+        Args:
+            i2c (I2C): I2C object for communication
+            width (int, optional): Touch screen width in pixels.
+                Default is 240
+            height (int, optional): Touch screen height in pixels.
+                Default is 320
+            rotation (int, optional): Orientation of touch screen
+              - 0: Portrait (default)
+              - 1: Landscape
+              - 2: Inverted portrait
+              - 3: Inverted landscape
+            address (int, optional): I2C address of the camera.
+                Default is 0x15
+        """
         self.i2c = i2c
         self.address = address
         self.width = width
         self.height = height
         self.rotation = rotation
 
-    def is_connected(self):
+    def _is_connected(self):
         """
-        Check if the CST816 touch screen is connected by reading the chip ID.
+        Checks if the touch screen is connected by reading the chip ID.
 
         Returns:
-            bool: True if connected, False otherwise
+            bool: True if the touch screen is connected and the chip ID is
+                  correct, otherwise False.
         """
         try:
             # Try to read the chip ID
             # If it throws an I/O error - the device isn't connected
-            chip_id = self.read_register_value(self._REG_CHIP_ID)
+            chip_id = self._get_chip_id()
 
             # Confirm the chip ID is correct
             if chip_id == self._CHIP_ID:
@@ -67,7 +101,13 @@ class CST816(CV2_Touch_Screen):
         except:
             return False
 
-    def getChipID(self):
+    def _get_chip_id(self):
+        """
+        Reads the chip ID.
+
+        Returns:
+            int: The chip ID of the HM01B0 (should be 0xB6).
+        """
         return self.read_register_value(self._REG_CHIP_ID)
 
     def is_touched(self):
@@ -84,6 +124,13 @@ class CST816(CV2_Touch_Screen):
         return touch_num > 0
 
     def get_touch_xy(self):
+        """
+        Get the X and Y coordinates of the touch point. Will return the last
+        touch point if no touch is currently detected.
+
+        Returns:
+            tuple: (x, y) coordinates of the touch point
+        """
         x = self.read_register_value(self._REG_X_POS_H, 2) & 0x0FFF
         y = self.read_register_value(self._REG_Y_POS_H, 2) & 0x0FFF
 
@@ -105,6 +152,8 @@ class CST816(CV2_Touch_Screen):
 
         Args:
             reg (int): Register address to read from
+            num_bytes (int, optional): Number of bytes to read from the register.
+                Default is 1
 
         Returns:
             int: Value read from the register

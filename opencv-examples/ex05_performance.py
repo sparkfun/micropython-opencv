@@ -5,7 +5,13 @@
 #-------------------------------------------------------------------------------
 # ex05_performance.py
 # 
-# This example
+# This example demonstrates some performance optimization techniques, and ways
+# to measure performance in the MicroPython port of OpenCV. Read through the
+# comments in this example to learn more!
+# 
+# Note that most examples do not include these optimizations for simplicity, but
+# if maximum performance is needed for your application, use the techniques
+# shown here.
 #-------------------------------------------------------------------------------
 
 # Import OpenCV and hardware initialization module
@@ -50,7 +56,7 @@ print("Press any key to continue")
 # Loop to continuously read frames from the camera and display them
 while True:
     # Read a frame from the camera and measure how long it takes. Try running
-    # this both with and without the preallocated `frame` array to see the
+    # this both with and without the pre-allocated `frame` array to see the
     # difference in performance
     t0 = time.ticks_us()
     success, frame = camera.read(frame)
@@ -63,7 +69,7 @@ while True:
         break
 
     # Now we'll do some processing on the frame. Try running this with and
-    # without the preallocated `result_image` array, and try different OpenCV
+    # without the pre-allocated `result_image` array, and try different OpenCV
     # functions to compare performance
     t0 = time.ticks_us()
     result_image = cv.cvtColor(frame, cv.COLOR_BGR2HSV, result_image)
@@ -88,6 +94,9 @@ while True:
     # this code. If you remove the output arguments from the functions above,
     # you'll see that the memory consumption increases significantly as new
     # arrays must be allocated each loop iteration
+    # 
+    # Note that calling `gc.mem_free()` actually takes a relatively long time to
+    # execute, so it should only be used for debugging, not in production code
     mem_free = gc.mem_free()
     memory_used = last_mem_free - mem_free
     last_mem_free = mem_free
@@ -101,15 +110,21 @@ while True:
     # since it mitigates how frequently garbage collection is triggered
     if memory_used < 0:
         print("Garbage collection triggered!")
-    
+
     # Something to try is triggering the garbage collector manually each loop
     # iteration to immediately free up memory. Garbage collection can be faster
     # if less memory has been allocated, so this can help avoid long stutters
-    # from occasional garbage collection. However garbage collection will always
-    # take *some* time, so this will lower the average FPS. You can choose to do
-    # this if you prefer a consistent frame rate, or don't if you prefer maximum
-    # frame rate and are okay with occasional stutters
-    # gc.collect()
+    # from occasional garbage collection. However, garbage collection always
+    # takes *some* time, so this will lower the average FPS. You can choose to
+    # do this if you prefer a consistent frame rate, or don't if you prefer
+    # maximum frame rate and are okay with occasional stutters gc.collect()
+
+    # For advanced users, you can use the internal buffers of the camera and
+    # display drivers: `camera._buffer` and `display._buffer`. Using these
+    # buffers directly can avoid the colorspace conversions implemented in
+    # `camera.read()` and `display.imshow()`, which can improve performance if
+    # your application can make use of the native color spaces and improve
+    # overall performance
 
     # Check for key presses
     key = cv.waitKey(1)

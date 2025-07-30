@@ -1,3 +1,15 @@
+/*
+ *------------------------------------------------------------------------------
+ * SPDX-License-Identifier: MIT
+ * 
+ * Copyright (c) 2025 SparkFun Electronics
+ *------------------------------------------------------------------------------
+ * core.cpp
+ * 
+ * MicroPython wrappers for functions from the OpenCV core module.
+ *------------------------------------------------------------------------------
+ */
+
 // C++ headers
 #include "opencv2/core.hpp"
 #include "opencv2/imgcodecs.hpp"

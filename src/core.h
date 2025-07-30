@@ -1,3 +1,15 @@
+/*
+ *------------------------------------------------------------------------------
+ * SPDX-License-Identifier: MIT
+ * 
+ * Copyright (c) 2025 SparkFun Electronics
+ *------------------------------------------------------------------------------
+ * core.h
+ * 
+ * MicroPython wrappers for functions from the OpenCV core module.
+ *------------------------------------------------------------------------------
+ */
+
 // C headers
 #include "py/runtime.h"
 

@@ -24,9 +24,9 @@ from cv2_hardware_init import *
 # 
 # Note - only BMP and PNG formats are currently supported in MicroPython OpenCV
 print("Loading image...")
-img = cv.imread("test_images/sparkfun_logo.png")
+img = cv.imread("opencv-examples/images/splash.png")
 
-# Show the image for 1 second
+# Show the image
 # 
 # Note - If the image is larger or smaller than the display, the behavior will
 # depend on the display driver. For example, the default ST7789 display driver
@@ -52,7 +52,7 @@ cv.imshow(display, edges)
 # 
 # Note - only BMP and PNG formats are currently supported in MicroPython OpenCV
 print("Saving modified image...")
-success = cv.imwrite("test_images/sparkfun_logo_edges.png", edges)
+success = cv.imwrite("opencv-examples/images/splash_edges.png", edges)
 
 # Check if the image was saved successfully
 if success:

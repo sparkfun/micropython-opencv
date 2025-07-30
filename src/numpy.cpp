@@ -1,9 +1,32 @@
+/*
+ *------------------------------------------------------------------------------
+ * SPDX-License-Identifier: MIT
+ * 
+ * Copyright (c) 2025 SparkFun Electronics
+ *------------------------------------------------------------------------------
+ * numpy.cpp
+ * 
+ * OpenCV Mat allocator implementation for ulab NumPy. Derived from:
+ * https://github.com/opencv/opencv/blob/aee828ac6ed3e45d7ca359d125349a570ca4e098/modules/python/src2/cv2_numpy.cpp
+ * Licensed under the Apache License, Version 2.0
+ * Copyright (C) 2000-2022, Intel Corporation, all rights reserved.
+ * Copyright (C) 2009-2011, Willow Garage Inc., all rights reserved.
+ * Copyright (C) 2009-2016, NVIDIA Corporation, all rights reserved.
+ * Copyright (C) 2010-2013, Advanced Micro Devices, Inc., all rights reserved.
+ * Copyright (C) 2015-2023, OpenCV Foundation, all rights reserved.
+ * Copyright (C) 2008-2016, Itseez Inc., all rights reserved.
+ * Copyright (C) 2019-2023, Xperience AI, all rights reserved.
+ * Copyright (C) 2019-2022, Shenzhen Institute of Artificial Intelligence and Robotics for Society, all rights reserved.
+ * Copyright (C) 2022-2023, Southern University of Science And Technology, all rights reserved.
+ * 
+ * Third party copyrights are property of their respective owners.
+ *------------------------------------------------------------------------------
+ */
+
 // C++ headers
 #include "numpy.h"
 #include "convert.h"
 
-// Derived from:
-// https://github.com/opencv/opencv/blob/aee828ac6ed3e45d7ca359d125349a570ca4e098/modules/python/src2/cv2_numpy.cpp#L11-L22
 UMatData* NumpyAllocator::allocate(ndarray_obj_t* ndarray, int dims, const int* sizes, int type, size_t* step) const
 {
     UMatData* u = new UMatData(this);

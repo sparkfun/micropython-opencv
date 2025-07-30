@@ -1,3 +1,15 @@
+/*
+ *------------------------------------------------------------------------------
+ * SPDX-License-Identifier: MIT
+ * 
+ * Copyright (c) 2025 SparkFun Electronics
+ *------------------------------------------------------------------------------
+ * opencv_upy.c
+ * 
+ * OpenCV module registration.
+ *------------------------------------------------------------------------------
+ */
+
 #include "core.h"
 #include "highgui.h"
 #include "imgcodecs.h"

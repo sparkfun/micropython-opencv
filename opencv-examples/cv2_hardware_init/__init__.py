@@ -9,11 +9,11 @@ try:
 except:
     print("Display initialization failed, skipping...")
 
-# Optional - show a splash image on the display if one is available, or clear
-# the display of any previous content
-if not display.splash():
-    if hasattr(display, 'clear'):
-        display.clear()
+# Optional - Show a splash screen on the display with an optional filename (if
+# not provided, it defaults to `splash.png` in the root directory of the
+# MicroPython filesystem). If the file is not present, the driver will simply
+# clear the display of any previous content
+display.splash("opencv-examples/images/splash.png")
 
 # Import the camera driver
 try:

@@ -1,135 +1,150 @@
+#-------------------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+# 
+# Copyright (c) 2025 SparkFun Electronics
+#-------------------------------------------------------------------------------
+# hm01b0.py
+#
+# Base class for OpenCV HM01B0 camera drivers.
+# 
+# This class is derived from:
+# https://github.com/openmv/openmv/blob/5acf5baf92b4314a549bdd068138e5df6cc0bac7/drivers/sensors/hm01b0.c
+# Released under the MIT license.
+# Copyright (C) 2013-2024 OpenMV, LLC.
+#-------------------------------------------------------------------------------
+
 from .dvp_camera import DVP_Camera
 from time import sleep_us
 import cv2
 
-# Derived from:
-# https:#github.com/openmv/openmv/blob/5acf5baf92b4314a549bdd068138e5df6cc0bac7/drivers/sensors/hm01b0.c
 class HM01B0(DVP_Camera):
-    
+    """
+    Base class for OpenCV HM01B0 camera drivers.
+    """
     # Read only registers
-    MODEL_ID_H = 0x0000
-    MODEL_ID_L = 0x0001
-    FRAME_COUNT = 0x0005
-    PIXEL_ORDER = 0x0006
+    _MODEL_ID_H = 0x0000
+    _MODEL_ID_L = 0x0001
+    _FRAME_COUNT = 0x0005
+    _PIXEL_ORDER = 0x0006
     # Sensor mode control
-    MODE_SELECT = 0x0100
-    IMG_ORIENTATION = 0x0101
-    SW_RESET = 0x0103
-    GRP_PARAM_HOLD = 0x0104
+    _MODE_SELECT = 0x0100
+    _IMG_ORIENTATION = 0x0101
+    _SW_RESET = 0x0103
+    _GRP_PARAM_HOLD = 0x0104
     # Sensor exposure gain control
-    INTEGRATION_H = 0x0202
-    INTEGRATION_L = 0x0203
-    ANALOG_GAIN = 0x0205
-    DIGITAL_GAIN_H = 0x020E
-    DIGITAL_GAIN_L = 0x020F
+    _INTEGRATION_H = 0x0202
+    _INTEGRATION_L = 0x0203
+    _ANALOG_GAIN = 0x0205
+    _DIGITAL_GAIN_H = 0x020E
+    _DIGITAL_GAIN_L = 0x020F
     # Frame timing control
-    FRAME_LEN_LINES_H = 0x0340
-    FRAME_LEN_LINES_L = 0x0341
-    LINE_LEN_PCK_H = 0x0342
-    LINE_LEN_PCK_L = 0x0343
+    _FRAME_LEN_LINES_H = 0x0340
+    _FRAME_LEN_LINES_L = 0x0341
+    _LINE_LEN_PCK_H = 0x0342
+    _LINE_LEN_PCK_L = 0x0343
     # Binning mode control
-    READOUT_X = 0x0383
-    READOUT_Y = 0x0387
-    BINNING_MODE = 0x0390
+    _READOUT_X = 0x0383
+    _READOUT_Y = 0x0387
+    _BINNING_MODE = 0x0390
     # Test pattern control
-    TEST_PATTERN_MODE = 0x0601
+    _TEST_PATTERN_MODE = 0x0601
     # Black level control
-    BLC_CFG = 0x1000
-    BLC_TGT = 0x1003
-    BLI_EN = 0x1006
-    BLC2_TGT = 0x1007
+    _BLC_CFG = 0x1000
+    _BLC_TGT = 0x1003
+    _BLI_EN = 0x1006
+    _BLC2_TGT = 0x1007
     #  Sensor reserved
-    DPC_CTRL = 0x1008
-    SINGLE_THR_HOT = 0x100B
-    SINGLE_THR_COLD = 0x100C
+    _DPC_CTRL = 0x1008
+    _SINGLE_THR_HOT = 0x100B
+    _SINGLE_THR_COLD = 0x100C
     # VSYNC,HSYNC and pixel shift register
-    VSYNC_HSYNC_PIXEL_SHIFT_EN = 0x1012
+    _VSYNC_HSYNC_PIXEL_SHIFT_EN = 0x1012
     # Automatic exposure gain control
-    AE_CTRL = 0x2100
-    AE_TARGET_MEAN = 0x2101
-    AE_MIN_MEAN = 0x2102
-    CONVERGE_IN_TH = 0x2103
-    CONVERGE_OUT_TH = 0x2104
-    MAX_INTG_H = 0x2105
-    MAX_INTG_L = 0x2106
-    MIN_INTG = 0x2107
-    MAX_AGAIN_FULL = 0x2108
-    MAX_AGAIN_BIN2 = 0x2109
-    MIN_AGAIN = 0x210A
-    MAX_DGAIN = 0x210B
-    MIN_DGAIN = 0x210C
-    DAMPING_FACTOR = 0x210D
-    FS_CTRL = 0x210E
-    FS_60HZ_H = 0x210F
-    FS_60HZ_L = 0x2110
-    FS_50HZ_H = 0x2111
-    FS_50HZ_L = 0x2112
-    FS_HYST_TH = 0x2113
+    _AE_CTRL = 0x2100
+    _AE_TARGET_MEAN = 0x2101
+    _AE_MIN_MEAN = 0x2102
+    _CONVERGE_IN_TH = 0x2103
+    _CONVERGE_OUT_TH = 0x2104
+    _MAX_INTG_H = 0x2105
+    _MAX_INTG_L = 0x2106
+    _MIN_INTG = 0x2107
+    _MAX_AGAIN_FULL = 0x2108
+    _MAX_AGAIN_BIN2 = 0x2109
+    _MIN_AGAIN = 0x210A
+    _MAX_DGAIN = 0x210B
+    _MIN_DGAIN = 0x210C
+    _DAMPING_FACTOR = 0x210D
+    _FS_CTRL = 0x210E
+    _FS_60HZ_H = 0x210F
+    _FS_60HZ_L = 0x2110
+    _FS_50HZ_H = 0x2111
+    _FS_50HZ_L = 0x2112
+    _FS_HYST_TH = 0x2113
     # Motion detection control
-    MD_CTRL = 0x2150
-    I2C_CLEAR = 0x2153
-    WMEAN_DIFF_TH_H = 0x2155
-    WMEAN_DIFF_TH_M = 0x2156
-    WMEAN_DIFF_TH_L = 0x2157
-    MD_THH = 0x2158
-    MD_THM1 = 0x2159
-    MD_THM2 = 0x215A
-    MD_THL = 0x215B
-    STATISTIC_CTRL = 0x2000
-    MD_LROI_X_START_H = 0x2011
-    MD_LROI_X_START_L = 0x2012
-    MD_LROI_Y_START_H = 0x2013
-    MD_LROI_Y_START_L = 0x2014
-    MD_LROI_X_END_H = 0x2015
-    MD_LROI_X_END_L = 0x2016
-    MD_LROI_Y_END_H = 0x2017
-    MD_LROI_Y_END_L = 0x2018
-    MD_INTERRUPT = 0x2160
+    _MD_CTRL = 0x2150
+    _I2C_CLEAR = 0x2153
+    _WMEAN_DIFF_TH_H = 0x2155
+    _WMEAN_DIFF_TH_M = 0x2156
+    _WMEAN_DIFF_TH_L = 0x2157
+    _MD_THH = 0x2158
+    _MD_THM1 = 0x2159
+    _MD_THM2 = 0x215A
+    _MD_THL = 0x215B
+    _STATISTIC_CTRL = 0x2000
+    _MD_LROI_X_START_H = 0x2011
+    _MD_LROI_X_START_L = 0x2012
+    _MD_LROI_Y_START_H = 0x2013
+    _MD_LROI_Y_START_L = 0x2014
+    _MD_LROI_X_END_H = 0x2015
+    _MD_LROI_X_END_L = 0x2016
+    _MD_LROI_Y_END_H = 0x2017
+    _MD_LROI_Y_END_L = 0x2018
+    _MD_INTERRUPT = 0x2160
     #  Sensor timing control
-    QVGA_WIN_EN = 0x3010
-    SIX_BIT_MODE_EN = 0x3011
-    PMU_AUTOSLEEP_FRAMECNT = 0x3020
-    ADVANCE_VSYNC = 0x3022
-    ADVANCE_HSYNC = 0x3023
-    EARLY_GAIN = 0x3035
+    _QVGA_WIN_EN = 0x3010
+    _SIX_BIT_MODE_EN = 0x3011
+    _PMU_AUTOSLEEP_FRAMECNT = 0x3020
+    _ADVANCE_VSYNC = 0x3022
+    _ADVANCE_HSYNC = 0x3023
+    _EARLY_GAIN = 0x3035
     #  IO and clock control
-    BIT_CONTROL = 0x3059
-    OSC_CLK_DIV = 0x3060
-    ANA_Register_11 = 0x3061
-    IO_DRIVE_STR = 0x3062
-    IO_DRIVE_STR2 = 0x3063
-    ANA_Register_14 = 0x3064
-    OUTPUT_PIN_STATUS_CONTROL = 0x3065
-    ANA_Register_17 = 0x3067
-    PCLK_POLARITY = 0x3068
+    _BIT_CONTROL = 0x3059
+    _OSC_CLK_DIV = 0x3060
+    _ANA_Register_11 = 0x3061
+    _IO_DRIVE_STR = 0x3062
+    _IO_DRIVE_STR2 = 0x3063
+    _ANA_Register_14 = 0x3064
+    _OUTPUT_PIN_STATUS_CONTROL = 0x3065
+    _ANA_Register_17 = 0x3067
+    _PCLK_POLARITY = 0x3068
     
     # Useful values of Himax registers
-    HIMAX_RESET = 0x01
-    HIMAX_MODE_STANDBY = 0x00
-    HIMAX_MODE_STREAMING = 0x01     # I2C triggered streaming enable
-    HIMAX_MODE_STREAMING_NFRAMES = 0x03     # Output N frames
-    HIMAX_MODE_STREAMING_TRIG = 0x05     # Hardware Trigger
-    # HIMAX_SET_HMIRROR  (r, x)         ((r & 0xFE) | ((x & 1) << 0))
-    # HIMAX_SET_VMIRROR  (r, x)         ((r & 0xFD) | ((x & 1) << 1))
+    _HIMAX_RESET = 0x01
+    _HIMAX_MODE_STANDBY = 0x00
+    _HIMAX_MODE_STREAMING = 0x01     # I2C triggered streaming enable
+    _HIMAX_MODE_STREAMING_NFRAMES = 0x03     # Output N frames
+    _HIMAX_MODE_STREAMING_TRIG = 0x05     # Hardware Trigger
+    # _HIMAX_SET_HMIRROR  (r, x)         ((r & 0xFE) | ((x & 1) << 0))
+    # _HIMAX_SET_VMIRROR  (r, x)         ((r & 0xFD) | ((x & 1) << 1))
 
-    PCLK_RISING_EDGE = 0x00
-    PCLK_FALLING_EDGE = 0x01
-    AE_CTRL_ENABLE = 0x00
-    AE_CTRL_DISABLE = 0x01
-    
-    HIMAX_BOOT_RETRY = 10
-    HIMAX_LINE_LEN_PCK_FULL = 0x178
-    HIMAX_FRAME_LENGTH_FULL = 0x109
+    _PCLK_RISING_EDGE = 0x00
+    _PCLK_FALLING_EDGE = 0x01
+    _AE_CTRL_ENABLE = 0x00
+    _AE_CTRL_DISABLE = 0x01
 
-    HIMAX_LINE_LEN_PCK_QVGA = 0x178
-    HIMAX_FRAME_LENGTH_QVGA = 0x104
+    _HIMAX_BOOT_RETRY = 10
+    _HIMAX_LINE_LEN_PCK_FULL = 0x178
+    _HIMAX_FRAME_LENGTH_FULL = 0x109
 
-    HIMAX_LINE_LEN_PCK_QQVGA = 0x178
-    HIMAX_FRAME_LENGTH_QQVGA = 0x084
+    _HIMAX_LINE_LEN_PCK_QVGA = 0x178
+    _HIMAX_FRAME_LENGTH_QVGA = 0x104
 
-    INIT_COMMANDS = (
-        (BLC_TGT,              0x08),          #  BLC target :8  at 8 bit mode
-        (BLC2_TGT,             0x08),          #  BLI target :8  at 8 bit mode
+    _HIMAX_LINE_LEN_PCK_QQVGA = 0x178
+    _HIMAX_FRAME_LENGTH_QQVGA = 0x084
+
+    _INIT_COMMANDS = (
+        (_BLC_TGT,              0x08),          #  BLC target :8  at 8 bit mode
+        (_BLC2_TGT,             0x08),          #  BLI target :8  at 8 bit mode
         (0x3044,               0x0A),          #  Increase CDS time for settling
         (0x3045,               0x00),          #  Make symmetric for cds_tg and rst_tg
         (0x3047,               0x0A),          #  Increase CDS time for settling
@@ -145,23 +160,23 @@ class HM01B0(DVP_Camera):
         (0x3059,               0x1E),
         (0x3064,               0x00),
         (0x3065,               0x04),          #  pad pull 0
-        (ANA_Register_17,      0x00),          #  Disable internal oscillator
+        (_ANA_Register_17,      0x00),          #  Disable internal oscillator
 
-        (BLC_CFG,              0x43),          #  BLC_on, IIR
+        (_BLC_CFG,              0x43),          #  BLC_on, IIR
 
         (0x1001,               0x43),          #  BLC dithering en
         (0x1002,               0x43),          #  blc_darkpixel_thd
         (0x0350,               0x7F),          #  Dgain Control
-        (BLI_EN,               0x01),          #  BLI enable
+        (_BLI_EN,               0x01),          #  BLI enable
         (0x1003,               0x00),          #  BLI Target [Def: 0x20]
 
-        (DPC_CTRL,             0x01),          #  DPC option 0: DPC off   1 : mono   3 : bayer1   5 : bayer2
+        (_DPC_CTRL,             0x01),          #  DPC option 0: DPC off   1 : mono   3 : bayer1   5 : bayer2
         (0x1009,               0xA0),          #  cluster hot pixel th
         (0x100A,               0x60),          #  cluster cold pixel th
-        (SINGLE_THR_HOT,       0x90),          #  single hot pixel th
-        (SINGLE_THR_COLD,      0x40),          #  single cold pixel th
+        (_SINGLE_THR_HOT,       0x90),          #  single hot pixel th
+        (_SINGLE_THR_COLD,      0x40),          #  single cold pixel th
         (0x1012,               0x00),          #  Sync. shift disable
-        (STATISTIC_CTRL,       0x07),          #  AE stat en | MD LROI stat en | magic
+        (_STATISTIC_CTRL,       0x07),          #  AE stat en | MD LROI stat en | magic
         (0x2003,               0x00),
         (0x2004,               0x1C),
         (0x2007,               0x00),
@@ -175,46 +190,46 @@ class HM01B0(DVP_Camera):
         (0x2017,               0x00),
         (0x2018,               0x9B),
 
-        (AE_CTRL,              0x01),          #Automatic Exposure
-        (AE_TARGET_MEAN,       0x64),          #AE target mean          [Def: 0x3C]
-        (AE_MIN_MEAN,          0x0A),          #AE min target mean      [Def: 0x0A]
-        (CONVERGE_IN_TH,       0x03),          #Converge in threshold   [Def: 0x03]
-        (CONVERGE_OUT_TH,      0x05),          #Converge out threshold  [Def: 0x05]
-        (MAX_INTG_H,           (HIMAX_FRAME_LENGTH_QVGA - 2) >> 8),          #Maximum INTG High Byte  [Def: 0x01]
-        (MAX_INTG_L,           (HIMAX_FRAME_LENGTH_QVGA - 2) & 0xFF),        #Maximum INTG Low Byte   [Def: 0x54]
-        (MAX_AGAIN_FULL,       0x04),          #Maximum Analog gain in full frame mode [Def: 0x03]
-        (MAX_AGAIN_BIN2,       0x04),          #Maximum Analog gain in bin2 mode       [Def: 0x04]
-        (MAX_DGAIN,            0xC0),
+        (_AE_CTRL,              0x01),          #Automatic Exposure
+        (_AE_TARGET_MEAN,       0x64),          #AE target mean          [Def: 0x3C]
+        (_AE_MIN_MEAN,          0x0A),          #AE min target mean      [Def: 0x0A]
+        (_CONVERGE_IN_TH,       0x03),          #Converge in threshold   [Def: 0x03]
+        (_CONVERGE_OUT_TH,      0x05),          #Converge out threshold  [Def: 0x05]
+        (_MAX_INTG_H,           (_HIMAX_FRAME_LENGTH_QVGA - 2) >> 8),          #Maximum INTG High Byte  [Def: 0x01]
+        (_MAX_INTG_L,           (_HIMAX_FRAME_LENGTH_QVGA - 2) & 0xFF),        #Maximum INTG Low Byte   [Def: 0x54]
+        (_MAX_AGAIN_FULL,       0x04),          #Maximum Analog gain in full frame mode [Def: 0x03]
+        (_MAX_AGAIN_BIN2,       0x04),          #Maximum Analog gain in bin2 mode       [Def: 0x04]
+        (_MAX_DGAIN,            0xC0),
 
-        (INTEGRATION_H,        0x01),          #Integration H           [Def: 0x01]
-        (INTEGRATION_L,        0x08),          #Integration L           [Def: 0x08]
-        (ANALOG_GAIN,          0x00),          #Analog Global Gain      [Def: 0x00]
-        (DAMPING_FACTOR,       0x20),          #Damping Factor          [Def: 0x20]
-        (DIGITAL_GAIN_H,       0x01),          #Digital Gain High       [Def: 0x01]
-        (DIGITAL_GAIN_L,       0x00),          #Digital Gain Low        [Def: 0x00]
+        (_INTEGRATION_H,        0x01),          #Integration H           [Def: 0x01]
+        (_INTEGRATION_L,        0x08),          #Integration L           [Def: 0x08]
+        (_ANALOG_GAIN,          0x00),          #Analog Global Gain      [Def: 0x00]
+        (_DAMPING_FACTOR,       0x20),          #Damping Factor          [Def: 0x20]
+        (_DIGITAL_GAIN_H,       0x01),          #Digital Gain High       [Def: 0x01]
+        (_DIGITAL_GAIN_L,       0x00),          #Digital Gain Low        [Def: 0x00]
 
-        (FS_CTRL,              0x00),          #Flicker Control
+        (_FS_CTRL,              0x00),          #Flicker Control
 
-        (FS_60HZ_H,            0x00),
-        (FS_60HZ_L,            0x3C),
-        (FS_50HZ_H,            0x00),
-        (FS_50HZ_L,            0x32),
+        (_FS_60HZ_H,            0x00),
+        (_FS_60HZ_L,            0x3C),
+        (_FS_50HZ_H,            0x00),
+        (_FS_50HZ_L,            0x32),
 
-        (MD_CTRL,              0x00),
-        (FRAME_LEN_LINES_H,    HIMAX_FRAME_LENGTH_QVGA >> 8),
-        (FRAME_LEN_LINES_L,    HIMAX_FRAME_LENGTH_QVGA & 0xFF),
-        (LINE_LEN_PCK_H,       HIMAX_LINE_LEN_PCK_QVGA >> 8),
-        (LINE_LEN_PCK_L,       HIMAX_LINE_LEN_PCK_QVGA & 0xFF),
-        (QVGA_WIN_EN,          0x01),          # Enable QVGA window readout
+        (_MD_CTRL,              0x00),
+        (_FRAME_LEN_LINES_H,    _HIMAX_FRAME_LENGTH_QVGA >> 8),
+        (_FRAME_LEN_LINES_L,    _HIMAX_FRAME_LENGTH_QVGA & 0xFF),
+        (_LINE_LEN_PCK_H,       _HIMAX_LINE_LEN_PCK_QVGA >> 8),
+        (_LINE_LEN_PCK_L,       _HIMAX_LINE_LEN_PCK_QVGA & 0xFF),
+        (_QVGA_WIN_EN,          0x01),          # Enable QVGA window readout
         (0x0383,               0x01),
         (0x0387,               0x01),
         (0x0390,               0x00),
         (0x3011,               0x70),
         (0x3059,               0x22), # 1-bit mode
-        (OSC_CLK_DIV,          0x14),
-        (IMG_ORIENTATION,      0x00),          # change the orientation
+        (_OSC_CLK_DIV,          0x14),
+        (_IMG_ORIENTATION,      0x00),          # change the orientation
         (0x0104,               0x01),
-        (MODE_SELECT,          0x01), # Streaming mode
+        (_MODE_SELECT,          0x01), # Streaming mode
     )
 
     def __init__(
@@ -223,16 +238,34 @@ class HM01B0(DVP_Camera):
         i2c_address = 0x24,
         num_data_pins = 1
     ):
+        """
+        Initializes the HM01B0 camera with default settings.
+
+        Args:
+            i2c (I2C): I2C object for communication
+            i2c_address (int, optional): I2C address (default: 0x24)
+            num_data_pins (int, optional): Number of data pins
+                - 1 (Default)
+                - 4
+                - 8
+        """
         super().__init__(i2c, i2c_address)
 
-        self.soft_reset()
-        self.send_init(num_data_pins)
+        self._soft_reset()
+        self._send_init(num_data_pins)
     
-    def is_connected(self):
+    def _is_connected(self):
+        """
+        Checks if the camera is connected by reading the chip ID.
+
+        Returns:
+            bool: True if the camera is connected and the chip ID is correct,
+                  otherwise False.
+        """
         try:
             # Try to read the chip ID
             # If it throws an I/O error - the device isn't connected
-            id = self.getChipID()
+            id = self._get_chip_id()
             
             # Confirm the chip ID is correct
             if id == 0x01B0:
@@ -242,49 +275,57 @@ class HM01B0(DVP_Camera):
         except:
             return False
 
-    def getChipID(self):
+    def _get_chip_id(self):
         """
-        Reads the chip ID from the HM01B0 sensor.
+        Reads the chip ID.
+
         Returns:
-            int: The chip ID as a 16-bit integer.
+            int: The chip ID of the HM01B0 (should be 0x01B0).
         """
-        data = self.readRegister(self.MODEL_ID_H, 2)
+        data = self._read_register(self._MODEL_ID_H, 2)
         return (data[0] << 8) | data[1]
 
-    def soft_reset(self):
+    def _soft_reset(self):
         """
         Performs a software reset of the HM01B0 sensor.
         This resets the sensor to its default state.
         """
         # HM01B0 can require multiple attempts to reset properly
-        for i in range(self.HIMAX_BOOT_RETRY):
-            self.writeRegister(self.SW_RESET, self.HIMAX_RESET)
+        for i in range(self._HIMAX_BOOT_RETRY):
+            self._write_register(self._SW_RESET, self._HIMAX_RESET)
             sleep_us(1000)
-            mode = self.readRegister(self.MODE_SELECT)
-            if mode[0] == self.HIMAX_MODE_STANDBY:
+            mode = self._read_register(self._MODE_SELECT)
+            if mode[0] == self._HIMAX_MODE_STANDBY:
                 break
             sleep_us(10000)
 
-    def setMode(self, mode):
+    def _set_mode(self, mode):
         """
         Sets the operating mode of the HM01B0 sensor.
         Args:
-            mode (int): The mode to set, e.g., MODE_STREAMING.
+            mode (int): The mode to set, e.g., _HIMAX_MODE_STREAMING.
         """
-        self.writeRegister(self.MODE_SELECT, mode)
+        self._write_register(self._MODE_SELECT, mode)
 
-    def trigger(self):
-        self.writeRegister(self.MODE_SELECT, self.HIMAX_MODE_STREAMING_NFRAMES)
+    def _trigger(self):
+        """
+        Triggers the HM01B0 sensor to capture a number of images. See
+        _set_n_frames().
+        """
+        self._write_register(self._MODE_SELECT, self._HIMAX_MODE_STREAMING_NFRAMES)
 
-    def set_n_frames(self, n_frames):
-        self.writeRegister(self.PMU_AUTOSLEEP_FRAMECNT, n_frames)
+    def _set_n_frames(self, n_frames):
+        """
+        Sets the number of frames to capture before stopping. See _trigger().
+        """
+        self._write_register(self._PMU_AUTOSLEEP_FRAMECNT, n_frames)
 
-    def send_init(self, num_data_pins):
+    def _send_init(self, num_data_pins):
         """
         Initializes the HM01B0 sensor with default settings.
         This includes setting up exposure, gain, and frame timing.
         """
-        for reg, value in self.INIT_COMMANDS:
+        for reg, value in self._INIT_COMMANDS:
             if reg == 0x3059:
                 # Set the data pin mode based on the number of data pins
                 if num_data_pins == 1:
@@ -293,13 +334,19 @@ class HM01B0(DVP_Camera):
                     value = 0x42
                 else:
                     value = 0x02
-            self.writeRegister(reg, value)
+            self._write_register(reg, value)
             sleep_us(1000)
- 
-    def read(self, image = None):
+
+    def read(self, image=None):
         """
-        Reads a frame from the camera.
+        Reads an image from the camera.
+
+        Args:
+            image (ndarray, optional): Image to read into
+
         Returns:
-            tuple: (success, frame)
+            tuple: (success, image)
+                - success (bool): True if the image was read, otherwise False
+                - image (ndarray): The captured image, or None if reading failed
         """
-        return (True, cv2.cvtColor(self.buffer, cv2.COLOR_BayerRG2BGR, image))
+        return (True, cv2.cvtColor(self._buffer, cv2.COLOR_BayerRG2BGR, image))

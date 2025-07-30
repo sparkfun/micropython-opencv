@@ -34,7 +34,7 @@ while True:
     success, frame = camera.read()
 
     # Check if the frame was read successfully
-    if success == False:
+    if not success:
         print("Error reading frame from camera")
         break
 

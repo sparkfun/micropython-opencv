@@ -1,28 +1,27 @@
+#-------------------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+# 
+# Copyright (c) 2025 SparkFun Electronics
+#-------------------------------------------------------------------------------
+# st7789_spi.py
+#
+# OpenCV ST7789 display driver using a SPI interface.
+# 
+# This class is derived from:
+# https://github.com/easytarget/st7789-framebuffer/blob/main/st7789_purefb.py
+# Released under the MIT license.
+# Copyright (c) 2024 Owen Carter
+# Copyright (c) 2024 Ethan Lacasse
+# Copyright (c) 2020-2023 Russ Hughes
+# Copyright (c) 2019 Ivan Belokobylskiy
+#-------------------------------------------------------------------------------
+
 from .st7789 import ST7789
 from machine import Pin
 
-# Derived from:
-# https://github.com/easytarget/st7789-framebuffer/blob/main/st7789_purefb.py
 class ST7789_SPI(ST7789):
     """
-    OpenCV SPI driver for ST7789 displays
-
-    Args:
-        width (int): display width **Required**
-        height (int): display height **Required**
-        spi (SPI): SPI bus **Required**
-        pin_dc (Pin): Data/Command pin number **Required**
-        pin_cs (Pin): Chip Select pin number
-        rotation (int): Orientation of display
-          - 0-Portrait, default
-          - 1-Landscape
-          - 2-Inverted Portrait
-          - 3-Inverted Landscape
-        color_order (int):
-          - RGB: Red, Green Blue, default
-          - BGR: Blue, Green, Red
-        reverse_bytes_in_word (bool):
-          - Enable if the display uses LSB byte order for color words
+    OpenCV ST7789 display driver using a SPI interface.
     """
     def __init__(
         self,
@@ -32,36 +31,62 @@ class ST7789_SPI(ST7789):
         pin_dc,
         pin_cs=None,
         rotation=0,
-        color_order=ST7789.BGR,
+        bgr_order=True,
         reverse_bytes_in_word=True,
     ):
+        """
+        Initializes the ST7789 SPI display driver.
+
+        Args:
+            width (int): Display width in pixels
+            height (int): Display height in pixels
+            spi (SPI): SPI bus object
+            pin_dc (int): Data/Command pin number
+            pin_cs (int, optional): Chip Select pin number
+            rotation (int, optional): Orientation of display
+              - 0: Portrait (default)
+              - 1: Landscape
+              - 2: Inverted portrait
+              - 3: Inverted landscape
+            bgr_order (bool, optional): Color order
+              - True: BGR (default)
+              - False: RGB
+            reverse_bytes_in_word (bool, optional):
+              - Enable if the display uses LSB byte order for color words
+        """
         # Store SPI arguments
-        self.spi = spi
-        self.dc = Pin(pin_dc) # Don't change mode/alt
-        self.cs = Pin(pin_cs, Pin.OUT, value=1) if pin_cs else None
-        
-        super().__init__(width, height, rotation, color_order, reverse_bytes_in_word)
+        self._spi = spi
+        self._dc = Pin(pin_dc) # Don't change mode/alt
+        self._cs = Pin(pin_cs, Pin.OUT, value=1) if pin_cs else None
+
+        super().__init__(width, height, rotation, bgr_order, reverse_bytes_in_word)
 
     def _write(self, command=None, data=None):
-        """SPI write to the device: commands and data."""
+        """
+        Writes commands and data to the display.
+
+        Args:
+            command (bytes, optional): Command to send to the display
+            data (bytes, optional): Data to send to the display
+        """
         # Save the current mode and alt of the DC pin in case it's used by
         # another device on the same SPI bus
-        dcMode, dcAlt = self.savePinModeAlt(self.dc)
+        dcMode, dcAlt = self._save_pin_mode_alt(self._dc)
 
         # Temporarily set the DC pin to output mode
-        self.dc.init(mode=Pin.OUT)
+        self._dc.init(mode=Pin.OUT)
 
         # Write to the display
-        if self.cs:
-            self.cs.off()
+        if self._cs:
+            self._cs.off()
         if command is not None:
-            self.dc.off()
-            self.spi.write(command)
+            self._dc.off()
+            self._spi.write(command)
         if data is not None:
-            self.dc.on()
-            self.spi.write(data)
-        if self.cs:
-            self.cs.on()
+            self._dc.on()
+            self._spi.write(data)
+        if self._cs:
+            self._cs.on()
 
         # Restore the DC pin to its original mode and alt
-        self.dc.init(mode=dcMode, alt=dcAlt)
+        self._dc.init(mode=dcMode, alt=dcAlt)
