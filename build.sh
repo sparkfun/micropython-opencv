@@ -144,8 +144,7 @@ function build_micropython_opencv {
     mkdir "$FROZEN_MODULES_DIR"
 
     # Create our frozen filesystem archive for the examples directory
-    # Note the "." to make the read-only version of the examples directory hidden in IDEs like Thonny
-    create_frozen_fs "examples" "$FROZEN_EXAMPLES_UNPACKED_DIR" "$FROZEN_MODULES_DIR/$FROZEN_EXAMPLES_ARCHIVE_SCRIPT"
+    create_frozen_fs "opencv-examples" "$FROZEN_EXAMPLES_UNPACKED_DIR" "$FROZEN_MODULES_DIR/$FROZEN_EXAMPLES_ARCHIVE_SCRIPT"
 
     # Add necessary content to the manifest file to freeze the modules in the provided directory
     add_to_manifest "$FROZEN_MODULES_DIR" "rp2" "SPARKFUN_XRP_CONTROLLER" "mpconfigvariant_LARGE_BINARY.cmake"
