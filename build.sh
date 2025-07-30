@@ -25,7 +25,9 @@ function create_frozen_fs {
     echo "The frozen directory will be named: $DIR_NAME_ON_BOARD"
     echo "The output file will be: $OUTPUT_FILE"
 
-    cp -r $DIR_TO_FREEZE $DIR_NAME_ON_BOARD
+    if [ $DIR_TO_FREEZE != $DIR_NAME_ON_BOARD ]; then
+        cp -r $DIR_TO_FREEZE $DIR_NAME_ON_BOARD
+    fi
 
     # Use on-import=extract so our frozen filesystem is unpacked to '/' in flash on import
     # Use --compress to compress the frozen filesystem archive
