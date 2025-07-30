@@ -1,0 +1,23 @@
+name: Build and Deploy Firmware Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Build Firmware
+      run: source build.sh && build_micropython_opencv
+    - name: Upload Release Assets
+      uses: shogo82148/actions-upload-release-asset@v1
+      with:
+        asset_path: "micropython/ports/rp2/build-SPARKFUN_XRP_CONTROLLER-LARGE_BINARY/MICROPYTHON_OPENCV_SPARKFUN_XRP_CONTROLLER.uf2"
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        upload_url: ${{ github.event.release.upload_url }}
+

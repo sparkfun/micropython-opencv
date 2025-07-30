@@ -1,4 +1,4 @@
-name: Build firmware
+name: Build Firmware
 
 on:
   pull_request:
@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - features_for_launch
-  workflow_dispatch:
 
 jobs:
   build:
@@ -17,21 +16,5 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: true
-    - name: Install packages
-      run: |
-        sudo apt install cmake python3 build-essential gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
-    - name: Build MPY Cross
-      run: make -C micropython/mpy-cross
-    - name: MicroPython submodules
-      run: make -C micropython/ports/rp2 BOARD=SPARKFUN_XRP_CONTROLLER submodules
-    - name: Set Pico SDK path
-      run: echo "PICO_SDK_PATH=$GITHUB_WORKSPACE/micropython/lib/pico-sdk" >> "$GITHUB_ENV"
-    - name: Build OpenCV
-      run: make -C src/opencv PLATFORM=rp2350 --no-print-directory -j4
-    - name: Build firmware
-      run: make BOARD=SPARKFUN_XRP_CONTROLLER -j4
-    - name: Upload UF2
-      uses: actions/upload-artifact@v4
-      with:
-        name: firmware.uf2
-        path: micropython/ports/rp2/build-SPARKFUN_XRP_CONTROLLER-LARGE_BINARY/firmware.uf2
+    - name: Build Firmware
+      run: source build.sh && build_micropython_opencv
