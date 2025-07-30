@@ -173,4 +173,7 @@ function build_micropython_opencv {
 
     # Build firmware
     make BOARD=SPARKFUN_XRP_CONTROLLER ${MAKEOPTS}
+
+    # Rename firmware file to identify it as the OpenCV build and which board it's for
+    mv micropython/ports/rp2/build-SPARKFUN_XRP_CONTROLLER-LARGE_BINARY/firmware.uf2 micropython/ports/rp2/build-SPARKFUN_XRP_CONTROLLER-LARGE_BINARY/MICROPYTHON_OPENCV_SPARKFUN_XRP_CONTROLLER.uf2
 }
