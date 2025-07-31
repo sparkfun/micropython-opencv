@@ -3,7 +3,7 @@
 # 
 # Copyright (c) 2025 SparkFun Electronics
 #-------------------------------------------------------------------------------
-# ex01_touch_drive.py
+# ex01_touch_screen_drive.py
 # 
 # This example creates a simple touch screen interface to drive the XRP robot.
 # It creates arrow buttons to drive around, and a stop button to exit the
@@ -138,25 +138,25 @@ while True:
         elif (ui_cx - button_cx <= x <= ui_cx + button_cx and
               ui_cy - button_spacing - button_cy <= y <= ui_cy - button_spacing + button_cy):
             print("Forward")
-            # drivetrain.straight(20, 0.5)
+            drivetrain.straight(20, 0.5)
         
         # Check if the backward arrow was pressed
         elif (ui_cx - button_cx <= x <= ui_cx + button_cx and
               ui_cy + button_spacing - button_cy <= y <= ui_cy + button_spacing + button_cy):
             print("Backward")
-            # drivetrain.straight(-20, 0.5)
+            drivetrain.straight(-20, 0.5)
         
         # Check if the right arrow was pressed
         elif (ui_cy - button_cy <= y <= ui_cy + button_cy and
               ui_cx + button_spacing - button_cx <= x <= ui_cx + button_spacing + button_cx):
             print("Right")
-            # drivetrain.turn(-90, 0.5)
+            drivetrain.turn(-90, 0.5)
         
         # Check if the left arrow was pressed
         elif (ui_cy - button_cy <= y <= ui_cy + button_cy and
               ui_cx - button_spacing - button_cx <= x <= ui_cx - button_spacing + button_cx):
             print("Left")
-            # drivetrain.turn(90, 0.5)
+            drivetrain.turn(90, 0.5)
 
     # Check for key presses
     key = cv.waitKey(1)
