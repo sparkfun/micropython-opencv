@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="opencv-examples/images/splash.png" />
+</p>
+
 # MicroPython-OpenCV
 
 Welcome to SparkFun's MicroPython port of OpenCV! This is the first known MicroPython port of OpenCV, and as such, there may be some rough edges. Hardware support is limited to SparkFun products.
@@ -6,127 +10,93 @@ Welcome to SparkFun's MicroPython port of OpenCV! This is the first known MicroP
 
 1. Flash MicroPython-OpenCV firmware
     * Back up any files you want to keep, they *will* be overwritten!
-    * Download the latest firmware from the [Releases tab](https://github.com/sparkfun/micropython-opencv/releases).
+    * Download the latest firmware for your board from the [Releases tab](https://github.com/sparkfun/micropython-opencv/releases).
     * If you don't know how to flash firmware to your board, find your board [here](https://micropython.org/download/) and follow the instructions using the OpenCV firmware.
-2. Copy examples (optional)
-    * It is suggested to copy the entire examples folder to your MicroPython board to get started. This can be done simply with [mpremote](https://docs.micropython.org/en/latest/reference/mpremote.html):
-        * `cd micropython-opencv/examples`
-        * `mpremote cp -r . :`
-3. Configure hardware drivers
+    * After first boot, the [opencv-examples](opencv-examples) directory will be automatically extraced to the MicroPython filesystem for easy access to all the examples.
+2. Configure hardware driver initialization
     * The MicroPython port of OpenCV depends on hardware drivers to interface with cameras and displays. Drivers are built into the firmware, so there is no need to install them manually.
-    * An example module called [cv2_hardware_init](examples/cv2_hardware_init/) is imported by all examples to initialize the drivers. You will likely need to edit the files for your specific hardware and board configuration.
-4. Write OpenCV code!
+    * An example module called [cv2_hardware_init](opencv-examples/cv2_hardware_init/) is imported by all examples to initialize the drivers. You will likely need to edit the files for your specific hardware and board configuration.
+3. Write and run OpenCV code
     * Any IDE should work, so use your favorite!
-    * The code block below contains snippets from various examples to highlight major features.
+    * Start with the examples! Go through them in order, which will verify your hardware is working and demonstrate some basics of OpenCV. Read the comments to understand the differences with the MicroPython port.
+    * The code block below contains snippets to highlight major features.
 
 ```python
-# Import OpenCV, just as you would in any other Python environment!
+# Import OpenCV, just like any other Python environment!
 import cv2 as cv
 
-# Standard OpenCV leverages the host operating system to access hardware, but we
-# don't have that luxury in MicroPython. Instead, drivers are provided for
-# various hardware components, which need to be initialized before using them.
-# The exmples import a module called `cv2_hardware_init`, which initializes the
-# drivers. You may need to edit the contents of the `cv2_hardware_init` module
-# based on your specific board and hardware configuration
+# Initialize hardware drivers by importing the example module (you'll likely 
+# need to modify it for your specific hardware configuration).
 from cv2_hardware_init import *
 
-# Import NumPy, almost like any other Python environment! The only difference is
-# the addition of `from ulab` since MicroPython does not have a full NumPy
-# implementation; ulab NumPy is a lightweight version of standard NumPy
+# Import ulab NumPy and initialize an image, almost like any other Python
+# environment! 
 from ulab import numpy as np
-
-# Initialize an image (NumPy array) to be displayed, just like in any other
-# Python environment! Here we create a 240x320 pixel image with 3 color channels
-# (BGR order, like standard OpenCV) and a data type of `uint8` (you should
-# always specify the data type, because NumPy defaults to `float`)
 img = np.zeros((240, 320, 3), dtype=np.uint8)
 
-# OpenCV's drawing functions can be used to modify the image. Here is the
-# obligatory "Hello OpenCV!" text in red
-img = cv2.putText(img, "Hello OpenCV!", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+# Call OpenCV functions just like any other Python environment!
+img = cv.putText(img, "Hello OpenCV!", (50, 200), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+img = cv.Canny(img, 100, 200)
 
-# Once we have an image ready to show, just call `cv.imshow()`, almost like any
-# other Python environment! However, there is one important difference:
-# 
-# Standard OpenCV takes a window name string in `cv.imshow()`, which is used
-# to display the image in a window. We don't have windows in MicroPython, so
-# there is an API change where the first argument must be a display driver. Any
-# display driver can be used, as long as it implements an `imshow()` method that
-# takes a NumPy array as input
-cv.imshow(display, img) # Can alternatively call `display.imshow(img)`
+# Call `cv.imshow()`, almost like any other Python environment! Instead of a
+# window name string, you pass a display driver that implements an `imshow()` 
+# method that takes a NumPy array as input
+cv.imshow(display, img)
 
-# Standard OpenCV requires a call to `cv.waitKey()` to process events and
-# actually display the image. However the display driver shows the image
-# immediately, so it's not necessary to call `cv.waitKey()` in MicroPython.
-# But it is available, and behaves almost like any other Python environment! The
-# only difference is that it requires a key to be pressed in the REPL instead of
-# a window. It will wait for up to the specified number of milliseconds (0 for
-# indefinite), and return the ASCII code of the key pressed (-1 if no key press)
-# 
-# Note - Some MicroPython IDEs (like Thonny) don't actually send any key presses
-# until you hit Enter on your keyboard
-key = cv.waitKey(0) # Not necessary to display image, can remove if desired
+# Call `cv.waitKey()`, just like any other Python environment! This waits for a
+# key press on the REPL. Standard OpenCV requires this to update windows, but
+# MicroPython OpenCV does not.
+key = cv.waitKey(0)
 
-# Open a camera, similar to any other Python environment! In standard OpenCV,
-# you would use `cv.VideoCapture(0)` or similar, and OpenCV would leverage the
-# host operating system to open a camera object and return it as a
-# `cv.VideoCapture` object. However, we don't have that luxury in MicroPython,
-# so a camera driver is required instead. Any camera driver can be used, as long
-# as it implements the same methods as the standard OpenCV `cv.VideoCapture`
-# class, such as `open()`, `read()`, and `release()`
+# Use a camera, similar to any other Python environment! `cv.VideoCapture(0)`
+# is not used in MicroPython OpenCV, the driver is initialized separately.
 camera.open()
-
-# Read a frame from the camera, just like any other Python environment! It
-# returns a tuple, where the first element is a boolean indicating success,
-# and the second element is the frame (NumPy array) read from the camera
 success, frame = camera.read()
-
-# Release the camera, just like in any other Python environment!
 camera.release()
 
-# Call `cv.imread()` to read an image from the MicroPython filesystem, just
-# like in any other Python environment! Make sure to copy the image to the
-# MicroPython filesystem first, and set the path to the image file as needed
-# 
-# If your board can mount an SD card, you can instead load the image to the SD
-# card and change the path to point to the SD card
+# Call `cv.imread()` and `cv.imwrite()` to read and write images to and from
+# the MicroPython filesystem, just like in any other Python environment! Can 
+# also point to an SD card.
 # 
 # Note - only BMP and PNG formats are currently supported in MicroPython OpenCV
-img = cv.imread("test_images/sparkfun_logo.png")
-
-# Let's modify the image! Here we use `cv2.Canny()` to perform edge detection
-# on the image, which is a common operation in computer vision
-edges = cv2.Canny(img, 100, 200)
-
-# Now we'll save the modified image to the MicroPython filesystem using
-# `cv.imwrite()`, just like in any other Python environment!
-# 
-# Again, SD cards are supported, just change the path to point to the SD card
-# 
-# Note - only BMP and PNG formats are currently supported in MicroPython OpenCV
-success = cv.imwrite("test_images/sparkfun_logo_edges.png", edges)
+img = cv.imread("path/to/image.png")
+success = cv.imwrite("path/to/image.png", img)
 ```
 
 # Hardware Support and Requirements
 
 Hardware support in this repository is mostly limited to SparkFun products. The current list of supported proudcts is very small, but may be expanded in the future. Users are welcome to fork this repository to add support for other products, following our licence requirements. Assistance in adding support for other hardware will not be provided by SparkFun. We may consider pull requests that add support for additional hardware, see [#Contributing](#Contributing).
 
-The OpenCV firmware adds ~3MiB on top of the standard MicroPython firmware, which itself be up to 1MiB in size (depending on platform and board). So a board with at least 8MB of flash is recommended, to also have space available for file storage.
+The OpenCV firmware adds over 3MiB on top of the standard MicroPython firmware, which itself be up to 1MiB in size (depending on platform and board). You'll also want some storage space, so a board with at least 8MB of flash is recommended.
 
 PSRAM is a requirement to do anything useful with OpenCV. A single 320x240 RGB888 frame buffer requires 225KiB of RAM; most processors only have a few hundred KiB of SRAM. Several frame buffers can be needed for even simple vision pipelines, so you really need at least a few MiB of RAM available. The more the merrier!
 
-Below is the list of supported hardware devices:
+Below is the list of currently supported hardware:
 
-* MicroPython Devices
-    * [XRP Controller](https://www.sparkfun.com/sparkfun-experiential-robotics-platform-xrp-controller.html)
-* Camera Drivers
-    * HM01B0
-    * [OV5640](https://www.sparkfun.com/ov5640-camera-board-5-megapixel-2592x1944-fisheye-lens.html) (not fully working yet)
-* Display Drivers
-    * ST7789
-* Touch Screen Drivers
-    * CST816
+## MicroPython Devices
+
+| Status | Device | Notes |
+| --- | --- | --- |
+| ✔️ | [XRP Controller](https://www.sparkfun.com/sparkfun-experiential-robotics-platform-xrp-controller.html) | |
+
+## Camera Drivers
+
+| Status | Device | Notes |
+| --- | --- | --- |
+| ✔️ | HM01B0 | |
+| ⚠️ | [OV5640](https://www.sparkfun.com/ov5640-camera-board-5-megapixel-2592x1944-fisheye-lens.html) | See [#22](https://github.com/sparkfun/micropython-opencv/issues/22) |
+
+## Display Drivers
+
+| Status | Device | Notes |
+| --- | --- | --- |
+| ✔️ | ST7789 | |
+
+## Touch Screen Drivers
+
+| Status | Device | Notes |
+| --- | --- | --- |
+| ✔️ | CST816 | |
 
 # Performance
 
