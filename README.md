@@ -100,13 +100,26 @@ Below is the list of currently supported hardware:
 
 # Performance
 
-Limit your expectations. OpenCV typically runs on full desktop systems containing processors running at GHz speeds with dozens of cores optimized for computing speed. In contrast, microcontrollers processors typically run at a few hundred MHz 1 or 2 cores optimized for low power consumtion. Exact performance depends on many things, including the processor, vision pipeline, image resolution, colorspaces used, RAM available, etc. But for reference, the RP2350 can run the SparkFun Logo Detection Example at about 2.5 FPS at 320x240 resolution.
+Limit your expectations. OpenCV typically runs on full desktop systems containing processors running at GHz speeds with dozens of cores optimized for computing speed. In contrast, microcontrollers processors typically run at a few hundred MHz with 1 or 2 cores optimized for low power consumtion. Exact performance depends on many things, including the processor, vision pipeline, image resolution, colorspaces used, RAM available, etc. But for reference, the RP2350 can run the [SparkFun Logo Detection Example](opencv-examples/ex06_detect_sfe_logo.py) at 2 to 2.5 FPS at 320x240 resolution.
 
 Something to consider is that MicroPython uses a garbage collector for memory management. As images are created and destroyed in a vision pipeline, RAM will be consumed until the garbage collector runs. The collection process takes longer with more RAM, so this can result in noticable delays during collection (typically a few hundred milliseconds). To mitigate this, it's best to pre-allocate arrays and utilize the optional `dst` argument of OpenCV functions to avoid allocating new arrays when possible. Pre-allocation also helps improve performance by avoiding repeated delays from allocating memory.
 
+Below are some typical execution times for various OpenCV functions. All were tested on the XRP (RP2350) with the [splash image](opencv-examples/images/splash.png), which is 320x240.
+
+| Function | Execution Time |
+| --- | --- |
+| `dst = cv.blur(src, (5, 5))` | 115ms |
+| `dst = cv.blur(src, (5, 5), dst)` | 87ms |
+| `retval, dst = cv.threshold(src, 127, 255, cv.THRESH_BINARY)` | 76ms |
+| `retval, dst = cv.threshold(src, 127, 255, cv.THRESH_BINARY, dst)` | 46ms |
+| `dst = cv.cvtColor(src, cv.COLOR_BGR2HSV)` | 114ms |
+| `dst = cv.cvtColor(src, cv.COLOR_BGR2HSV, dst)` | 84ms |
+| `dst = cv.Canny(src, 100, 200)` | 504ms |
+| `dst = cv.Canny(src, 100, 200, dst)` | 482ms |
+
 Another way to improve performance is to select the best hardware drivers for your setup. For example, the default SPI driver for the ST7789 is limited to the max SPI baudrate for the processor's SPI peripheral. That's 24MHz in the case of the RP2350, but another driver is provided that uses the PIO peripheral that runs at 75MHz, so displaying images can be ~3x faster (ignoring any required colorspace conversions).
 
-For users wanting maximum performance, it may be desireable to bypass the high-level functions of the display/camera drivers, and instead work directly with the buffer member variables and read/write functions. This can avoid computationally expensive colorspace conversions when reading and writing images if they're not needed.
+For users wanting maximum performance, it may be desireable to bypass the high-level functions of the display/camera drivers, and instead work directly with the buffer member variables and read/write functions. This can avoid computationally expensive colorspace conversions when reading and writing images if they're not needed, but this is for advanced users only.
 
 # Included OpenCV Functions
 
