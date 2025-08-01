@@ -1,26 +1,16 @@
-# Set Pico SDK flags to create our own malloc wrapper and enable exceptions
-CMAKE_ARGS += -DSKIP_PICO_MALLOC=1 -DPICO_CXX_ENABLE_EXCEPTIONS=1
+ifndef PLATFORM
+$(error PLATFORM not specified. Use 'make PLATFORM=rp2350' or similar.)
+endif
 
-# Get current directory
-CURRENT_DIR = $(shell pwd)
+TOOLCHAIN_FILE = platforms/${PLATFORM}.toolchain.cmake
 
-# Set the MicroPython user C module path to the OpenCV module
-MAKE_ARGS = USER_C_MODULES="$(CURRENT_DIR)/src/opencv_upy.cmake"
+# TODO: For some reason, specifying this in the toolchain file doesn't work
+CMAKE_ARGS += -DBUILD_LIST=core,imgproc,imgcodecs
 
-# Ensure we're building the OpenCV board variant
-MAKE_ARGS += BOARD_VARIANT=LARGE_BINARY
-
-# Use the OpenCV driver manifest
-MAKE_ARGS += FROZEN_MANIFEST="$(CURRENT_DIR)/manifest.py"
-
-# Build MicroPython with the OpenCV module
+# Generic build
 all:
-	@cd micropython/ports/rp2 && export CMAKE_ARGS="$(CMAKE_ARGS)" && make -f Makefile $(MAKEFLAGS) $(MAKE_ARGS)
+	cd opencv && mkdir -p build && cmake -S . -B build -DPICO_BUILD_DOCS=0 -DCMAKE_TOOLCHAIN_FILE=../${TOOLCHAIN_FILE} ${CMAKE_ARGS} && make -C build -f Makefile $(MAKEFLAGS) $(MAKE_ARGS)
 
-# Clean the MicroPython build
+# Clean the OpenCV build
 clean:
-	@cd micropython/ports/rp2 && make -f Makefile $(MAKEFLAGS) $(MAKE_ARGS) clean
-
-# Load the MicroPython submodules
-submodules:
-	@cd micropython/ports/rp2 && make -f Makefile $(MAKEFLAGS) $(MAKE_ARGS) submodules
+	cd opencv && rm -rf build

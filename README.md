@@ -1,110 +1,59 @@
-<p align="center">
-    <img src="opencv-examples/images/splash.png" />
-</p>
+# SparkFun MicroPython-OpenCV
 
-# MicroPython-OpenCV
+Welcome to SparkFun's MicroPython port of OpenCV! This is the first known MicroPython port of OpenCV, which opens up a whole new world of vision processing abilities on embedded devices in a Python environment!
 
-Welcome to SparkFun's MicroPython port of OpenCV! This is the first known MicroPython port of OpenCV, and as such, there may be some rough edges. Hardware support is limited to SparkFun products.
+As the first port, there may be incomplete or missing features, and some rough edges. For example, we have only implemented support for the Raspberry Pi RP2350 so far, and some of the build procedures are hard-coded for that. We'd be happy to work with the community to create an official port in the future, but until then, this repo is available and fully open-source for anyone to use!
 
-# Quick Start
+# Example Snippets
 
-1. Flash MicroPython-OpenCV firmware
-    * Back up any files you want to keep, they *will* be overwritten!
-    * Download the latest firmware for your board from the [Releases tab](https://github.com/sparkfun/micropython-opencv/releases).
-    * If you don't know how to flash firmware to your board, find your board [here](https://micropython.org/download/) and follow the instructions using the OpenCV firmware.
-    * After first boot, the [opencv-examples](opencv-examples) directory will be automatically extraced to the MicroPython filesystem for easy access to all the examples.
-2. Configure hardware driver initialization
-    * The MicroPython port of OpenCV depends on hardware drivers to interface with cameras and displays. Drivers are built into the firmware, so there is no need to install them manually.
-    * An example module called [cv2_hardware_init](opencv-examples/cv2_hardware_init/) is imported by all examples to initialize the drivers. You will likely need to edit the files for your specific hardware and board configuration.
-3. Write and run OpenCV code
-    * Any IDE should work, so use your favorite!
-    * Start with the examples! Go through them in order, which will verify your hardware is working and demonstrate some basics of OpenCV. Read the comments to understand the differences with the MicroPython port.
-    * The code block below contains snippets to highlight major features.
+Below are example code snippets of features avaiable in this port of OpenCV. We've done our best to make it as similar as possible to standard OpenCV, but there are some necessary API changes due to the limitations of MicroPython.
 
 ```python
 # Import OpenCV, just like any other Python environment!
 import cv2 as cv
 
-# Initialize hardware drivers by importing the example module (you'll likely 
-# need to modify it for your specific hardware configuration).
-from cv2_hardware_init import *
-
 # Import ulab NumPy and initialize an image, almost like any other Python
-# environment! 
+# environment!
 from ulab import numpy as np
 img = np.zeros((240, 320, 3), dtype=np.uint8)
 
-# Call OpenCV functions just like any other Python environment!
+# Call OpenCV functions, just like standard OpenCV!
 img = cv.putText(img, "Hello OpenCV!", (50, 200), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 img = cv.Canny(img, 100, 200)
 
-# Call `cv.imshow()`, almost like any other Python environment! Instead of a
-# window name string, you pass a display driver that implements an `imshow()` 
-# method that takes a NumPy array as input
+# Call `cv.imshow()`, almost like standard OpenCV! Instead of passing a window
+# name string, you pass a display driver that implements an `imshow()` method
+# that takes a NumPy array as input.
 cv.imshow(display, img)
 
-# Call `cv.waitKey()`, just like any other Python environment! This waits for a
-# key press on the REPL. Standard OpenCV requires this to update windows, but
-# MicroPython OpenCV does not.
+# Call `cv.waitKey()`, just like standard OpenCV! Unlike standard OpenCV, this
+# waits for a key press on the REPL instead of a window, and it is not necessary
+# to call after `cv.imshow()` because display drivers show images immediately.
 key = cv.waitKey(0)
 
-# Use a camera, similar to any other Python environment! `cv.VideoCapture(0)`
-# is not used in MicroPython OpenCV, the driver is initialized separately.
+# Use a camera, similar to standard OpenCV! `cv.VideoCapture()` is not used in
+# MicroPython-OpenCV, because a separate camera driver that implements the same
+# methods as the OpenCV `VideoCapture` class must be initialized separately.
 camera.open()
 success, frame = camera.read()
 camera.release()
 
 # Call `cv.imread()` and `cv.imwrite()` to read and write images to and from
-# the MicroPython filesystem, just like in any other Python environment! Can 
-# also point to an SD card.
-# 
-# Note - only BMP and PNG formats are currently supported in MicroPython OpenCV
+# the MicroPython filesystem, just like standard OpenCV! It can also point to an
+# SD card if one is mounted for extra storage space.
 img = cv.imread("path/to/image.png")
 success = cv.imwrite("path/to/image.png", img)
 ```
 
-# Hardware Support and Requirements
-
-Hardware support in this repository is mostly limited to SparkFun products. The current list of supported proudcts is very small, but may be expanded in the future. Users are welcome to fork this repository to add support for other products, following our licence requirements. Assistance in adding support for other hardware will not be provided by SparkFun. We may consider pull requests that add support for additional hardware, see [#Contributing](#Contributing).
-
-The OpenCV firmware adds over 3MiB on top of the standard MicroPython firmware, which itself be up to 1MiB in size (depending on platform and board). You'll also want some storage space, so a board with at least 8MB of flash is recommended.
-
-PSRAM is a requirement to do anything useful with OpenCV. A single 320x240 RGB888 frame buffer requires 225KiB of RAM; most processors only have a few hundred KiB of SRAM. Several frame buffers can be needed for even simple vision pipelines, so you really need at least a few MiB of RAM available. The more the merrier!
-
-Below is the list of currently supported hardware:
-
-## MicroPython Devices
-
-| Status | Device | Notes |
-| --- | --- | --- |
-| ✔️ | [XRP Controller](https://www.sparkfun.com/sparkfun-experiential-robotics-platform-xrp-controller.html) | |
-
-## Camera Drivers
-
-| Status | Device | Notes |
-| --- | --- | --- |
-| ✔️ | HM01B0 | |
-| ⚠️ | [OV5640](https://www.sparkfun.com/ov5640-camera-board-5-megapixel-2592x1944-fisheye-lens.html) | See [#22](https://github.com/sparkfun/micropython-opencv/issues/22) |
-
-## Display Drivers
-
-| Status | Device | Notes |
-| --- | --- | --- |
-| ✔️ | ST7789 | |
-
-## Touch Screen Drivers
-
-| Status | Device | Notes |
-| --- | --- | --- |
-| ✔️ | CST816 | |
+For full example, see our [Red Vision repo](https://github.com/sparkfun/red_vision).
 
 # Performance
 
-Limit your expectations. OpenCV typically runs on full desktop systems containing processors running at GHz speeds with dozens of cores optimized for computing speed. In contrast, microcontrollers processors typically run at a few hundred MHz with 1 or 2 cores optimized for low power consumtion. Exact performance depends on many things, including the processor, vision pipeline, image resolution, colorspaces used, RAM available, etc. But for reference, the RP2350 can run the [SparkFun Logo Detection Example](opencv-examples/ex06_detect_sfe_logo.py) at 2 to 2.5 FPS at 320x240 resolution.
+Limit your expectations. OpenCV typically runs on full desktop systems containing processors running at GHz speeds with dozens of cores optimized for computing speed and GB of RAM. In contrast, microcontrollers processors typically run at a few hundred MHz with 1 or 2 cores optimized for low power consumtion with a few MB of RAM. Exact performance depends on many things, including the processor, vision pipeline, image resolution, colorspaces used, RAM available, etc.
 
-Something to consider is that MicroPython uses a garbage collector for memory management. As images are created and destroyed in a vision pipeline, RAM will be consumed until the garbage collector runs. The collection process takes longer with more RAM, so this can result in noticable delays during collection (typically a few hundred milliseconds). To mitigate this, it's best to pre-allocate arrays and utilize the optional `dst` argument of OpenCV functions to avoid allocating new arrays when possible. Pre-allocation also helps improve performance by avoiding repeated delays from allocating memory.
+If you want best performance, keep in mind is that MicroPython uses a garbage collector for memory management. If images are repeatedly created in a vision pipeline, RAM will be consumed until the garbage collector runs. The collection process takes longer with more RAM, so this can result in noticable delays during collection (typically a few hundred milliseconds). To mitigate this, it's best to pre-allocate arrays and utilize the optional `dst` argument of OpenCV functions so memory consumption is minimized. Pre-allocation also helps improve performance, because allocating memory takes time.
 
-Below are some typical execution times for various OpenCV functions. All were tested on the XRP (RP2350) with the [splash image](opencv-examples/images/splash.png), which is 320x240.
+Below are some typical execution times for various OpenCV functions. All were tested on a Raspberry Pi RP2350 with a 320x240 test image.
 
 | Function | Execution Time |
 | --- | --- |
@@ -117,17 +66,13 @@ Below are some typical execution times for various OpenCV functions. All were te
 | `dst = cv.Canny(src, 100, 200)` | 504ms |
 | `dst = cv.Canny(src, 100, 200, dst)` | 482ms |
 
-Another way to improve performance is to select the best hardware drivers for your setup. For example, the default SPI driver for the ST7789 is limited to the max SPI baudrate for the processor's SPI peripheral. That's 24MHz in the case of the RP2350, but another driver is provided that uses the PIO peripheral that runs at 75MHz, so displaying images can be ~3x faster (ignoring any required colorspace conversions).
-
-For users wanting maximum performance, it may be desireable to bypass the high-level functions of the display/camera drivers, and instead work directly with the buffer member variables and read/write functions. This can avoid computationally expensive colorspace conversions when reading and writing images if they're not needed, but this is for advanced users only.
-
 # Included OpenCV Functions
 
 Below is a list of all OpenCV functions included in the MicroPython port of OpenCV. This section follows OpenCV's module structure.
 
 Only the most useful OpenCV functions are included. The MicroPython environment is *extremely* limited, so many functions are omitted due to prohibitively high RAM and firmware size requirements. Other less useful functions have been omitted to reduce firmware size. If there are additional functions you'd like to be included, see [#Contributing](#Contributing).
 
-If you need help understanding how to use these functions, see the documentation link for each function. You can also check out [OpenCV's Python Tutorials](https://docs.opencv.org/4.11.0/d6/d00/tutorial_py_root.html) and other tutorials online for more educational experience. This repository is simply a port of OpenCV, so we do not document these functions or how to use them, except for deviations from standard Python OpenCV.
+If you need help understanding how to use these functions, see the documentation link for each function. You can also check out [OpenCV's Python Tutorials](https://docs.opencv.org/4.11.0/d6/d00/tutorial_py_root.html) and other tutorials online for more educational experience. This repository is simply a port of OpenCV, so we do not document these functions or how to use them, except for deviations from standard OpenCV.
 
 ## [`core`](https://docs.opencv.org/4.11.0/d0/de1/group__core.html)
 
@@ -248,72 +193,100 @@ If you need help understanding how to use these functions, see the documentation
 | `cv.waitKey([, delay]) -> retval`<br>Waits for a pressed key.<br>[Documentation](https://docs.opencv.org/4.11.0/d7/dfc/group__highgui.html#ga5628525ad33f52eab17feebcfba38bd7) | Input is taken from `sys.stdin`, which is typically the REPL. |
 | `cv.waitKeyEx([, delay]) -> retval`<br>Similar to waitKey, but returns full key code.<br>[Documentation](https://docs.opencv.org/4.11.0/d7/dfc/group__highgui.html#ga5628525ad33f52eab17feebcfba38bd7) | Input is taken from `sys.stdin`, which is typically the REPL.<br>Full key code is implementation specific, so special key codes in MicroPython will not match other Python environments. |
 
+# Hardware Drivers
+
+Standard OpenCV leverages the host operating system to access hardware, like creating windows and accessing cameras. MicroPython does not have that luxury, so instead, drivers must be implemented for these hardware devices. Take a look at our [Red Vision repo](https://github.com/sparkfun/red_vision) for examples. This leads to necessary API changes for functions like `cv.imshow()`.
+
+# MicroPython Board Requirements
+
+As of writing, the OpenCV firmware adds over 3MiB on top of the standard MicroPython firmware, which itself be up to 1MiB in size (depending on platform and board). You'll also want some storage space, so a board with at least 8MB of flash is recommended.
+
+PSRAM is basically a requirement to do anything useful with OpenCV. A single 320x240 RGB888 frame buffer requires 225KiB of RAM; most microcontrollers only have a few hundred KiB of SRAM. Several frame buffers can be needed for even simple vision pipelines, so you really need at least a few MiB of RAM available. The more the merrier!
+
 # Building
 
 Below are instructions to build the MicroPython-OpenCV firmware from scratch. Instructions are only provided for Linux systems.
 
-1. Install dependencies
-    * `sudo apt install cmake python3 build-essential gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib`
-2. Clone this repo
-    * `cd ~`
-    * `git clone https://github.com/sparkfun/micropython-opencv.git`
-    * `cd micropython-opencv`
-    * `git submodule update --init`
-3. Build mpy-cross
-    * `make -C micropython/mpy-cross`
-4. Clone submodules for your board
-    * `make -C micropython/ports/rp2 BOARD=SPARKFUN_XRP_CONTROLLER submodules`
+> [!NOTE]
+> This build process does not include any hardware drivers, see our [Red Vision repo](https://github.com/sparkfun/red_vision) for example drivers.
+
+> [!NOTE]
+> Because OpenCV dramatically increases the firmware size, it may be necessary to define board variants that reduce the storage size to avoid it overlapping with the firmware. See [#Adding New Boards](#Adding-New-Boards).
+
+1. Clone this repo and MicroPython
+    * ```
+      cd ~
+      git clone https://github.com/sparkfun/micropython-opencv.git
+      git clone https://github.com/micropython/micropython.git
+      ```
+2. Build the MicroPython cross-compiler
+    * ```
+      make -C micropython/mpy-cross -j4
+      ```
+3. Clone MicroPython submodules for your board
+    * ```
+      make -C micropython/ports/rp2 BOARD=SPARKFUN_XRP_CONTROLLER submodules
+      ```
     * Replace `rp2` and `SPARKFUN_XRP_CONTROLLER` with your platform and board name respectively
-5. Set environment variables (optional)
-    * Some platforms require environment variables to be set. Examples:
-    * `export PICO_SDK_PATH=~/micropython-opencv/micropython/lib/pico-sdk`
-6. Build OpenCV
-    * `make -C src/opencv PLATFORM=rp2350 --no-print-directory -j4`
+4. Set environment variables (if needed)
+    * Some platforms require environment variables to be set. Example:
+    * ```
+      export PICO_SDK_PATH=~/micropython/lib/pico-sdk
+      ```
+5. Build OpenCV for your platform
+    * ```
+      make -C micropython-opencv PLATFORM=rp2350 --no-print-directory -j4
+      ```
     * Replace `rp2350` with your board's platform
-7. Build firmware
-    * `make BOARD=SPARKFUN_XRP_CONTROLLER -j4`
-    * Replace `SPARKFUN_XRP_CONTROLLER` with your board name
-    * Your firmware file(s) will be located in `~/micropython-opencv/micropython/ports/<port-name>/build-<board-name>-OPENCV/`
+6. Build MicroPython-OpenCV firmware for your board
+    * ```
+      export CMAKE_ARGS="-DSKIP_PICO_MALLOC=1 -DPICO_CXX_ENABLE_EXCEPTIONS=1" && make -C micropython/ports/rp2 BOARD=SPARKFUN_XRP_CONTROLLER USER_C_MODULES=~/micropython-opencv/micropython_opencv.cmake -j4
+      ```
+    * Replace `rp2` and `SPARKFUN_XRP_CONTROLLER` with your platform and board name respectively
+    * Replace the `CMAKE_ARGS` contents with whatever is required for your board's platform
+    * Your firmware file(s) will be located in `~/micropython/ports/<port-name>/build-<board-name>/`
 
-# Adding New Board
+# Adding New Boards
 
-Because OpenCV adds ~3MiB to the firmware size, it is necessary to define variants that reduce the storage size to avoid it overlapping with the firmware. It is also beneficial to adjust the board name to include `OpenCV` (or similar) to help customers and tech support identify whether the MicroPython-OpenCV is actually flashed to the board.
+Because OpenCV dramatically increases the firmware size, it may be necessary to define board variants that reduce the storage size to avoid it overlapping with the firmware. It is also beneficial to adjust the board name to include `OpenCV` or similar to help people identify that the MicroPython-OpenCV firmware is flashed to the board instead of standard MicroPython.
 
-Below is the variant for the XRP Controller as an example. The variant is defined by creating a file called `mpconfigvariant_OPENCV.cmake` in [`micropython/ports/rp2/boards/SPARKFUN_XRP_CONTROLLER`](https://github.com/sparkfun/micropython/blob/7e728e8c6aad74ca244183f3e0705db6f332abd9/ports/rp2/boards/SPARKFUN_XRP_CONTROLLER/mpconfigvariant_LARGE_BINARY.cmake) with contents:
+Below is the variant for the XRP Controller as an example. The variant is defined by creating a file called [`micropython/ports/rp2/boards/SPARKFUN_XRP_CONTROLLER/mpconfigvariant_RED_VISION.cmake`](https://github.com/sparkfun/micropython/blob/7e728e8c6aad74ca244183f3e0705db6f332abd9/ports/rp2/boards/SPARKFUN_XRP_CONTROLLER/mpconfigvariant_LARGE_BINARY.cmake) with contents:
 
 ```
 list(APPEND MICROPY_DEF_BOARD
     # Board name
-    "MICROPY_HW_BOARD_NAME=\"SparkFun XRP Controller (OpenCV)\""
+    "MICROPY_HW_BOARD_NAME=\"SparkFun XRP Controller (Red Vision)\""
     # 8MB (8 * 1024 * 1024)
     "MICROPY_HW_FLASH_STORAGE_BYTES=8388608"
 )
 ```
 
-Some board definitions do not have `#ifndef` wrappers in `mpconfigboard.h` for `MICROPY_HW_BOARD_NAME` and `MICROPY_HW_FLASH_STORAGE_BYTES`. That should be added if needed so the variant can build properly.
+Some board definitions do not have `#ifndef` wrappers in `mpconfigboard.h` for `MICROPY_HW_BOARD_NAME` and `MICROPY_HW_FLASH_STORAGE_BYTES`. They should be added if needed so the variant can build properly.
 
-Then, the firmware can be built with `make BOARD=<board-name> -j4`
+Then, the firmware can be built by adding `BOARD_VARIANT=<variant-name>` to the `make` command when building the MicroPython-OpenCV firmware.
 
-# Adding New Platform
+# Adding New Platforms
 
-Only RP2350 exists currently, so the all requirements for adding new platforms is not fully known yet. However, it should be along the lines of:
+Only support for the Raspberry Pi RP2350 has been figured out, so the all requirements for adding new platforms is not fully known yet. However, it should be along the lines of:
 
 1. Create a valid toolchain file for the platform
     * See [rp2350.toolchain.cmake](src/opencv/platforms/rp2350.toolchain.cmake) for reference
     * This loosely follow's [OpenCV's platform definitions](https://github.com/opencv/opencv/tree/4.x/platforms)
 2. Ensure OpenCV builds correctly
-    * `make -C src/opencv PLATFORM=<new-platform> --no-print-directory -j4`
+    * ```
+      make -C micropython-opencv/src/opencv PLATFORM=<new-platform> --no-print-directory -j4
+      ```
 3. Create new board(s) for that platform
-    * See [#Adding New Board](#Adding-New-Board)
+    * See [#Adding New Boards](#Adding-New-Boards)
 4. Build MicroPython-OpenCV firmware for that board
-    * `make BOARD=<board-name> -j4`
+    * ```
+      make -C micropython/ports/rp2 BOARD=<board-name> USER_C_MODULES=micropython-opencv/src/micropython_opencv.cmake -j4
+      ```
 
 # Contributing
 
-Found a bug? Is there a discrepancy between standard OpenCV and MicroPython-OpenCV? Have a feature request? Want support for other hardware?
+Found a bug? Is there a discrepancy between standard OpenCV and MicroPython-OpenCV? Have a feature request?
 
 First, please see if there is an [existing issue](https://github.com/sparkfun/micropython-opencv/issues). If not, then please [open a new issue](https://github.com/sparkfun/micropython-opencv/issues/new) so we can discuss the topic!
 
 Pull requests are welcome! Please keep the scope of your pull request focused (make separate ones if needed), and keep file changes limited to the scope of your pull request.
-
-Keep in mind that we only intend to support SparkFun products in this repository, though we may be open to hosting support for some hardware from other vendors. Please first open an issue to check if we're open to it. If not, you're always welcome to create your own fork following our license requirements!

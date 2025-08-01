@@ -13,14 +13,14 @@ add_library(usermod_cv2 INTERFACE)
 
 # Add our source files to the library.
 target_sources(usermod_cv2 INTERFACE
-    ${CMAKE_CURRENT_LIST_DIR}/alloc.c
-    ${CMAKE_CURRENT_LIST_DIR}/convert.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/highgui.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/imgcodecs.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/imgproc.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/numpy.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/opencv_upy.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/alloc.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/convert.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/core.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/highgui.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/imgcodecs.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/imgproc.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/numpy.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/opencv_upy.c
 )
 
 # Add the src directory as an include directory.
@@ -49,7 +49,7 @@ target_compile_definitions(usermod INTERFACE ULAB_MAX_DIMS=4)
 include(${CMAKE_CURRENT_LIST_DIR}/ulab/code/micropython.cmake)
 
 # Include OpenCV
-set(OpenCV_DIR ${CMAKE_CURRENT_LIST_DIR}/opencv/opencv/build)
+set(OpenCV_DIR ${CMAKE_CURRENT_LIST_DIR}/opencv/build)
 find_package(OpenCV REQUIRED)
 target_include_directories(usermod INTERFACE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(usermod INTERFACE ${OpenCV_LIBS})

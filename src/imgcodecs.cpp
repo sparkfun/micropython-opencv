@@ -19,7 +19,7 @@
 // C headers
 extern "C" {
 #include "imgcodecs.h"
-#include "ulab/code/ndarray.h"
+#include "ndarray.h"
 #include "py/builtin.h"
 } // extern "C"
 

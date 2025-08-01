@@ -17,7 +17,7 @@
 // C headers
 extern "C" {
 #include "py/runtime.h"
-#include "ulab/code/ndarray.h"
+#include "ndarray.h"
 } // extern "C"
 
 using namespace cv;

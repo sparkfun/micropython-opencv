@@ -19,7 +19,7 @@
 // C headers
 extern "C" {
 #include "imgproc.h"
-#include "ulab/code/ndarray.h"
+#include "ndarray.h"
 } // extern "C"
 
 using namespace cv;
