@@ -45,7 +45,7 @@ img = cv.imread("path/to/image.png")
 success = cv.imwrite("path/to/image.png", img)
 ```
 
-For full example, see our [Red Vision repo](https://github.com/sparkfun/red_vision).
+For full examples, see our [Red Vision repo](https://github.com/sparkfun/red_vision).
 
 # Performance
 
@@ -248,9 +248,12 @@ Below are instructions to build the MicroPython-OpenCV firmware from scratch. In
 
 # Adding New Boards
 
+> [!NOTE]
+> This section assumes this board's platform is supported (eg. RP2350). If not, see [#Adding New Platforms](#Adding-New-Platforms).
+
 Because OpenCV dramatically increases the firmware size, it may be necessary to define board variants that reduce the storage size to avoid it overlapping with the firmware. It is also beneficial to adjust the board name to include `OpenCV` or similar to help people identify that the MicroPython-OpenCV firmware is flashed to the board instead of standard MicroPython.
 
-Below is the variant for the XRP Controller as an example. The variant is defined by creating a file called [`micropython/ports/rp2/boards/SPARKFUN_XRP_CONTROLLER/mpconfigvariant_RED_VISION.cmake`](https://github.com/sparkfun/micropython/blob/7e728e8c6aad74ca244183f3e0705db6f332abd9/ports/rp2/boards/SPARKFUN_XRP_CONTROLLER/mpconfigvariant_LARGE_BINARY.cmake) with contents:
+Below is the variant for the XRP Controller as an example. The variant is defined by creating a file called [`micropython/ports/rp2/boards/SPARKFUN_XRP_CONTROLLER/mpconfigvariant_RED_VISION.cmake`](https://github.com/sparkfun/micropython/blob/e23e46ad423352b3f2362a51889bda25cb17b6cb/ports/rp2/boards/SPARKFUN_XRP_CONTROLLER/mpconfigvariant_RED_VISION.cmake) with contents:
 
 ```
 list(APPEND MICROPY_DEF_BOARD
@@ -270,23 +273,29 @@ Then, the firmware can be built by adding `BOARD_VARIANT=<variant-name>` to the 
 Only support for the Raspberry Pi RP2350 has been figured out, so the all requirements for adding new platforms is not fully known yet. However, it should be along the lines of:
 
 1. Create a valid toolchain file for the platform
-    * See [rp2350.toolchain.cmake](src/opencv/platforms/rp2350.toolchain.cmake) for reference
+    * See [rp2350.toolchain.cmake](platforms/rp2350.toolchain.cmake) for reference
     * This loosely follow's [OpenCV's platform definitions](https://github.com/opencv/opencv/tree/4.x/platforms)
-2. Ensure OpenCV builds correctly
+2. Build OpenCV with the new platform
     * ```
-      make -C micropython-opencv/src/opencv PLATFORM=<new-platform> --no-print-directory -j4
+      make -C micropython-opencv/opencv PLATFORM=<new-platform> --no-print-directory -j4
       ```
-3. Create new board(s) for that platform
+3. Create a new board for the new platform
     * See [#Adding New Boards](#Adding-New-Boards)
-4. Build MicroPython-OpenCV firmware for that board
+4. Build MicroPython-OpenCV firmware for the new board
     * ```
-      make -C micropython/ports/rp2 BOARD=<board-name> USER_C_MODULES=micropython-opencv/src/micropython_opencv.cmake -j4
+      make -C micropython/ports/rp2 BOARD=<board-name> USER_C_MODULES=micropython-opencv/micropython_opencv.cmake -j4
       ```
 
 # Contributing
+
+> [!NOTE]
+> We at SparkFun are not OpenCV developers. For things related to OpenCV, please head to https://github.com/opencv/opencv
 
 Found a bug? Is there a discrepancy between standard OpenCV and MicroPython-OpenCV? Have a feature request?
 
 First, please see if there is an [existing issue](https://github.com/sparkfun/micropython-opencv/issues). If not, then please [open a new issue](https://github.com/sparkfun/micropython-opencv/issues/new) so we can discuss the topic!
 
 Pull requests are welcome! Please keep the scope of your pull request focused (make separate ones if needed), and keep file changes limited to the scope of your pull request.
+
+> [!NOTE]
+> Because of limitations of microcontrollers, MicroPython, and OpenCV, it may not be possible to add some features of OpenCV.

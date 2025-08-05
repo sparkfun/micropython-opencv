@@ -1,4 +1,6 @@
-# Derived from:
+# Credit to Joachim Burket for getting OpenCV to build on the ESP32 and
+# documenting a functional CMake configuration for it! This file is based on
+# their work here:
 # https://github.com/joachimBurket/esp32-opencv/blob/master/esp32/doc/detailed_build_procedure.md
 set(CMAKE_BUILD_TYPE Release)
 set(BUILD_SHARED_LIBS OFF)

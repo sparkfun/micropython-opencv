@@ -1,7 +1,9 @@
+# Need to specify the platform to build for
 ifndef PLATFORM
 $(error PLATFORM not specified. Use 'make PLATFORM=rp2350' or similar.)
 endif
 
+# Set the toolchain file
 TOOLCHAIN_FILE = platforms/${PLATFORM}.toolchain.cmake
 
 # TODO: For some reason, specifying this in the toolchain file doesn't work
