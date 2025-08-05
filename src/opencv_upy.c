@@ -1,97 +1,30 @@
+/*
+ *------------------------------------------------------------------------------
+ * SPDX-License-Identifier: MIT
+ * 
+ * Copyright (c) 2025 SparkFun Electronics
+ *------------------------------------------------------------------------------
+ * opencv_upy.c
+ * 
+ * OpenCV module registration.
+ *------------------------------------------------------------------------------
+ */
+
 #include "core.h"
+#include "highgui.h"
+#include "imgcodecs.h"
 #include "imgproc.h"
 
-// Define a Python reference to the function we'll make available.
-// See example.cpp for the definition.
-static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_core_inRange_obj, 3, cv2_core_inRange);
-static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_core_max_obj, 2, cv2_core_max);
-static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_core_min_obj, 2, cv2_core_min);
-static MP_DEFINE_CONST_FUN_OBJ_KW(cv2_imgproc_cvtColor_obj, 2, cv2_imgproc_cvtColor);
-
-// Define all attributes of the module.
-// Table entries are key/value pairs of the attribute name (a string)
-// and the MicroPython object reference.
-// All identifiers and strings are written as MP_QSTR_xxx and will be
-// optimized to word-sized integers by the build system (interned strings).
+// Python module globals dictionary
 static const mp_rom_map_elem_t cv2_module_globals_table[] = {
-    ////////////////////////////////////////////////////////////////////////////
-    // Module name
-    ////////////////////////////////////////////////////////////////////////////
-    
+    // Python module name
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_cv2) },
 
-    ////////////////////////////////////////////////////////////////////////////
-    // Constants
-    ////////////////////////////////////////////////////////////////////////////
-    
-    // Color conversion codes. These are defined in <opencv2/imgproc.hpp>,
-    // however we can't include that header here because it's C++ and this is C,
-    // so we have to redefine them here. Only a subset of the most common
-    // conversions are included here.
-    { MP_ROM_QSTR(MP_QSTR_COLOR_COLOR_BGR2BGRA), MP_ROM_INT(0) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_COLOR_RGB2RGBA), MP_ROM_INT(0) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_COLOR_BGRA2BGR), MP_ROM_INT(1) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_COLOR_RGBA2RGB), MP_ROM_INT(1) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_COLOR_BGR2RGBA), MP_ROM_INT(2) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_COLOR_RGB2BGRA), MP_ROM_INT(2) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_COLOR_RGBA2BGR), MP_ROM_INT(3) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_COLOR_BGRA2RGB), MP_ROM_INT(3) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_COLOR_BGR2RGB), MP_ROM_INT(4) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_COLOR_RGB2BGR), MP_ROM_INT(4) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_COLOR_BGRA2RGBA), MP_ROM_INT(5) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_COLOR_RGBA2BGRA), MP_ROM_INT(5) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BGR2GRAY), MP_ROM_INT(6) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_RGB2GRAY), MP_ROM_INT(7) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_GRAY2BGR), MP_ROM_INT(8) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_GRAY2RGB), MP_ROM_INT(8) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_GRAY2BGRA), MP_ROM_INT(9) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_GRAY2RGBA), MP_ROM_INT(9) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BGRA2GRAY), MP_ROM_INT(10) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_RGBA2GRAY), MP_ROM_INT(11) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BGR2BGR565), MP_ROM_INT(12) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_RGB2BGR565), MP_ROM_INT(13) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BGR5652BGR), MP_ROM_INT(14) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BGR5652RGB), MP_ROM_INT(15) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BGRA2BGR565), MP_ROM_INT(16) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_RGBA2BGR565), MP_ROM_INT(17) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BGR5652BGRA), MP_ROM_INT(18) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BGR5652RGBA), MP_ROM_INT(19) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_GRAY2BGR565), MP_ROM_INT(20) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BGR5652GRAY), MP_ROM_INT(21) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BGR2YCrCb), MP_ROM_INT(36) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_RGB2YCrCb), MP_ROM_INT(37) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_YCrCb2BGR), MP_ROM_INT(38) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_YCrCb2RGB), MP_ROM_INT(39) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BGR2HSV), MP_ROM_INT(40) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_RGB2HSV), MP_ROM_INT(41) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_HSV2BGR), MP_ROM_INT(54) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_HSV2RGB), MP_ROM_INT(55) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BayerBG2BGR), MP_ROM_INT(46) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BayerGB2BGR), MP_ROM_INT(47) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BayerRG2BGR), MP_ROM_INT(48) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BayerGR2BGR), MP_ROM_INT(49) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BayerRG2RGB), MP_ROM_INT(46) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BayerGR2RGB), MP_ROM_INT(47) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BayerBG2RGB), MP_ROM_INT(48) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BayerGB2RGB), MP_ROM_INT(49) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BayerBG2GRAY), MP_ROM_INT(86) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BayerGB2GRAY), MP_ROM_INT(87) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BayerRG2GRAY), MP_ROM_INT(88) },
-    { MP_ROM_QSTR(MP_QSTR_COLOR_BayerGR2GRAY), MP_ROM_INT(89) },
-    
-    ////////////////////////////////////////////////////////////////////////////
-    // OpenCV core functions
-    ////////////////////////////////////////////////////////////////////////////
-    
-    { MP_ROM_QSTR(MP_QSTR_inRange), MP_ROM_PTR(&cv2_core_inRange_obj) },
-    { MP_ROM_QSTR(MP_QSTR_max), MP_ROM_PTR(&cv2_core_max_obj) },
-    { MP_ROM_QSTR(MP_QSTR_min), MP_ROM_PTR(&cv2_core_min_obj) },
-    
-    ////////////////////////////////////////////////////////////////////////////
-    // OpenCV imgproc functions
-    ////////////////////////////////////////////////////////////////////////////
-    
-    { MP_ROM_QSTR(MP_QSTR_cvtColor), MP_ROM_PTR(&cv2_imgproc_cvtColor_obj) },
+    // Inlude globals from each OpenCV module
+    OPENCV_CORE_GLOBALS,
+    OPENCV_HIGHGUI_GLOBALS,
+    OPENCV_IMGCODECS_GLOBALS,
+    OPENCV_IMGPROC_GLOBALS,
 };
 static MP_DEFINE_CONST_DICT(cv2_module_globals, cv2_module_globals_table);
 

@@ -1,3 +1,17 @@
+/*
+ *------------------------------------------------------------------------------
+ * SPDX-License-Identifier: MIT
+ * 
+ * Copyright (c) 2025 SparkFun Electronics
+ *------------------------------------------------------------------------------
+ * alloc.c
+ * 
+ * Wrapper functions for malloc(), free(), calloc(), and realloc(). These ensure
+ * memory gets allocated on the C heap before the MicroPython garbage collector
+ * has been initialized, and and in the GC pool afterwards.
+ *------------------------------------------------------------------------------
+ */
+
 // C headers
 #include "py/runtime.h"
 

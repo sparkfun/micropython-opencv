@@ -1,3 +1,16 @@
+/*
+ *------------------------------------------------------------------------------
+ * SPDX-License-Identifier: MIT
+ * 
+ * Copyright (c) 2025 SparkFun Electronics
+ *------------------------------------------------------------------------------
+ * convert.cpp
+ * 
+ * Helper functions to convert between various data types from MicroPython, ulab
+ * NumPy, and OpenCV
+ *------------------------------------------------------------------------------
+ */
+
 // C++ headers
 #include "convert.h"
 #include "numpy.h"
@@ -16,8 +29,7 @@ uint8_t mat_depth_to_ndarray_type(int depth)
         case CV_16U: return NDARRAY_UINT16;
         case CV_16S: return NDARRAY_INT16;
         case CV_32F: return NDARRAY_FLOAT;
-        // case CV_Bool: return NDARRAY_BOOL;
-        default: mp_raise_ValueError(MP_ERROR_TEXT("Unsupported Mat depth"));
+        default: mp_raise_TypeError(MP_ERROR_TEXT("Unsupported Mat depth"));
     }
 }
 
@@ -29,8 +41,7 @@ int ndarray_type_to_mat_depth(uint8_t type)
         case NDARRAY_UINT16: return CV_16U;
         case NDARRAY_INT16: return CV_16S;
         case NDARRAY_FLOAT: return CV_32F;
-        // case NDARRAY_BOOL: return CV_Bool;
-        default: mp_raise_ValueError(MP_ERROR_TEXT("Unsupported ndarray type"));
+        default: mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
     }
 }
 
@@ -39,7 +50,7 @@ ndarray_obj_t *mat_to_ndarray(Mat& mat)
     // Derived from:
     // https://github.com/opencv/opencv/blob/aee828ac6ed3e45d7ca359d125349a570ca4e098/modules/python/src2/cv2_convert.cpp#L313-L328
     if(mat.data == NULL)
-        mp_const_none;
+        return (ndarray_obj_t*) mp_const_none;
     Mat temp, *ptr = (Mat*)&mat;
     if(!ptr->u || ptr->allocator != &GetNumpyAllocator())
     {
@@ -62,6 +73,7 @@ Mat ndarray_to_mat(ndarray_obj_t *ndarray)
     // We have an ndarray_obj_t, so these checks have already been done.
 
     // https://github.com/opencv/opencv/blob/aee828ac6ed3e45d7ca359d125349a570ca4e098/modules/python/src2/cv2_convert.cpp#L130-L172
+    bool needcopy = false;
     int type = ndarray_type_to_mat_depth(ndarray->dtype);
 
     int ndims = ndarray->ndim;
@@ -73,15 +85,39 @@ Mat ndarray_to_mat(ndarray_obj_t *ndarray)
         _strides[i] = ndarray->strides[ULAB_MAX_DIMS - ndarray->ndim + i];
     }
 
-    // https://github.com/opencv/opencv/blob/aee828ac6ed3e45d7ca359d125349a570ca4e098/modules/python/src2/cv2_convert.cpp#L176-L221
+    // https://github.com/opencv/opencv/blob/aee828ac6ed3e45d7ca359d125349a570ca4e098/modules/python/src2/cv2_convert.cpp#L176-L241
     bool ismultichannel = ndims == 3;
+
+    for( int i = ndims-1; i >= 0 && !needcopy; i-- )
+    {
+        // these checks handle cases of
+        //  a) multi-dimensional (ndims > 2) arrays, as well as simpler 1- and 2-dimensional cases
+        //  b) transposed arrays, where _strides[] elements go in non-descending order
+        //  c) flipped arrays, where some of _strides[] elements are negative
+        // the _sizes[i] > 1 is needed to avoid spurious copies when NPY_RELAXED_STRIDES is set
+        if( (i == ndims-1 && _sizes[i] > 1 && (size_t)_strides[i] != elemsize) ||
+            (i < ndims-1 && _sizes[i] > 1 && _strides[i] < _strides[i+1]) )
+            needcopy = true;
+    }
 
     if (ismultichannel)
     {
         int channels = ndims >= 1 ? (int)_sizes[ndims - 1] : 1;
         ndims--;
         type |= CV_MAKETYPE(0, channels);
+
+        if (ndims >= 1 && _strides[ndims - 1] != (size_t)elemsize*_sizes[ndims])
+            needcopy = true;
+
         elemsize = CV_ELEM_SIZE(type);
+    }
+
+    if (needcopy)
+    {
+        ndarray = ndarray_from_mp_obj(ndarray_copy(ndarray), 0);
+        for (int i = 0; i < ndarray->ndim; i++) {
+            _strides[i] = ndarray->strides[ULAB_MAX_DIMS - ndarray->ndim + i];
+        }
     }
 
     // https://github.com/opencv/opencv/blob/aee828ac6ed3e45d7ca359d125349a570ca4e098/modules/python/src2/cv2_convert.cpp#L243-L261
@@ -146,4 +182,325 @@ Mat mp_obj_to_mat(mp_obj_t obj)
     Mat mat = ndarray_to_mat(ndarray);
 
     return mat;
+}
+
+Size mp_obj_to_size(mp_obj_t obj)
+{
+    // Check for None object
+    if(obj == mp_const_none)
+    {
+        // Create an empty Size object
+        return Size();
+    }
+
+    // Assume the object is a ndarray, or can be converted to one. Will raise an
+    // exception if not
+    ndarray_obj_t *ndarray = ndarray_from_mp_obj(obj, 0);
+    
+    // Validate the length of the ndarray
+    if(ndarray->len != 2)
+    {
+        mp_raise_TypeError(MP_ERROR_TEXT("Size must be length 2"));
+    }
+
+    // Compute the size, checking the type of the ndarray
+    Size size;
+    switch(ndarray->dtype)
+    {
+        case NDARRAY_UINT8:
+            size.width = ((uint8_t*) ndarray->array)[0];
+            size.height = ((uint8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT8:
+            size.width = ((int8_t*) ndarray->array)[0];
+            size.height = ((int8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_UINT16:
+            size.width = ((uint16_t*) ndarray->array)[0];
+            size.height = ((uint16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT16:
+            size.width = ((int16_t*) ndarray->array)[0];
+            size.height = ((int16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_FLOAT:
+            size.width = ((float*) ndarray->array)[0];
+            size.height = ((float*) ndarray->array)[1];
+            break;
+        case NDARRAY_BOOL:
+            size.width = ((bool*) ndarray->array)[0];
+            size.height = ((bool*) ndarray->array)[1];
+            break;
+        default:
+            mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
+            break;
+    }
+
+    return size;
+}
+
+Size2f mp_obj_to_size2f(mp_obj_t obj)
+{
+    // Check for None object
+    if(obj == mp_const_none)
+    {
+        // Create an empty Size2f object
+        return Size2f();
+    }
+
+    // Assume the object is a ndarray, or can be converted to one. Will raise an
+    // exception if not
+    ndarray_obj_t *ndarray = ndarray_from_mp_obj(obj, 0);
+    
+    // Validate the length of the ndarray
+    if(ndarray->len != 2)
+    {
+        mp_raise_TypeError(MP_ERROR_TEXT("Size2f must be length 2"));
+    }
+
+    // Compute the size, checking the type of the ndarray
+    Size2f size;
+    switch(ndarray->dtype)
+    {
+        case NDARRAY_UINT8:
+            size.width = ((uint8_t*) ndarray->array)[0];
+            size.height = ((uint8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT8:
+            size.width = ((int8_t*) ndarray->array)[0];
+            size.height = ((int8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_UINT16:
+            size.width = ((uint16_t*) ndarray->array)[0];
+            size.height = ((uint16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT16:
+            size.width = ((int16_t*) ndarray->array)[0];
+            size.height = ((int16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_FLOAT:
+            size.width = ((float*) ndarray->array)[0];
+            size.height = ((float*) ndarray->array)[1];
+            break;
+        case NDARRAY_BOOL:
+            size.width = ((bool*) ndarray->array)[0];
+            size.height = ((bool*) ndarray->array)[1];
+            break;
+        default:
+            mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
+            break;
+    }
+
+    return size;
+}
+
+Point mp_obj_to_point(mp_obj_t obj)
+{
+    // Check for None object
+    if(obj == mp_const_none)
+    {
+        // Create an empty Point object
+        return Point();
+    }
+
+    // Assume the object is a ndarray, or can be converted to one. Will raise an
+    // exception if not
+    ndarray_obj_t *ndarray = ndarray_from_mp_obj(obj, 0);
+    
+    // Validate the length of the ndarray
+    if(ndarray->len != 2)
+    {
+        mp_raise_TypeError(MP_ERROR_TEXT("Point must be length 2"));
+    }
+
+    // Compute the point, checking the type of the ndarray
+    Point point;
+    switch(ndarray->dtype)
+    {
+        case NDARRAY_UINT8:
+            point.x = ((uint8_t*) ndarray->array)[0];
+            point.y = ((uint8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT8:
+            point.x = ((int8_t*) ndarray->array)[0];
+            point.y = ((int8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_UINT16:
+            point.x = ((uint16_t*) ndarray->array)[0];
+            point.y = ((uint16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT16:
+            point.x = ((int16_t*) ndarray->array)[0];
+            point.y = ((int16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_FLOAT:
+            point.x = ((float*) ndarray->array)[0];
+            point.y = ((float*) ndarray->array)[1];
+            break;
+        case NDARRAY_BOOL:
+            point.x = ((bool*) ndarray->array)[0];
+            point.y = ((bool*) ndarray->array)[1];
+            break;
+        default:
+            mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
+            break;
+    }
+
+    return point;
+}
+
+Point2f mp_obj_to_point2f(mp_obj_t obj)
+{
+    // Check for None object
+    if(obj == mp_const_none)
+    {
+        // Create an empty Point2f object
+        return Point2f();
+    }
+
+    // Assume the object is a ndarray, or can be converted to one. Will raise an
+    // exception if not
+    ndarray_obj_t *ndarray = ndarray_from_mp_obj(obj, 0);
+
+    // Validate the length of the ndarray
+    if(ndarray->len != 2)
+    {
+        mp_raise_TypeError(MP_ERROR_TEXT("Point2f must be length 2"));
+    }
+
+    // Compute the point, checking the type of the ndarray
+    Point2f point;
+    switch(ndarray->dtype)
+    {
+        case NDARRAY_UINT8:
+            point.x = ((uint8_t*) ndarray->array)[0];
+            point.y = ((uint8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT8:
+            point.x = ((int8_t*) ndarray->array)[0];
+            point.y = ((int8_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_UINT16:
+            point.x = ((uint16_t*) ndarray->array)[0];
+            point.y = ((uint16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_INT16:
+            point.x = ((int16_t*) ndarray->array)[0];
+            point.y = ((int16_t*) ndarray->array)[1];
+            break;
+        case NDARRAY_FLOAT:
+            point.x = ((float*) ndarray->array)[0];
+            point.y = ((float*) ndarray->array)[1];
+            break;
+        case NDARRAY_BOOL:
+            point.x = ((bool*) ndarray->array)[0];
+            point.y = ((bool*) ndarray->array)[1];
+            break;
+        default:
+            mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
+            break;
+    }
+
+    return point;
+}
+
+Scalar mp_obj_to_scalar(mp_obj_t obj)
+{
+    // Check for None object
+    if(obj == mp_const_none)
+    {
+        // Create an empty Scalar object
+        return Scalar();
+    }
+
+    // Assume the object is a ndarray, or can be converted to one. Will raise an
+    // exception if not
+    ndarray_obj_t *ndarray = ndarray_from_mp_obj(obj, 0);
+    
+    // Validate the length of the ndarray
+    if(ndarray->len > 4)
+    {
+        mp_raise_TypeError(MP_ERROR_TEXT("Scalar must be length 4 or less"));
+    }
+
+    // Compute the scalar, checking the type of the ndarray
+    Scalar scalar;
+    switch(ndarray->dtype)
+    {
+        case NDARRAY_UINT8:
+            for(size_t i = 0; i < ndarray->len; i++)
+                scalar[i] = ((uint8_t*) ndarray->array)[i];
+            break;
+        case NDARRAY_INT8:
+            for(size_t i = 0; i < ndarray->len; i++)
+                scalar[i] = ((int8_t*) ndarray->array)[i];
+            break;
+        case NDARRAY_UINT16:
+            for(size_t i = 0; i < ndarray->len; i++)
+                scalar[i] = ((uint16_t*) ndarray->array)[i];
+            break;
+        case NDARRAY_INT16:
+            for(size_t i = 0; i < ndarray->len; i++)
+                scalar[i] = ((int16_t*) ndarray->array)[i];
+            break;
+        case NDARRAY_FLOAT:
+            for(size_t i = 0; i < ndarray->len; i++)
+                scalar[i] = ((float*) ndarray->array)[i];
+            break;
+        case NDARRAY_BOOL:
+            for(size_t i = 0; i < ndarray->len; i++)
+                scalar[i] = ((bool*) ndarray->array)[i];
+            break;
+        default:
+            mp_raise_TypeError(MP_ERROR_TEXT("Unsupported ndarray type"));
+            break;
+    }
+
+    return scalar;
+}
+
+std::vector<std::vector<Point>> mp_obj_to_contours(mp_obj_t obj)
+{
+    // Check for None object
+    if(obj == mp_const_none)
+    {
+        // Create an empty contours object
+        return std::vector<std::vector<Point>>();
+    }
+    
+    // Create a vector to hold the contours
+    std::vector<std::vector<Point>> contours;
+
+    // Ideally, we could just use ndarray_from_mp_obj(), but it has a bug with
+    // 4D arrays, so we need to do this a bit manually.
+    // https://github.com/v923z/micropython-ulab/issues/727
+    
+    // Assume the object is iterable. Will raise an exception if not
+    mp_obj_iter_buf_t iter_buf;
+    mp_obj_t iterable = mp_getiter(obj, &iter_buf);
+    mp_obj_t item;
+
+    // Iterate through all items in the iterable
+    while ((item = mp_iternext(iterable)) != MP_OBJ_STOP_ITERATION)
+    {
+        // Create a vector to hold the points of this contour
+        std::vector<Point> contour;
+        
+        // Convert the item to a Mat object (should be a 3D ndarray of points)
+        Mat contour_mat = mp_obj_to_mat(item);
+
+        // Iterate through the rows of the Mat object and extract the points
+        for (int j = 0; j < contour_mat.rows; j++)
+        {
+            contour.push_back(Point(
+                contour_mat.at<float>(j, 0),
+                contour_mat.at<float>(j, 1)
+            ));
+        }
+
+        // Add the contour to the list of contours
+        contours.push_back(contour);
+    }
+
+    return contours;
 }
