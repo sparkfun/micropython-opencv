@@ -24,6 +24,8 @@ extern "C" {
 
 using namespace cv;
 
+void * __dso_handle = nullptr;
+
 // The function below is a workaround for memory management issues between
 // OpenCV and the MicroPython GC. OpenCV allocates some objects on the heap,
 // whenever the first function that needs the objects happen to be called. That
