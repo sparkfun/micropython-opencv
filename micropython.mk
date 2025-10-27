@@ -45,11 +45,14 @@ CXXFLAGS_USERMOD += -D__NEWLIB__
 # We use C++ features so have to link against the standard library.
 LDFLAGS_USERMOD += \
 	-L$(CPPEXAMPLE_MOD_DIR)/opencv/build/lib \
-	-L$(CPPEXAMPLE_MOD_DIR)/opencv/build/3rdparty/lib \
-	-lstdc++ \
-	-lsupc++ \
-	-lopencv_core \
+	-L$(CPPEXAMPLE_MOD_DIR)/opencv/build/3rdparty/lib
+
+LIBS_USERMOD += \
 	-lopencv_imgcodecs \
 	-lopencv_imgproc\
+	-lopencv_core \
 	-llibpng \
-	-lzlib
+	-lzlib \
+	-lm \
+	-lstdc++ \
+	-lsupc++
