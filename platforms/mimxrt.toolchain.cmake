@@ -33,3 +33,8 @@ set(CMAKE_CXX_FLAGS_INIT "${CMAKE_CXX_FLAGS_INIT} -DOPENCV_INCLUDE_PORT_FILE=\\\
 # Source: https://docs.zephyrproject.org/4.0.0/doxygen/html/zephyr__stdint_8h_source.html
 set(CMAKE_C_FLAGS_INIT "${CMAKE_C_FLAGS_INIT} -imacros ${CMAKE_CURRENT_LIST_DIR}/include/zephyr_stdint.h")
 set(CMAKE_CXX_FLAGS_INIT "${CMAKE_CXX_FLAGS_INIT} -imacros ${CMAKE_CURRENT_LIST_DIR}/include/zephyr_stdint.h")
+
+# make sure we are not creating position independent code - not needed for embedded
+set(CMAKE_POSITION_INDEPENDENT_CODE FALSE)
+
+
